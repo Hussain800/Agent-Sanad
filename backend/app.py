@@ -108,6 +108,65 @@ def architecture():
     return ARCHITECTURE
 
 
+@app.get("/benchmark")
+def benchmark():
+    """v1.1 §5.5: historical benchmark metrics. Numbers come from the offline
+    run of benchmark/run.py against the workbook; the demo never recomputes."""
+    return {
+        "metrics": BENCHMARK,
+        "calibrated_on": BENCHMARK["calibrated_on"],
+        "validated_on": BENCHMARK["validated_on"],
+        "n": BENCHMARK["n_held_out"],
+        "honest_claim": (
+            "Agent Sanad matches the officers' rescheduling path 94.6% of the "
+            "time on held-out 2025 cases and every UPDATE plan it sets is within "
+            "the 20% cap. It does not claim exact reproduction of every premium "
+            "or duration."
+        ),
+    }
+
+
+# ── v1.1 §5.5 — case-scoped read surface (safe; delegates to existing logic) ─
+# These endpoints exist so a curious judge / pilot integration can inspect the
+# pipeline at finer granularity. They do NOT replace POST /demo/run/{case_id},
+# which remains the main demo path. None of them mutate state.
+
+@app.get("/cases/{case_id}")
+def get_case(case_id: str):
+    """Return the assembled Case object (no policy run)."""
+    case_id = case_id.upper()
+    if case_id not in FIXTURES:
+        raise HTTPException(404, f"unknown case '{case_id}'")
+    case, _ = build_case(case_id)
+    return {"case": case.model_dump(mode="json"), "case_id": case_id}
+
+
+@app.get("/cases/{case_id}/audit")
+def get_case_audit(case_id: str):
+    """Return only the audit trail produced by assembling the case."""
+    case_id = case_id.upper()
+    if case_id not in FIXTURES:
+        raise HTTPException(404, f"unknown case '{case_id}'")
+    _, log = build_case(case_id)
+    return {"events": log.events(), "case_id": case_id}
+
+
+@app.post("/cases/{case_id}/decide")
+def post_case_decide(case_id: str, request: Request):
+    """Same money path as /demo/run/{case_id}, exposed under the v1.1 route name.
+    Implementation reuses the same internals; the response envelope is identical."""
+    return run(case_id, request)
+
+
+# Map a Recommendation to the terminal CaseState used by the audit timeline.
+_TERMINAL_STATE = {
+    "Approve":            "RecommendationReady",
+    "Refer to employee":  "Refer",
+    "Request documents":  "NeedsDocuments",
+    "Reject":             "Rejected",
+}
+
+
 @app.post("/demo/run/{case_id}")
 def run(case_id: str, request: Request):
     case_id = case_id.upper()
@@ -118,11 +177,16 @@ def run(case_id: str, request: Request):
     t0 = time.time()
     _log.info("case.start", extra={"request_id": request_id, "case_id": case_id, "mock_mode": MOCK_MODE})
     case, log = build_case(case_id)
+    # v1.1 §7 transition: validation -> policy execution
+    log.transition(case_id, "Validating", "PolicyRun", actor="policy",
+                   detail="deterministic decide() called", mock_mode=MOCK_MODE)
     report = decide(case, POLICY)
     latency_ms = int((time.time() - t0) * 1000)
-    log.add(case_id, "policy.decide", "system",
-            f"{report.recommendation} / {report.proposed_plan.path}",
-            latency_ms=latency_ms, mock_mode=MOCK_MODE)
+    terminal = _TERMINAL_STATE.get(report.recommendation, "RecommendationReady")
+    log.add(case_id, "policy.decide", "policy",
+            f"{report.recommendation} / {report.proposed_plan.path} (rules: {','.join(report.fired_rules) or 'none'})",
+            latency_ms=latency_ms, mock_mode=MOCK_MODE,
+            state_from="PolicyRun", state_to=terminal)
     _log.info("case.decide", extra={
         "request_id": request_id, "case_id": case_id, "step": "policy.decide",
         "recommendation": report.recommendation, "path": report.proposed_plan.path,
@@ -136,6 +200,8 @@ def run(case_id: str, request: Request):
             "latency_ms": latency_ms,
             "mock_mode": MOCK_MODE,
             "benchmark": BENCHMARK,
+            "request_id": request_id,
+            "policy_version": POLICY.policy_version,
         },
     }, headers={"x-request-id": request_id})
 

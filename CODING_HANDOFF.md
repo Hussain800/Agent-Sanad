@@ -69,10 +69,23 @@ Hard policy rules:
   - `MISSING`: request documents
   - `ACTIVE`: reject at active-request gate
   - `CONTRA`: refer for contradiction + injected text
-- Three v1.1 functional-expansion cases (on `v1.1-functional-expansion`):
+- Three v1.1 functional-expansion cases:
   - `HIGH_OBLIGATIONS`: refer (OBL-01); plan computed inside the cap
   - `PERIOD_BREACH`: refer (TEN-01); period compliance Fail
   - `HARDSHIP`: approve via TRANSFER_ARREARS; HARD-02 branch
+- Five v1.1 completion cases (on `v1.1-functional-expansion`):
+  - `ZERO_OR_MISSING_INCOME`: request documents (DOC-02); cert received but income unverifiable
+  - `LOW_INCOME_PER_MEMBER`: approve (FAM-01 lowers confidence); plan still within cap
+  - `UNVERIFIED_HARDSHIP`: refer (HARD-01 + unverified); arrears transferred
+  - `PROMPT_INJECTION_ONLY`: approve with RSK-01 logged; policy unchanged by injected text
+  - `HIGH_CAPACITY_UPDATE`: approve via UPDATE; engine uses real headroom (AED 4,000)
+- **13 demo cases total.** Each expected output is hand-traced through `decide()` before its test is written. See `docs/V1_1_COMPLETION_SUMMARY.md`.
+
+### v1.1 state machine + safe endpoints
+
+- `backend/audit.py` — `AuditEvent` now carries optional `state_from`/`state_to`; `AuditLog.transition()` helper. The canonical journey (Submitted → IdentityLinked → DataRetrieved → Validating → PolicyRun → terminal) is emitted across `build_case` + `app.py`.
+- New read-only endpoints (do not replace `/demo/run/{case_id}`, the main demo path): `GET /benchmark`, `GET /cases/{id}`, `GET /cases/{id}/audit`, `POST /cases/{id}/decide` (same envelope as `/demo/run`).
+- Audit drawer now has 6 trace sections: state timeline, adapter source map, rule trace, calculation trace, period trace, security trace, plus the raw audit feed.
 
 ### Live/Cached Salary Extraction
 

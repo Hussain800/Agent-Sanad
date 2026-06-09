@@ -57,10 +57,12 @@
     }
 
     .wrap { max-width: 1180px; margin: 20px auto 36px; padding: 0 16px; }
+    /* v1.1: 13 case buttons need the full row to wrap cleanly. The case-copy
+       lives on its own row below, which is also easier to scan. */
     .casebar {
       display: grid;
-      grid-template-columns: minmax(160px, 220px) 1fr;
-      gap: 14px;
+      grid-template-columns: 1fr;
+      gap: 12px;
       align-items: stretch;
       margin-bottom: 16px;
     }
@@ -102,9 +104,9 @@
     }
     .casecopy {
       display: grid;
-      grid-template-columns: 1.1fr 1fr;
-      gap: 12px;
-      min-height: 76px;
+      grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+      gap: 16px;
+      min-height: 60px;
       align-items: center;
     }
     .casecopy h1 { margin: 0 0 4px; font-size: 20px; line-height: 1.18; }
@@ -488,6 +490,10 @@
               <div class="calc-trace" id="tracePeriod">—</div>
             </section>
             <section class="trace-section">
+              <h4>6 · Security trace</h4>
+              <div class="calc-trace" id="traceSecurity">—</div>
+            </section>
+            <section class="trace-section">
               <h4>Raw audit feed</h4>
               <div class="drawer" id="drawer">Select a case.</div>
             </section>
@@ -628,6 +634,37 @@
         description: "A verified temporary circumstance (e.g. official assignment or medical leave) supports postponing any increase. Arrears move to the end of the loan; the installment is unchanged; the plan stays within both the 20% cap and the original approved period.",
         points: ["HARD-02", "Approve", "Transfer"],
         band: "success"
+      },
+      // ── v1.1 completion cases ────────────────────────────────────────────
+      ZERO_OR_MISSING_INCOME: {
+        title: "Income unverifiable — request documents",
+        description: "The salary certificate was received, but the parsed and verified income figures are both empty. The agent refuses to invent a number and requests a re-upload (DOC-02).",
+        points: ["DOC-02", "Incomplete", "No false certainty"],
+        band: "info"
+      },
+      LOW_INCOME_PER_MEMBER: {
+        title: "Low income per family member — approve with lower confidence",
+        description: "Average income per family member is below AED 2,500 (FAM-01). The plan is computed within the 20% cap, but FAM-01 lowers confidence to flag the social context for the officer.",
+        points: ["FAM-01", "Approve", "Lower confidence"],
+        band: "info"
+      },
+      UNVERIFIED_HARDSHIP: {
+        title: "Hardship claimed but unverified — refer",
+        description: "The beneficiary claims unemployment, but the supporting evidence has not been validated. Arrears transferred and the case routed to a specialist for verification (HARD-01).",
+        points: ["HARD-01", "Refer", "Unverified"],
+        band: "warning"
+      },
+      PROMPT_INJECTION_ONLY: {
+        title: "Prompt injection — logged but policy unchanged",
+        description: "Document contains instruction-like text. RSK-01 fires for the officer's awareness, but the values match the verification and the policy logic runs unchanged. The injected text never moves any number.",
+        points: ["RSK-01", "Approve", "Policy intact"],
+        band: "warning"
+      },
+      HIGH_CAPACITY_UPDATE: {
+        title: "High capacity — approve with full headroom",
+        description: "High verified income and a low current installment leave AED 4,000 of real headroom under the 20% cap. The engine uses computed capacity, not a fixed payment, to clear arrears in three months.",
+        points: ["CAP-02", "Approve", "Full headroom"],
+        band: "success"
       }
     };
 
@@ -704,14 +741,19 @@
       return RULE_CATALOG[rid] || { effect: "Note", text: rid };
     }
 
-    // State timeline per recommendation outcome.
-    function timelineFor(rec) {
-      const base = ["Submitted", "IdentityLinked", "DataRetrieved"];
-      if (rec === "Reject")             return [...base, "Rejected"];
-      if (rec === "Request documents")  return [...base, "Validating", "NeedsDocuments"];
-      if (rec === "Refer to employee")  return [...base, "Validating", "PolicyRun", "Refer"];
-      if (rec === "Approve")            return [...base, "Validating", "PolicyRun", "RecommendationReady"];
-      return base;
+    // State timeline derived from the actual audit events (v1.1 §7).
+    // Each AuditEvent now carries optional state_from / state_to; we extract
+    // the ordered sequence of states the case actually traversed.
+    function timelineFromAudit(audit) {
+      const states = [];
+      audit.forEach(e => {
+        if (e.state_to && e.state_to !== states[states.length - 1]) {
+          states.push(e.state_to);
+        }
+      });
+      // Defensive default — should never trigger now that build_case emits a
+      // Submitted event, but it keeps the UI from blanking on a malformed feed.
+      return states.length ? states : ["Submitted"];
     }
 
     // Adapter source map — the five integrations the brief assumes.
@@ -751,8 +793,8 @@
     }
 
     function renderTrace(rep, c, audit) {
-      // ── 1 · State timeline ──────────────────────────────────────────────
-      const states = timelineFor(rep.recommendation);
+      // ── 1 · State timeline (derived from real audit transitions) ────────
+      const states = timelineFromAudit(audit);
       const timelineEl = document.getElementById("traceTimeline");
       timelineEl.innerHTML = states.map((s, i) => {
         const cls = (i === states.length - 1) ? "state final" : "state";
@@ -829,9 +871,35 @@
         return `<div>${esc(k)}</div><div class="${cls}">${esc(v)}</div>`;
       }).join("");
 
+      // ── 6 · Security trace ────────────────────────────────────────────
+      const injection  = (c.documents && c.documents.injection_flags || []).length > 0;
+      const variance   = c.income ? c.income.variance_pct : 0;
+      const contraFlag = c.income ? c.income.contradiction_flag : false;
+      const extractionEvent = audit.find(e => e.step === "extract.salary_certificate");
+      const extractionSrc = extractionEvent ? extractionEvent.detail : "n/a";
+      const secRows = [
+        ["Document injection flag", injection ? "DETECTED (RSK-01)" : "Not detected",
+          injection ? "Fail" : "Pass"],
+        ["Income variance (cert vs verified)", `${variance.toFixed(1)}%`,
+          contraFlag ? "Fail" : "Pass"],
+        ["Contradiction flag (>30%)", contraFlag ? "Yes — INC-01 fired" : "No",
+          contraFlag ? "Fail" : "Pass"],
+        ["Extraction source", extractionSrc],
+        ["LLM authority", "Read-only: cannot decide, cannot write state, cannot call engine."],
+        ["Document text", "Treated as untrusted content. Never overrides policy logic."]
+      ];
+      document.getElementById("traceSecurity").innerHTML = secRows.map(([k, v, badge]) => {
+        const cls = badge === "Pass" ? "highlight-pass"
+                  : badge === "Fail" ? "highlight-fail" : "";
+        return `<div>${esc(k)}</div><div class="${cls}">${esc(v)}</div>`;
+      }).join("");
+
       // Raw audit feed (unchanged from v0.8 — judges still see it on the
       // dark drawer at the bottom of the trace).
-      const auditText = audit.map(e => `- ${e.step} (${e.actor}): ${e.detail}`).join("\n");
+      const auditText = audit.map(e => {
+        const transition = e.state_to ? `  [${e.state_from || "·"} → ${e.state_to}]` : "";
+        return `- ${e.step} (${e.actor}): ${e.detail}${transition}`;
+      }).join("\n");
       document.getElementById("drawer").textContent = `${auditText}\n\n${rep.reasoning}`;
     }
 

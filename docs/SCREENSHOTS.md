@@ -28,9 +28,20 @@ Save as `docs/screenshots/NN-name.png`.
 | **9** | `09-high-obligations.png` | HIGH_OBLIGATIONS selected. Amber scenario banner ("High obligations: …"), Section 8 shows Refer + UPDATE plan within cap, rule trace highlights OBL-01 as Refer effect. | Proves the assessment matrix considers obligations, not just salary. |
 | **10** | `10-period-breach.png` | PERIOD_BREACH selected. Red scenario banner ("Period breach (Rule 2)…"), Period chip shows Fail, 20% shows Pass, calculation trace shows additional_months = 150 > 24 remaining. | Proves Rule 2 enforcement. |
 | **11** | `11-hardship-approve.png` | HARDSHIP selected. Green scenario banner ("Verified temporary hardship (HARD-02)…"), Approve + TRANSFER_ARREARS, beneficiary status "Your verified circumstance has been recognised…". | Proves human-centred case handling. |
-| **12** | `12-audit-drawer-v1-1.png` | Any case with audit drawer scrolled to show all 5 trace sections + raw feed. | The v1.1 trust upgrade. |
+| **12** | `12-audit-drawer-v1-1.png` | Any case with audit drawer scrolled to show all 6 trace sections + raw feed. | The v1.1 trust upgrade. |
 
-**Optional 13th:** `13-mobile-view.png` at 390×844 (iPhone size) showing the responsive collapse. Worth +1 point on Demo/UX if you have 30 seconds to set up Chrome devtools.
+**v1.1 completion adds five more cases + the security trace:**
+
+| # | File name | What's on screen | Notes |
+|---|---|---|---|
+| **13** | `13-injection-only.png` | PROMPT_INJECTION_ONLY selected. Approve badge, RSK-01 in fired rules, security trace row showing "Document injection flag: DETECTED" while the plan is unchanged. | **The strongest security beat:** injection logged, decision untouched. |
+| **14** | `14-zero-income.png` | ZERO_OR_MISSING_INCOME selected. Request documents, DOC-02, Incomplete status, no plan generated. | Proves no-false-certainty when income can't be verified. |
+| **15** | `15-low-per-member.png` | LOW_INCOME_PER_MEMBER selected. Approve + FAM-01, confidence chip shows lowered band. | Proves family/social analysis. |
+| **16** | `16-unverified-hardship.png` | UNVERIFIED_HARDSHIP selected. Refer + HARD-01, TRANSFER path, "unverified" wording in beneficiary view. | Contrast with verified HARDSHIP (Approve). |
+| **17** | `17-high-capacity.png` | HIGH_CAPACITY_UPDATE selected. Approve, large headroom (AED 4,000) in calculation trace. | Proves the engine uses real headroom, not fixed payments. |
+| **18** | `18-security-trace.png` | Audit drawer scrolled to section 6 (Security trace) on the CONTRA or PROMPT_INJECTION_ONLY case. | The explicit "document text cannot override policy logic" statement. |
+
+**Optional 19th:** `19-mobile-view.png` at 390×844 (iPhone size) showing the responsive collapse. Worth +1 point on Demo/UX if you have 30 seconds to set up Chrome devtools.
 
 ---
 

@@ -4,6 +4,8 @@
 **Base:** stable v0.8 on `main`
 **Scope:** product depth, not industry tooling
 
+> **Note:** This document covers the **first** expansion step (3 cases: HIGH_OBLIGATIONS, PERIOD_BREACH, HARDSHIP). The branch has since grown to **13 cases** with a state-machine audit timeline, a security trace, and safe v1.1 endpoints. For the complete, current picture see [`V1_1_COMPLETION_SUMMARY.md`](./V1_1_COMPLETION_SUMMARY.md).
+
 ---
 
 ## What this expansion is — and is not
