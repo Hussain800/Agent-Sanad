@@ -10,7 +10,45 @@
 
 The branch now ships **13 deterministic demo cases** that exercise every branch of `decide()` plus the assessment matrix, an officer drawer with **6 evidence-linked trace sections** including a complete v1.1 §7 state-machine timeline (**8 states**: Submitted → IdentityLinked → DataRetrieved → Extracting → Validating → PolicyRun → terminal → Closed), **6 safe v1.1 API endpoints** (including a stateless officer-action) on top of the v0.8 `/demo/run` route, and updated docs. The protected money path is untouched. **44 of 44 tests pass.** Benchmark wording is unchanged.
 
-### Second completion pass (this iteration)
+### Fourth pass — production hardening
+
+- **Build-version handshake** — frontend pins `CLIENT_BUILD`; `/healthz` returns
+  `app_version`; a mismatch (stale uvicorn serving new static files with old
+  routes — the cause of the "404 on /cases/GOLDEN" report) shows an actionable
+  yellow banner instead of raw errors. A regression test forbids the pins drifting.
+- **PRD §5.5 error contract** — every error now returns
+  `{error_code, message, path, app_version}`; no framework defaults leak.
+- **One-command launchers** — `run.ps1` / `run.sh` set the environment and
+  refuse to start on top of an already-bound port 8000 (stale-process trap).
+- **`docs/PRODUCTION_READINESS.md`** — honest committee-grade assessment:
+  what is production-grade now, what is mocked by design with its pilot
+  replacement, and the genuine pilot gap list (persistence, real UAE PASS,
+  real integrations, deployment, compliance).
+- README rewritten around the real app flow.
+
+### Third pass — the app experience rebuild
+
+The one-page "case-button simulator" UI was replaced with a proper multi-screen
+government-service flow (still a single offline HTML file, zero frameworks):
+
+1. **Landing** — branded service entry with "Continue with UAE PASS".
+2. **UAE PASS mock** — simulated verification (clearly labeled; no credentials).
+3. **Application stepper** — Programme data (retrieved) → Financial details
+   (editable) → Documents (status cards) → Review & submit. Sample-case prefill
+   or fully custom values.
+4. **Processing** — animated agent timeline driven by the real audit states.
+5. **Beneficiary result** — status + plain-language reason only.
+6. **Officer portal** — queue sidebar (13 samples + last submitted application),
+   Section-8, all 6 trace sections, audit feed, benchmark, officer actions, IBM strip.
+
+New custom-application flow (engine untouched): `MockApplication` schema →
+`backend/applications.py` → `POST /applications/mock` + `POST /applications/mock/decide`
+(same envelope as `/demo/run`). `GET /cases` now also returns picker metadata.
+New test file `tests/test_applications.py` proves the app works from **user
+input**, including: custom approve, missing-certificate request-docs, active-request
+reject, high-obligations refer, period-breach refer, and injection-cannot-override.
+
+### Second completion pass (previous iteration)
 
 - **State machine completed** — added the `Extracting` and `Closed` states so the audit timeline shows the full canonical v1.1 §7 journey.
 - **Officer action endpoint** — `POST /cases/{id}/officer-action` (stateless): validates an `OfficerAction` (approve / adjust / escalate; reason code required on adjust/escalate), records an OFF-01 officer-actor audit event, and returns the unchanged deterministic report. Completes the "human owns exceptions" governance story without persistence.

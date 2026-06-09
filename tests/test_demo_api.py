@@ -13,6 +13,30 @@ def test_healthz_reports_offline_safe_mode():
     assert data["ok"] is True
     assert data["mock_mode"] is True
     assert data["policy_version"] == "sanad-v0.8"
+    assert data["app_version"]          # build handshake field present
+
+
+def test_frontend_and_backend_build_versions_match():
+    """The UI pins CLIENT_BUILD and compares it to /healthz app_version at boot
+    (stale-server detection). This test prevents the two pins from drifting."""
+    from backend.app import APP_VERSION
+    from pathlib import Path
+    html = (Path(__file__).resolve().parents[1] / "frontend" / "index.html").read_text(encoding="utf-8")
+    assert f'CLIENT_BUILD = "{APP_VERSION}"' in html, (
+        "frontend CLIENT_BUILD must equal backend APP_VERSION — update both together"
+    )
+
+
+def test_error_envelope_contract():
+    """PRD §5.5 — errors return {error_code, message}, not framework defaults."""
+    r = client.post("/demo/run/UNKNOWN")
+    assert r.status_code == 404
+    body = r.json()
+    assert body["error_code"] == "NOT_FOUND"
+    assert "message" in body and "app_version" in body
+    r2 = client.post("/applications/mock/decide", json={"monthly_income_aed": -1})
+    assert r2.status_code == 422
+    assert r2.json()["error_code"] == "VALIDATION_ERROR"
 
 
 def test_demo_run_returns_contract_and_benchmark():

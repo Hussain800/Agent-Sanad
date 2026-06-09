@@ -164,6 +164,22 @@ The branch grew the demo from 5 to **13 deterministic cases**, all derived from 
 5. **Period trace** (Rule 2) — remaining term, additional months, pass/fail + explanation.
 6. **Security trace** — injection flag, income variance, contradiction flag, extraction source, and the explicit statement that document text never overrides policy.
 
+### v1.1 app experience (multi-screen flow)
+
+The frontend is a hash-routed multi-screen SPA (one offline file, no frameworks):
+**Landing → UAE PASS (mock) → Application stepper (Programme data → Financial
+details → Documents → Review) → Processing (animated from real audit
+transitions) → Beneficiary result**, plus a separate **Officer portal** with a
+case-queue sidebar that holds all dense evidence (Section-8, 6-section trace,
+audit feed, benchmark, officer actions, IBM strip).
+
+Custom applications: `MockApplication` (Pydantic, `extra="forbid"`, no PII
+fields) → `backend/applications.py` builds a synthetic Case with canonical
+state transitions → the **existing** `decide()` rules. Endpoints:
+`POST /applications/mock` (snapshot) and `POST /applications/mock/decide`
+(same envelope as `/demo/run`). The beneficiary sees status + one plain
+sentence; the officer sees everything.
+
 ### v1.1 §5.5 endpoints
 
 `/demo/run/{case_id}` remains the main demo path. Added: `GET /benchmark`, `GET /cases/{id}`, `GET /cases/{id}/audit`, `POST /cases/{id}/decide` (same envelope as `/demo/run`), and `POST /cases/{id}/officer-action` (stateless human action — validates an `OfficerAction`, records an OFF-01 audit event; adjust/escalate require a reason code). Case-creation lifecycle write endpoints and persistence are deferred — see [`V1_1_COMPLETION_SUMMARY.md`](./V1_1_COMPLETION_SUMMARY.md).

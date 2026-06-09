@@ -10,12 +10,19 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import ValidationError
 
 from backend.adapters import build_case, FIXTURES
+from backend.applications import build_case_from_application
 from backend.policy.engine import decide
 from backend.policy.rules import load_policy
-from backend.schemas import OfficerAction
+from backend.schemas import MockApplication, OfficerAction
 
 POLICY = load_policy()
 MOCK_MODE = os.getenv("LOCAL_MOCK_MODE", "true").lower() == "true"
+
+# Build version — the frontend pins the same string and compares it against
+# /healthz at boot. A mismatch means a stale server process is running old
+# routes while serving new static files (the classic local-dev failure mode);
+# the UI then shows an actionable banner instead of leaking raw 404s.
+APP_VERSION = "1.1.0"
 
 
 # ---- structured JSON logger (IBM agent skill 6: observability) ---------------
@@ -91,17 +98,82 @@ ARCHITECTURE = {
     },
 }
 
-app = FastAPI(title="Agent Sanad", version="0.8")
+app = FastAPI(title="Agent Sanad", version=APP_VERSION)
+
+
+# ── PRD §5.5 error contract: every error returns {error_code, message} ──────
+# Keeps raw framework tracebacks away from clients; the structured logger
+# still captures full detail server-side.
+_ERROR_CODES = {400: "BAD_REQUEST", 404: "NOT_FOUND", 405: "METHOD_NOT_ALLOWED",
+                422: "VALIDATION_ERROR", 500: "INTERNAL_ERROR"}
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_envelope(request: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "error_code": _ERROR_CODES.get(exc.status_code, f"HTTP_{exc.status_code}"),
+            "message": str(exc.detail),
+            "path": str(request.url.path),
+            "app_version": APP_VERSION,
+        },
+    )
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_envelope(request: Request, exc: Exception):
+    _log.error("unhandled exception", extra={
+        "step": "error.unhandled", "case_id": str(request.url.path),
+    })
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error_code": "INTERNAL_ERROR",
+            "message": "An internal error occurred. The incident has been logged.",
+            "path": str(request.url.path),
+            "app_version": APP_VERSION,
+        },
+    )
 
 
 @app.get("/healthz")
 def healthz():
-    return {"ok": True, "mock_mode": MOCK_MODE, "policy_version": POLICY.policy_version}
+    return {
+        "ok": True,
+        "mock_mode": MOCK_MODE,
+        "policy_version": POLICY.policy_version,
+        "app_version": APP_VERSION,
+    }
+
+
+# Human-facing labels for the app's sample-case picker (mirrors seeds/cases_v1.json).
+CASE_META = {
+    "GOLDEN":                 {"label": "Clean update — approve",            "group": "Standard"},
+    "NOHEAD":                 {"label": "No headroom — transfer & refer",    "group": "Hardship"},
+    "MISSING":                {"label": "Missing salary certificate",        "group": "Documents"},
+    "ACTIVE":                 {"label": "Active request — auto reject",      "group": "Governance"},
+    "CONTRA":                 {"label": "Income contradiction + injection",  "group": "Security"},
+    "HIGH_OBLIGATIONS":       {"label": "High obligations — refer",          "group": "Risk"},
+    "PERIOD_BREACH":          {"label": "Period breach — refer",             "group": "Governance"},
+    "HARDSHIP":               {"label": "Verified hardship — approve",       "group": "Hardship"},
+    "ZERO_OR_MISSING_INCOME": {"label": "Income unverifiable — request docs","group": "Documents"},
+    "LOW_INCOME_PER_MEMBER":  {"label": "Low income per member — approve",   "group": "Social"},
+    "UNVERIFIED_HARDSHIP":    {"label": "Unverified hardship — refer",       "group": "Hardship"},
+    "PROMPT_INJECTION_ONLY":  {"label": "Prompt injection — logged only",    "group": "Security"},
+    "HIGH_CAPACITY_UPDATE":   {"label": "High capacity — approve",           "group": "Standard"},
+}
 
 
 @app.get("/cases")
 def cases():
-    return {"cases": list(FIXTURES.keys())}
+    return {
+        "cases": list(FIXTURES.keys()),
+        "details": [
+            {"id": cid, **CASE_META.get(cid, {"label": cid, "group": "Other"})}
+            for cid in FIXTURES.keys()
+        ],
+    }
 
 
 @app.get("/architecture")
@@ -200,6 +272,72 @@ def post_officer_action(case_id: str, body: dict):
         "note": ("Deterministic recommendation preserved. Officer action recorded "
                  "with OFF-01 audit; adjust/escalate require a reason code."),
     }
+
+
+# ── v1.1 app flow — custom mock application (stateless) ─────────────────────
+# The beneficiary form posts here. Input is Pydantic-validated, mapped onto a
+# synthetic Case (backend/applications.py), and decided by the EXISTING
+# deterministic engine. No persistence, no PII, no engine changes.
+
+def _parse_mock_application(body: dict) -> MockApplication:
+    try:
+        return MockApplication(**(body or {}))
+    except ValidationError as exc:
+        raise HTTPException(422, f"invalid application: {exc.errors()}")
+
+
+@app.post("/applications/mock")
+def post_mock_application(body: dict):
+    """Validate a mock application and return the assembled Case snapshot
+    (no policy run) — used by the app's review step."""
+    app_in = _parse_mock_application(body)
+    case, log, application_id = build_case_from_application(app_in)
+    return {
+        "application_id": application_id,
+        "case": case.model_dump(mode="json"),
+        "audit": log.events(),
+    }
+
+
+@app.post("/applications/mock/decide")
+def post_mock_application_decide(body: dict, request: Request):
+    """Full custom flow: validate -> build synthetic Case -> existing decide().
+    Returns the same envelope shape as /demo/run/{case_id}."""
+    request_id = request.headers.get("x-request-id") or uuid.uuid4().hex[:12]
+    app_in = _parse_mock_application(body)
+    t0 = time.time()
+    case, log, application_id = build_case_from_application(app_in)
+    log.transition(application_id, "Validating", "PolicyRun", actor="policy",
+                   detail="deterministic decide() called", mock_mode=MOCK_MODE)
+    report = decide(case, POLICY)
+    latency_ms = int((time.time() - t0) * 1000)
+    terminal = _TERMINAL_STATE.get(report.recommendation, "RecommendationReady")
+    log.add(application_id, "policy.decide", "policy",
+            f"{report.recommendation} / {report.proposed_plan.path} "
+            f"(rules: {','.join(report.fired_rules) or 'none'})",
+            latency_ms=latency_ms, mock_mode=MOCK_MODE,
+            state_from="PolicyRun", state_to=terminal)
+    log.transition(application_id, terminal, "Closed", mock_mode=MOCK_MODE,
+                   detail="case finalized in the audit record")
+    _log.info("application.decide", extra={
+        "request_id": request_id, "case_id": application_id,
+        "step": "policy.decide", "recommendation": report.recommendation,
+        "path": report.proposed_plan.path, "fired_rules": report.fired_rules,
+        "latency_ms": latency_ms, "mock_mode": MOCK_MODE,
+    })
+    return JSONResponse({
+        "application_id": application_id,
+        "case": case.model_dump(mode="json"),
+        "report": report.model_dump(mode="json"),
+        "audit": log.events(),
+        "impact": {
+            "latency_ms": latency_ms,
+            "mock_mode": MOCK_MODE,
+            "benchmark": BENCHMARK,
+            "request_id": request_id,
+            "policy_version": POLICY.policy_version,
+        },
+    }, headers={"x-request-id": request_id})
 
 
 # Map a Recommendation to the terminal CaseState used by the audit timeline.
