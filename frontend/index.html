@@ -1,0 +1,106 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Agent Sanad — Arrears Rescheduling</title>
+<style>
+:root{--ink:#1a2b3c;--muted:#5b6b7b;--line:#dfe6ee;--bg:#f5f7fa;--card:#fff;
+--gold:#b8902f;--green:#1f7a4d;--red:#b3261e;--amber:#9a6700;--brand:#0b3d2e}
+*{box-sizing:border-box}body{margin:0;font:15px/1.5 -apple-system,Segoe UI,Roboto,Arial;color:var(--ink);background:var(--bg)}
+header{background:var(--brand);color:#fff;padding:14px 22px;display:flex;align-items:center;gap:12px}
+header b{font-weight:700}header .tag{margin-left:auto;font-size:12px;opacity:.85;border:1px solid #ffffff55;padding:3px 8px;border-radius:20px}
+.wrap{max-width:980px;margin:22px auto;padding:0 16px}
+.row{display:flex;gap:16px;flex-wrap:wrap}.col{flex:1;min-width:300px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:16px}
+.card h3{margin:0 0 12px;font-size:14px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.sel{display:flex;gap:8px;flex-wrap:wrap}
+.sel button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:9px 12px;cursor:pointer;font-weight:600}
+.sel button:hover{border-color:var(--gold)}.sel button.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+.kv{display:grid;grid-template-columns:1fr auto;gap:6px 14px}.kv div:nth-child(odd){color:var(--muted)}
+.kv div:nth-child(even){font-weight:600;text-align:right}
+.chip{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700}
+.pass{background:#e6f4ec;color:var(--green)}.fail{background:#fdeceb;color:var(--red)}.na{background:#eef1f4;color:var(--muted)}
+.badge{display:inline-block;padding:4px 10px;border-radius:6px;font-weight:700;font-size:13px}
+.b-Approve{background:#e6f4ec;color:var(--green)}.b-Refer{background:#fff5e0;color:var(--amber)}
+.b-Reject{background:#fdeceb;color:var(--red)}.b-Request{background:#eef1f4;color:var(--muted)}
+.rec{font-size:22px;font-weight:800;margin:4px 0}
+.muted{color:var(--muted)}.mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
+.drawer{background:#0d2a20;color:#d7e7df;border-radius:10px;padding:14px;white-space:pre-wrap}
+.impact{display:grid;grid-template-columns:1fr 1fr;gap:8px 18px}
+.impact .big{font-size:20px;font-weight:800;color:var(--brand)}
+.pill{font-size:11px;border:1px solid var(--line);border-radius:20px;padding:2px 8px;color:var(--muted)}
+small.note{color:var(--muted)}
+</style></head><body>
+<header><b>Sheikh Zayed Housing Programme</b> · Agent Sanad — Arrears Rescheduling
+<span class="tag" id="mode">offline-safe</span></header>
+<div class="wrap">
+  <div class="card"><h3>Demo case</h3><div class="sel" id="cases"></div></div>
+  <div class="row">
+    <div class="col">
+      <div class="card"><h3>Recommendation</h3>
+        <div class="rec" id="rec">—</div>
+        <div id="chips"></div>
+        <div style="margin-top:12px" class="kv" id="fields"></div>
+      </div>
+      <div class="card"><h3>Why this plan?</h3><div class="drawer mono" id="drawer">Select a case.</div></div>
+    </div>
+    <div class="col">
+      <div class="card"><h3>Retrieved &amp; extracted</h3><div class="kv" id="facts"></div>
+        <div style="margin-top:10px" id="flags"></div></div>
+      <div class="card"><h3>Zero-bureaucracy impact</h3>
+        <div class="impact">
+          <div class="muted">Manual process</div><div class="big">~5 days</div>
+          <div class="muted">Agent Sanad</div><div class="big" id="lat">&lt;1s</div>
+        </div><hr style="border:none;border-top:1px solid var(--line);margin:12px 0"/>
+        <div class="impact" id="bench"></div>
+        <small class="note" id="benchnote"></small>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const API="";  // same origin
+let active=null;
+const f0=x=>x==null?"—":("AED "+Number(x).toLocaleString());
+const chip=(label,v)=>`<span class="chip ${v==='Pass'?'pass':v==='Fail'?'fail':'na'}">${label}: ${v}</span>`;
+async function load(){const r=await fetch(API+"/cases");const {cases}=await r.json();
+  const el=document.getElementById("cases");el.innerHTML="";
+  cases.forEach(c=>{const b=document.createElement("button");b.textContent=c;b.onclick=()=>run(c,b);el.appendChild(b);});
+  if(cases[0])run(cases[0],el.firstChild);}
+async function run(id,btn){document.querySelectorAll("#cases button").forEach(b=>b.classList.remove("active"));
+  if(btn)btn.classList.add("active");
+  const r=await fetch(API+"/demo/run/"+id,{method:"POST"});const d=await r.json();
+  const rep=d.report,c=d.case,pl=rep.proposed_plan;
+  const short=rep.recommendation.split(" ")[0];
+  document.getElementById("rec").innerHTML=`<span class="badge b-${short}">${rep.recommendation}</span>`;
+  document.getElementById("chips").innerHTML=
+    chip("20% Rule",rep.twenty_pct_compliance)+" "+chip("Period",rep.period_compliance)+
+    ` <span class="pill">path: ${pl.path}</span> <span class="pill">risk: ${rep.risk_level}</span> <span class="pill">conf: ${rep.confidence}</span>`;
+  document.getElementById("fields").innerHTML=
+    `<div>Application status</div><div>${rep.application_status}</div>`+
+    `<div>Arrears</div><div>${f0(rep.arrears_amount_aed)}</div>`+
+    `<div>Remaining balance</div><div>${f0(rep.remaining_balance_aed)}</div>`+
+    `<div>Remaining term</div><div>${rep.remaining_term_months} mo</div>`+
+    `<div>Proposed deduction rate</div><div>${(rep.proposed_deduction_rate*100).toFixed(1)}%</div>`+
+    `<div>New installment</div><div>${f0(pl.new_total_installment_aed)}</div>`+
+    `<div>Additional premium</div><div>${f0(pl.additional_premium_aed)}</div>`+
+    `<div>Additional months</div><div>${pl.additional_months}</div>`;
+  document.getElementById("facts").innerHTML=
+    `<div>Verified income</div><div>${f0(c.income.verified_monthly_income_aed)}</div>`+
+    `<div>Income on certificate</div><div>${f0(c.income.salary_certificate_income_aed)}</div>`+
+    `<div>Current installment</div><div>${f0(c.loan&&c.loan.current_installment_aed)}</div>`+
+    `<div>Family size</div><div>${c.applicant&&c.applicant.family_size}</div>`+
+    `<div>Income trend</div><div>${c.income.income_trend}</div>`;
+  document.getElementById("flags").innerHTML="Fired rules: "+rep.fired_rules.map(x=>`<span class="pill">${x}</span>`).join(" ");
+  document.getElementById("drawer").textContent=
+    d.audit.map(e=>`• ${e.step} (${e.actor}) — ${e.detail}`).join("\n")+"\n\n"+rep.reasoning;
+  document.getElementById("lat").textContent="<"+Math.max(1,d.impact.latency_ms)+"ms";
+  const b=d.impact.benchmark;
+  document.getElementById("bench").innerHTML=
+    `<div class="muted">Path-match (2025)</div><div class="big">${(b.path_match_accuracy*100).toFixed(1)}%</div>`+
+    `<div class="muted">20% compliance</div><div class="big">${(b.twenty_pct_compliance_update*100).toFixed(0)}%</div>`+
+    `<div class="muted">Premium dev (med)</div><div>${f0(b.premium_dev_median_aed)}</div>`+
+    `<div class="muted">Months dev (med)</div><div>${b.months_dev_median}</div>`;
+  document.getElementById("benchnote").textContent=
+    `Benchmarked on ${b.n_held_out} held-out ${b.validated_on} decisions (calibrated ${b.calibrated_on}). Path-match, not exact reproduction.`;
+}
+load();
+</script></body></html>

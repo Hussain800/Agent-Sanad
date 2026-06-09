@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.env
+.venv/
+venv/
+.claude/
+
+# Real beneficiary data - never commit
+RescheduleArrears*.xlsx
+RescheduleArrears*.xls
+benchmark/data/*.xlsx
+benchmark/data/*.xls

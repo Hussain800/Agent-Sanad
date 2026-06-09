@@ -1,0 +1,10 @@
+{
+  "note": "Demo cases. Full inputs live in backend/adapters fixtures; this is the human-facing index.",
+  "cases": [
+    {"id":"GOLDEN","label":"Golden — UPDATE / Approve","expect":"UPDATE_INSTALLMENT, Approve, 20%+Period Pass"},
+    {"id":"NOHEAD","label":"No headroom — TRANSFER / Refer","expect":"TRANSFER_ARREARS, Refer (EMI>salary)"},
+    {"id":"MISSING","label":"Missing salary certificate","expect":"Request documents, Incomplete"},
+    {"id":"ACTIVE","label":"Active request","expect":"Reject at gate 1 (ACTIVE-01)"},
+    {"id":"CONTRA","label":"Contradiction + injection","expect":"Refer (INC-01, RSK-01)"}
+  ]
+}
