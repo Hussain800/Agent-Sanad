@@ -7,10 +7,12 @@ import uuid
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
+from pydantic import ValidationError
 
 from backend.adapters import build_case, FIXTURES
 from backend.policy.engine import decide
 from backend.policy.rules import load_policy
+from backend.schemas import OfficerAction
 
 POLICY = load_policy()
 MOCK_MODE = os.getenv("LOCAL_MOCK_MODE", "true").lower() == "true"
@@ -158,6 +160,48 @@ def post_case_decide(case_id: str, request: Request):
     return run(case_id, request)
 
 
+@app.post("/cases/{case_id}/officer-action")
+def post_officer_action(case_id: str, body: dict):
+    """v1.1 §5.5 / §6 — record a human officer's decision on a case.
+
+    STATELESS by design: there is no database in the hackathon build, so this
+    validates the OfficerAction, records an OFF-01 audit event with the officer
+    as actor, and returns the (unchanged) deterministic report alongside the
+    officer's recorded action. The deterministic recommendation is never
+    overwritten silently — adjust/escalate require a reason code (governance).
+    """
+    case_id = case_id.upper()
+    if case_id not in FIXTURES:
+        raise HTTPException(404, f"unknown case '{case_id}'")
+    # Validate the officer action against the typed contract.
+    payload = dict(body or {})
+    payload.setdefault("case_id", case_id)
+    try:
+        action = OfficerAction(**payload)
+    except ValidationError as exc:
+        raise HTTPException(422, f"invalid officer action: {exc.errors()}")
+
+    case, log = build_case(case_id)
+    report = decide(case, POLICY)
+    terminal = _TERMINAL_STATE.get(report.recommendation, "RecommendationReady")
+    detail = f"officer {action.action}"
+    if action.override_reason_code:
+        detail += f" (reason: {action.override_reason_code})"
+    # OFF-01: human-in-the-loop record. Actor = officer.
+    log.add(case_id, "officer.action", "officer", detail,
+            mock_mode=MOCK_MODE, state_from=terminal,
+            state_to={"approve": "Approved", "adjust": "Adjusted",
+                      "escalate": "Refer"}.get(action.action, terminal))
+    return {
+        "case_id": case_id,
+        "report": report.model_dump(mode="json"),
+        "officer_action": action.model_dump(mode="json"),
+        "audit": log.events(),
+        "note": ("Deterministic recommendation preserved. Officer action recorded "
+                 "with OFF-01 audit; adjust/escalate require a reason code."),
+    }
+
+
 # Map a Recommendation to the terminal CaseState used by the audit timeline.
 _TERMINAL_STATE = {
     "Approve":            "RecommendationReady",
@@ -187,6 +231,9 @@ def run(case_id: str, request: Request):
             f"{report.recommendation} / {report.proposed_plan.path} (rules: {','.join(report.fired_rules) or 'none'})",
             latency_ms=latency_ms, mock_mode=MOCK_MODE,
             state_from="PolicyRun", state_to=terminal)
+    # v1.1 §7 — the case is finalized into the audit record (no further mutation).
+    log.transition(case_id, terminal, "Closed", mock_mode=MOCK_MODE,
+                   detail="case finalized in the audit record")
     _log.info("case.decide", extra={
         "request_id": request_id, "case_id": case_id, "step": "policy.decide",
         "recommendation": report.recommendation, "path": report.proposed_plan.path,

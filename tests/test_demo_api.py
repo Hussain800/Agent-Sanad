@@ -82,11 +82,11 @@ def test_architecture_exposes_ibm_seven_skills_mapping():
 # ── v1.1 §7 state-machine contract ──────────────────────────────────────────
 
 def test_state_machine_transitions_emitted_for_each_case():
-    """Every case must emit the canonical v1.1 state journey:
-    Submitted -> IdentityLinked -> DataRetrieved -> Validating -> PolicyRun
-    -> one of {RecommendationReady, NeedsDocuments, Refer, Rejected}.
+    """Every case must emit the canonical v1.1 §7 state journey:
+    Submitted -> IdentityLinked -> DataRetrieved -> Extracting -> Validating
+    -> PolicyRun -> {RecommendationReady|NeedsDocuments|Refer|Rejected} -> Closed.
 
-    Pre-policy gates (ACTIVE-01, DOC-01/02) DO traverse Validating first because
+    Pre-policy gates (ACTIVE-01, DOC-01/02) DO traverse the full journey because
     the gates are enforced inside decide(); the audit transitions are about the
     canonical journey, not about which branch decide() took."""
     terminal = {
@@ -104,13 +104,26 @@ def test_state_machine_transitions_emitted_for_each_case():
         "PROMPT_INJECTION_ONLY":  "RecommendationReady",
         "HIGH_CAPACITY_UPDATE":   "RecommendationReady",
     }
+    expected_prefix = ["Submitted", "IdentityLinked", "DataRetrieved",
+                       "Extracting", "Validating", "PolicyRun"]
     for cid, want in terminal.items():
         audit = client.post(f"/demo/run/{cid}").json()["audit"]
         states = [e["state_to"] for e in audit if e.get("state_to")]
-        expected_prefix = ["Submitted", "IdentityLinked", "DataRetrieved",
-                           "Validating", "PolicyRun"]
-        assert states[:5] == expected_prefix, f"{cid}: {states}"
-        assert states[-1] == want, f"{cid} terminal: got {states[-1]} expected {want}"
+        assert states[:6] == expected_prefix, f"{cid}: {states}"
+        # ... PolicyRun -> terminal -> Closed
+        assert states[-2] == want, f"{cid} terminal: got {states[-2]} expected {want}"
+        assert states[-1] == "Closed", f"{cid} did not reach Closed: {states}"
+
+
+def test_phase5_required_cases_show_all_state_markers():
+    """Phase 5 explicitly names these five cases; each must show every canonical
+    state marker in its audit feed."""
+    required_states = {"Submitted", "IdentityLinked", "DataRetrieved",
+                       "Extracting", "Validating", "PolicyRun", "Closed"}
+    for cid in ("GOLDEN", "MISSING", "ACTIVE", "PERIOD_BREACH", "CONTRA"):
+        audit = client.post(f"/demo/run/{cid}").json()["audit"]
+        states = {e["state_to"] for e in audit if e.get("state_to")}
+        assert required_states <= states, f"{cid} missing: {required_states - states}"
 
 
 def test_audit_events_carry_actor_and_mock_mode():
@@ -155,7 +168,10 @@ def test_get_case_audit_returns_state_transition_journey():
     assert r.status_code == 200
     events = r.json()["events"]
     states = [e["state_to"] for e in events if e.get("state_to")]
-    assert states[:4] == ["Submitted", "IdentityLinked", "DataRetrieved", "Validating"]
+    # build_case emits up to Validating; the terminal + Closed states are added
+    # by the policy-run path, so the assembly audit ends at Validating.
+    assert states[:5] == ["Submitted", "IdentityLinked", "DataRetrieved",
+                          "Extracting", "Validating"]
 
 
 def test_post_cases_decide_matches_demo_run_envelope():
@@ -178,3 +194,96 @@ def test_unknown_case_returns_404_on_every_case_route():
         r = method(url)
         assert r.status_code == 404, url
     assert client.post("/cases/UNKNOWN/decide").status_code == 404
+
+
+# ── v1.1 §5.5 / §6 — officer action (human owns exceptions) ─────────────────
+
+def test_officer_action_approve_records_off_audit_and_preserves_report():
+    r = client.post("/cases/GOLDEN/officer-action", json={"action": "approve"})
+    assert r.status_code == 200
+    body = r.json()
+    # The deterministic recommendation is unchanged.
+    assert body["report"]["recommendation"] == "Approve"
+    # An officer-actor audit event exists.
+    assert any(e["actor"] == "officer" and e["step"] == "officer.action"
+               for e in body["audit"])
+
+
+def test_officer_action_adjust_requires_reason_code():
+    # Missing reason on adjust -> 422 from the OfficerAction validator.
+    r = client.post("/cases/GOLDEN/officer-action", json={"action": "adjust"})
+    assert r.status_code == 422
+    # With a reason -> accepted.
+    ok = client.post("/cases/GOLDEN/officer-action",
+                     json={"action": "adjust", "override_reason_code": "OFF-MANUAL-01"})
+    assert ok.status_code == 200
+    assert ok.json()["officer_action"]["override_reason_code"] == "OFF-MANUAL-01"
+
+
+def test_officer_action_unknown_case_404():
+    assert client.post("/cases/UNKNOWN/officer-action",
+                       json={"action": "approve"}).status_code == 404
+
+
+# ── Phase 4 — Section-8 field presence across ALL cases ─────────────────────
+
+SECTION_8_FIELDS = [
+    "application_status", "case_summary", "income_analysis", "arrears_amount_aed",
+    "remaining_balance_aed", "remaining_term_months", "proposed_deduction_rate",
+    "proposed_plan", "twenty_pct_compliance", "period_compliance",
+    "recommendation", "reasoning",
+]
+ALL_CASES = [
+    "GOLDEN", "NOHEAD", "MISSING", "ACTIVE", "CONTRA",
+    "HIGH_OBLIGATIONS", "PERIOD_BREACH", "HARDSHIP",
+    "ZERO_OR_MISSING_INCOME", "LOW_INCOME_PER_MEMBER",
+    "UNVERIFIED_HARDSHIP", "PROMPT_INJECTION_ONLY", "HIGH_CAPACITY_UPDATE",
+]
+
+
+def test_every_case_returns_all_section_8_fields():
+    for cid in ALL_CASES:
+        report = client.post(f"/demo/run/{cid}").json()["report"]
+        for field in SECTION_8_FIELDS:
+            assert field in report, f"{cid} missing Section-8 field {field}"
+        # Non-empty human-readable fields on every case.
+        assert report["case_summary"].strip()
+        assert report["income_analysis"].strip()
+        assert report["reasoning"].strip()
+
+
+def test_none_path_cases_have_clean_na_compliance():
+    """For cases where no plan is generated, compliance is N/A (not a misleading
+    Pass/Fail), and the plan path is NONE."""
+    for cid in ("MISSING", "ACTIVE", "CONTRA", "ZERO_OR_MISSING_INCOME"):
+        report = client.post(f"/demo/run/{cid}").json()["report"]
+        assert report["proposed_plan"]["path"] == "NONE", cid
+        assert report["twenty_pct_compliance"] == "N/A", cid
+        assert report["period_compliance"] == "N/A", cid
+
+
+# ── Phase 8 — governance / PII safety ───────────────────────────────────────
+
+def test_no_real_pii_in_any_case_payload():
+    """Every applicant_ref / agreement_id is synthetic (APP-/AGR- prefix), and
+    no name longer than a masked stub is exposed."""
+    import re
+    for cid in ALL_CASES:
+        case = client.post(f"/demo/run/{cid}").json()["case"]
+        app_ref = case["applicant"]["applicant_ref"]
+        assert app_ref.startswith("APP-"), f"{cid}: {app_ref}"
+        # Name must be masked (contains an asterisk, not a real full name).
+        assert "*" in case["applicant"]["name_masked"], cid
+        if case.get("loan"):
+            assert case["loan"]["agreement_id"].startswith("AGR-"), cid
+        # No 15-digit Emirates-ID-style number anywhere in the case payload.
+        assert not re.search(r"\b\d{15}\b", str(case)), f"{cid} has an ID-like number"
+
+
+def test_prompt_injection_does_not_change_decision_via_api():
+    """Security boundary, asserted through the HTTP layer: the injection case
+    fires RSK-01 but produces the same Approve plan as if there were no injection."""
+    report = client.post("/demo/run/PROMPT_INJECTION_ONLY").json()["report"]
+    assert "RSK-01" in report["fired_rules"]
+    assert report["recommendation"] == "Approve"
+    assert report["proposed_plan"]["new_total_installment_aed"] == 3000

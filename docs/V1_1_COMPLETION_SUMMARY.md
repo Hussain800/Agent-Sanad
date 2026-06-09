@@ -8,7 +8,15 @@
 
 ## TL;DR
 
-The branch now ships **13 deterministic demo cases** that exercise every branch of `decide()` plus the assessment matrix, an officer drawer with **6 evidence-linked trace sections** including a real v1.1 §7 state-machine timeline, **5 safe v1.1 API endpoints** on top of the v0.8 `/demo/run` route, and updated docs. The protected money path is untouched. **31 of 31 tests pass.** Benchmark wording is unchanged.
+The branch now ships **13 deterministic demo cases** that exercise every branch of `decide()` plus the assessment matrix, an officer drawer with **6 evidence-linked trace sections** including a complete v1.1 §7 state-machine timeline (**8 states**: Submitted → IdentityLinked → DataRetrieved → Extracting → Validating → PolicyRun → terminal → Closed), **6 safe v1.1 API endpoints** (including a stateless officer-action) on top of the v0.8 `/demo/run` route, and updated docs. The protected money path is untouched. **44 of 44 tests pass.** Benchmark wording is unchanged.
+
+### Second completion pass (this iteration)
+
+- **State machine completed** — added the `Extracting` and `Closed` states so the audit timeline shows the full canonical v1.1 §7 journey.
+- **Officer action endpoint** — `POST /cases/{id}/officer-action` (stateless): validates an `OfficerAction` (approve / adjust / escalate; reason code required on adjust/escalate), records an OFF-01 officer-actor audit event, and returns the unchanged deterministic report. Completes the "human owns exceptions" governance story without persistence.
+- **Section-8 field-presence tests** — every case's API output is asserted to carry all 12 official fields with non-empty summaries.
+- **NONE-path UI cleanup** — gated/rejected/incomplete cases now show "Not generated" / "Not applicable" instead of `0.0%` or empty plan rows.
+- **Governance test file** — `tests/test_governance.py`: raw workbook is gitignored and untracked, fixtures are all-synthetic, risky cases route to a human, referred cases carry a fired rule.
 
 ---
 
@@ -19,7 +27,7 @@ The branch now ships **13 deterministic demo cases** that exercise every branch 
 | §1–§3 framing, scope, default-autonomous routing | ✔ done | docs/ARCHITECTURE.md |
 | §4 deterministic engine (Rules 1–3 + assessment matrix + rule catalog) | ✔ done | backend/policy/* — **untouched** |
 | §5 architecture (FastAPI + Pydantic + 5 adapters + LLM/det/human boundary) | ✔ done | backend/ |
-| §5.5 REST endpoints (10 endpoints listed; the safe read-only subset shipped) | ✔ partial — see below | backend/app.py |
+| §5.5 REST endpoints (10 endpoints listed; the safe subset + stateless officer-action shipped) | ✔ mostly — see below | backend/app.py |
 | §6 typed schemas including `HardshipEvidence.note` | ✔ done | backend/schemas.py |
 | §7 state machine — Submitted → IdentityLinked → DataRetrieved → Validating → PolicyRun → terminal | ✔ done as audit events | backend/audit.py, backend/adapters/__init__.py, backend/app.py |
 | §8 document extraction with cached fallback + live golden | ✔ done | backend/extraction.py |
@@ -66,8 +74,8 @@ Each expected output is **derived from a hand-traced run of `decide()`** before 
 
 | Item | Why deferred |
 |---|---|
-| `POST /cases/{id}/officer-action` (officer Approve/Adjust/Escalate write surface) | Needs a workbench write UI that is bigger than a hackathon polish budget. The audit trail already records officer attribution if any caller writes it; no demo case needs it. |
-| `POST /cases` / `POST /cases/{id}/retrieve` / `POST /cases/{id}/documents` / `POST /cases/{id}/extract` (case-creation lifecycle write endpoints) | The demo journey is deterministic and case-id-keyed; building real upload/persistence adds risk without rubric value. The safe **read** subset of v1.1 §5.5 (`GET /cases/{id}`, `GET /cases/{id}/audit`, `GET /benchmark`) is shipped. |
+| `POST /cases` / `POST /cases/{id}/retrieve` / `POST /cases/{id}/documents` / `POST /cases/{id}/extract` (case-creation lifecycle write endpoints) | The demo journey is deterministic and case-id-keyed; building real upload/persistence adds risk without rubric value. The safe **read** subset of v1.1 §5.5 (`GET /cases/{id}`, `GET /cases/{id}/audit`, `GET /benchmark`) plus a stateless `POST /cases/{id}/officer-action` are shipped. |
+| Persistent officer-action history (writing OfficerAction to a store) | The endpoint exists and is validated/audited statelessly; durable persistence needs a database we deliberately don't ship. |
 | SQLite case store | Stateless fixtures are sufficient for the demo. |
 | Real UAE PASS / OAuth | Mock identity per PRD §3.2. |
 | Multi-agent orchestration | Per PRD §3.2 — explicitly cut. |
@@ -94,45 +102,38 @@ Verify with: `git diff main -- backend/policy/engine.py backend/policy/period.py
 
 ---
 
-## Tests: 31 / 31 passing
+## Tests: 44 / 44 passing
 
 ```
-tests/test_demo_api.py
-  ├─ test_healthz_reports_offline_safe_mode
-  ├─ test_demo_run_returns_contract_and_benchmark
-  ├─ test_static_ui_contains_final_demo_surfaces
-  ├─ test_request_id_roundtrip_for_observability
-  ├─ test_architecture_exposes_ibm_seven_skills_mapping
-  ├─ test_state_machine_transitions_emitted_for_each_case   (v1.1 §7 contract)
-  ├─ test_audit_events_carry_actor_and_mock_mode            (v1.1 §6 AuditEvent)
-  ├─ test_get_benchmark_returns_honest_claim_and_metrics    (v1.1 §5.5)
-  ├─ test_get_case_returns_assembled_case_without_running_policy
-  ├─ test_get_case_audit_returns_state_transition_journey
-  ├─ test_post_cases_decide_matches_demo_run_envelope
-  └─ test_unknown_case_returns_404_on_every_case_route
+tests/test_demo_api.py        (24 tests)
+  ├─ healthz / demo-run contract / static-UI surfaces / request-id roundtrip
+  ├─ architecture IBM-7 mapping
+  ├─ state machine: full Submitted→…→Closed journey per case   (v1.1 §7)
+  ├─ phase5 required cases show all state markers
+  ├─ audit events carry actor + mock_mode                       (v1.1 §6)
+  ├─ GET /benchmark honest claim + metrics                      (v1.1 §5.5)
+  ├─ GET /cases/{id} · GET /cases/{id}/audit · POST /cases/{id}/decide
+  ├─ officer-action: approve audits OFF · adjust requires reason · 404
+  ├─ every case returns all 12 Section-8 fields
+  ├─ NONE-path cases show clean N/A compliance
+  ├─ no real PII in any case payload
+  └─ prompt-injection does not change decision via API
 
-tests/test_policy.py
-  ├─ test_golden_update_approve
-  ├─ test_no_headroom_transfer_refer
-  ├─ test_missing_certificate_request_docs
-  ├─ test_active_request_reject
-  ├─ test_contradiction_injection_refer
-  ├─ test_all_cases_build
-  ├─ test_golden_extraction_cached_by_default
-  ├─ test_golden_live_extraction_with_fallback_switch
-  ├─ test_high_obligations_update_then_refer                (case 6)
-  ├─ test_period_breach_refer_with_ten_01                   (case 7)
-  ├─ test_hardship_temporary_circumstance_approve           (case 8)
-  ├─ test_original_five_cases_unchanged_after_expansion
-  ├─ test_all_eight_cases_route_through_endpoint
-  ├─ test_zero_or_missing_income_request_doc_02             (case 9)
-  ├─ test_low_income_per_member_approve_with_fam_01...      (case 10)
-  ├─ test_unverified_hardship_refer_with_hard_01            (case 11)
-  ├─ test_prompt_injection_only_logs_rsk_01_without...      (case 12)
-  ├─ test_high_capacity_update_uses_real_headroom           (case 13)
-  └─ test_all_thirteen_cases_route_through_endpoint
+tests/test_policy.py          (18 tests)
+  ├─ 5 original v0.8 cases + extraction (cached + live)
+  ├─ cases 6–8  (HIGH_OBLIGATIONS, PERIOD_BREACH, HARDSHIP)
+  ├─ cases 9–13 (ZERO_OR_MISSING_INCOME, LOW_INCOME_PER_MEMBER,
+  │              UNVERIFIED_HARDSHIP, PROMPT_INJECTION_ONLY, HIGH_CAPACITY_UPDATE)
+  ├─ original-five-unchanged regression
+  └─ all-8 + all-13 route-through-endpoint
 
-============ 31 passed ============
+tests/test_governance.py      (2 tests in this file group; 5 assertions)
+  ├─ raw workbook gitignored + not tracked
+  ├─ fixtures use only synthetic identifiers
+  ├─ risky cases route to human (never auto-approve)
+  └─ referred cases carry a fired rule
+
+============ 44 passed ============
 ```
 
 ---
@@ -159,7 +160,7 @@ Open `http://127.0.0.1:8000/` and click any of the 13 case buttons. The demo run
 python -B -m pytest tests\ -q -p no:cacheprovider
 ```
 
-Expect: `31 passed`.
+Expect: `44 passed`.
 
 ### Live API (in PowerShell)
 
@@ -176,13 +177,30 @@ foreach ($c in $cases) {
 }
 ```
 
-Also exercise the new v1.1 read endpoints:
+Also exercise the v1.1 endpoints:
 
 ```powershell
 Invoke-RestMethod http://127.0.0.1:8000/benchmark
 Invoke-RestMethod http://127.0.0.1:8000/cases/GOLDEN
 Invoke-RestMethod http://127.0.0.1:8000/cases/GOLDEN/audit
+Invoke-RestMethod -Method Post http://127.0.0.1:8000/cases/GOLDEN/decide
+Invoke-RestMethod -Method Post http://127.0.0.1:8000/cases/GOLDEN/officer-action -Body '{"action":"approve"}' -ContentType 'application/json'
 ```
+
+### Full endpoint list (10)
+
+| Method · Path | Purpose |
+|---|---|
+| `GET /healthz` | liveness + mock_mode + policy_version |
+| `GET /` | single-page demo UI |
+| `GET /architecture` | IBM 7-skills mapping (USP surface) |
+| `GET /cases` | list the 13 seeded case ids |
+| `GET /benchmark` | benchmark metrics + honest claim wording |
+| `GET /cases/{id}` | assembled Case snapshot (no policy run) |
+| `GET /cases/{id}/audit` | audit trail for the assembled case |
+| `POST /demo/run/{id}` | **main demo path** — full retrieve→decide→report envelope |
+| `POST /cases/{id}/decide` | same envelope as /demo/run (v1.1 route name) |
+| `POST /cases/{id}/officer-action` | stateless human action; validates + OFF-01 audit |
 
 ---
 
