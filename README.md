@@ -1,30 +1,48 @@
-# Agent Sanad — MVP backend spine (v0.8)
+# Agent Sanad
+
+Agentera - MOEI X 42 Abu Dhabi Hackathon.
+
+Agent Sanad is an agentic AI prototype for Sheikh Zayed Housing Programme housing-loan arrears rescheduling. It combines a deterministic policy engine, fixture-backed integration adapters, an officer recommendation UI, and a historical benchmark panel.
+
+## MVP Spine
 
 Deterministic arrears-rescheduling engine + 5 mock adapters + one demo endpoint + benchmark.
+
 The money path is tested and green; the benchmark reproduces 94.6% path-match on held-out 2025.
 
 ## Run
+
 ```bash
-python -m venv .venv && source .venv/bin/activate
+python -m venv .venv
+.venv\Scripts\activate
 pip install -r requirements.txt
-PYTHONPATH=. python -m pytest tests/ -q          # 6 passing — money path
-PYTHONPATH=. uvicorn backend.app:app --reload    # open http://127.0.0.1:8000
+python -m pytest tests/ -q
+python -m uvicorn backend.app:app --reload
 ```
-Open `/` for the demo UI (case selector → recommendation card → "Why this plan?" → impact panel).
-Endpoint: `POST /demo/run/{case_id}` where case_id ∈ GOLDEN, NOHEAD, MISSING, ACTIVE, CONTRA.
 
-## Benchmark (already validated)
+Open `http://127.0.0.1:8000/` for the demo UI.
+
+Endpoint: `POST /demo/run/{case_id}` where `case_id` is one of `GOLDEN`, `NOHEAD`, `MISSING`, `ACTIVE`, `CONTRA`.
+
+## Benchmark
+
 ```bash
-# put the workbook at benchmark/data/RescheduleArrears.xlsx (gitignored — real data)
-PYTHONPATH=. python benchmark/run.py benchmark/data/RescheduleArrears.xlsx
+# Put the workbook at benchmark/data/RescheduleArrears.xlsx
+# benchmark/data is gitignored because the workbook contains real beneficiary data.
+python benchmark/run.py benchmark/data/RescheduleArrears.xlsx
 ```
-→ held-out 2025: path-match 94.6%, 20% compliance 100% (UPDATE), premium dev AED 557, months dev 10.
 
-## What to build next (Claude Code), per the PRD
-Polish the frontend, add loading/exception styling, wire the optional live salary-cert extraction
-(golden case only, cached fallback). DO NOT change `backend/policy/engine.py` without re-running tests.
-You personally review: decide(), the 20% cap, period.py, rule IDs, recommendation wording.
+Expected held-out 2025 result: path-match 94.6%, 20% compliance 100% for UPDATE plans, premium deviation AED 557, months deviation 10.
+
+## What To Build Next
+
+Polish the frontend, add loading and exception-case styling, and wire optional live salary-certificate extraction for the golden case only with cached fallback.
+
+Do not change `backend/policy/engine.py` without re-running tests. Personally review `decide()`, the 20% cap, period logic, rule IDs, and recommendation wording.
 
 ## Layout
-backend/ (schemas, policy/engine+period+rules+config, adapters, app, confidence, reasoning, audit)
-benchmark/ (normalize, replay, score, run)  ·  frontend/index.html  ·  tests/test_policy.py
+
+- `backend/`: schemas, policy engine, period checks, rules, adapters, API, confidence, reasoning, audit
+- `benchmark/`: normalize, replay, score, run
+- `frontend/index.html`: single-page demo UI
+- `tests/test_policy.py`: policy regression tests
