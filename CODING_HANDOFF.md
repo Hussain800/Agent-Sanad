@@ -83,9 +83,12 @@ Hard policy rules:
 
 ### v1.1 state machine + safe endpoints
 
-- `backend/audit.py` — `AuditEvent` now carries optional `state_from`/`state_to`; `AuditLog.transition()` helper. The canonical journey (Submitted → IdentityLinked → DataRetrieved → Validating → PolicyRun → terminal) is emitted across `build_case` + `app.py`.
-- New read-only endpoints (do not replace `/demo/run/{case_id}`, the main demo path): `GET /benchmark`, `GET /cases/{id}`, `GET /cases/{id}/audit`, `POST /cases/{id}/decide` (same envelope as `/demo/run`).
-- Audit drawer now has 6 trace sections: state timeline, adapter source map, rule trace, calculation trace, period trace, security trace, plus the raw audit feed.
+- `backend/audit.py` — `AuditEvent` now carries optional `state_from`/`state_to`; `AuditLog.transition()` helper. The **full canonical 8-state journey** (Submitted → IdentityLinked → DataRetrieved → Extracting → Validating → PolicyRun → terminal → Closed) is emitted across `build_case` + `app.py`. The UI timeline is reconstructed from these real audit events.
+- Endpoints (do not replace `/demo/run/{case_id}`, the main demo path): `GET /benchmark`, `GET /cases/{id}`, `GET /cases/{id}/audit`, `POST /cases/{id}/decide` (same envelope as `/demo/run`), `POST /cases/{id}/officer-action` (stateless `OfficerAction` validation + OFF-01 audit; adjust/escalate require a reason code).
+- `backend/schemas.py` — added `OfficerAction` (v1.1 §6) with the reason-code validator.
+- Audit drawer has 6 trace sections: state timeline, adapter source map, rule trace, calculation trace, period trace, security trace, plus the raw audit feed.
+- NONE-path cases (gated/rejected/incomplete) render "Not generated" / "Not applicable" in the Section-8 table — no misleading zeroes.
+- Tests: **44 passing** across `tests/test_policy.py`, `tests/test_demo_api.py`, `tests/test_governance.py`.
 
 ### Live/Cached Salary Extraction
 

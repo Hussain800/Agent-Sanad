@@ -267,10 +267,11 @@ def build_case(case_id: str):
 
     v1.1 §7 — explicit state transitions are emitted between adapter calls so the
     audit drawer can render the canonical case journey:
-      Submitted -> IdentityLinked -> DataRetrieved -> Validating -> PolicyRun
+      Submitted -> IdentityLinked -> DataRetrieved -> Extracting -> Validating
+      -> PolicyRun
     The terminal state (RecommendationReady / NeedsDocuments / Refer / Rejected)
-    is emitted by the API layer once decide() returns, since that's where the
-    recommendation is actually known.
+    and the final Closed state are emitted by the API layer once decide()
+    returns, since that's where the recommendation is actually known.
     """
     if case_id not in FIXTURES:
         raise KeyError(case_id)
@@ -286,9 +287,12 @@ def build_case(case_id: str):
     log.transition(case_id, "IdentityLinked", "DataRetrieved",
                    detail=f"loan {loan_d.agreement_id} + arrears retrieved from Programme")
     docs = doc_validate(case_id, log)
+    # Extracting: salary-certificate parse (cached or live synthetic) happens here.
+    log.transition(case_id, "DataRetrieved", "Extracting", actor="adapter",
+                   detail="parsing salary certificate")
     ext = salary_extract(case_id, f.get("cert_income"), docs["received_docs"], log)
     ver = salary_verify(case_id, ext["cert_income"], log)
-    log.transition(case_id, "DataRetrieved", "Validating",
+    log.transition(case_id, "Extracting", "Validating",
                    detail="documents + salary verification complete")
     variance = ver["variance_pct"]
     income_kwargs = dict(

@@ -157,16 +157,16 @@ The branch grew the demo from 5 to **13 deterministic cases**, all derived from 
 
 ### Audit drawer — six evidence-linked trace sections
 
-1. **State timeline** — derived from real `AuditEvent.state_to` transitions (v1.1 §7): Submitted → IdentityLinked → DataRetrieved → Validating → PolicyRun → RecommendationReady / NeedsDocuments / Refer / Rejected.
+1. **State timeline** — derived from real `AuditEvent.state_to` transitions (v1.1 §7, full 8-state journey): Submitted → IdentityLinked → DataRetrieved → Extracting → Validating → PolicyRun → RecommendationReady / NeedsDocuments / Refer / Rejected → Closed.
 2. **Adapter source map** — the five integrations and what each returns.
 3. **Rule trace** — every fired rule with plain-language meaning + colour-coded effect.
 4. **Calculation trace** (Rule 1) — income, EMI, 20% cap, headroom, arrears, premium, months, deduction rate.
 5. **Period trace** (Rule 2) — remaining term, additional months, pass/fail + explanation.
 6. **Security trace** — injection flag, income variance, contradiction flag, extraction source, and the explicit statement that document text never overrides policy.
 
-### v1.1 §5.5 endpoints (safe, read-only subset)
+### v1.1 §5.5 endpoints
 
-`/demo/run/{case_id}` remains the main demo path. Added: `GET /benchmark`, `GET /cases/{id}`, `GET /cases/{id}/audit`, `POST /cases/{id}/decide` (same envelope as `/demo/run`). Write/lifecycle endpoints and persistence are deferred — see [`V1_1_COMPLETION_SUMMARY.md`](./V1_1_COMPLETION_SUMMARY.md).
+`/demo/run/{case_id}` remains the main demo path. Added: `GET /benchmark`, `GET /cases/{id}`, `GET /cases/{id}/audit`, `POST /cases/{id}/decide` (same envelope as `/demo/run`), and `POST /cases/{id}/officer-action` (stateless human action — validates an `OfficerAction`, records an OFF-01 audit event; adjust/escalate require a reason code). Case-creation lifecycle write endpoints and persistence are deferred — see [`V1_1_COMPLETION_SUMMARY.md`](./V1_1_COMPLETION_SUMMARY.md).
 
 The officer card shows a per-scenario banner derived from fired rules. The beneficiary view still hides all internal math; the plain-language reason varies per scenario.
 

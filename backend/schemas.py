@@ -2,7 +2,7 @@
 from __future__ import annotations
 from datetime import date
 from typing import Literal, Optional
-from pydantic import BaseModel, Field, ConfigDict, conint, confloat
+from pydantic import BaseModel, Field, ConfigDict, conint, confloat, model_validator
 
 Path           = Literal["UPDATE_INSTALLMENT", "TRANSFER_ARREARS", "NONE"]
 Recommendation = Literal["Approve", "Request documents", "Refer to employee", "Reject"]
@@ -118,6 +118,23 @@ class PolicyConfig(BaseModel):
     low_income_per_member_aed: confloat(ge=0) = 2500
     income_variance_threshold: confloat(ge=0, le=1) = 0.30
     policy_version: str = "sanad-v0.8"
+
+
+class OfficerAction(BaseModel):                     # v1.1 PRD §6 — human-in-the-loop record
+    model_config = ConfigDict(extra="forbid")
+    case_id: str
+    action: Literal["approve", "adjust", "escalate"]
+    override_reason_code: Optional[str] = None
+    edited_installment_aed: Optional[confloat(ge=0)] = None
+    edited_months: Optional[conint(ge=0, le=600)] = None
+    notes: str = Field(default="", max_length=400)
+
+    @model_validator(mode="after")
+    def require_reason_on_change(self):
+        # adjust / escalate must carry a reason code (governance: OFF-01).
+        if self.action in ("adjust", "escalate") and not self.override_reason_code:
+            raise ValueError("override_reason_code required when adjusting or escalating")
+        return self
 
 
 class Case(BaseModel):                              # the orchestrator's working object

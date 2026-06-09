@@ -968,6 +968,9 @@
           `<span class="chip info">Risk: ${rep.risk_level}</span>` +
           `<span class="chip info">Confidence: ${rep.confidence}</span>`;
 
+        // When no plan is generated (gated/rejected/incomplete cases), show a
+        // clean "Not generated" / "Not applicable" rather than misleading zeroes.
+        const noPlan = !pl || pl.path === "NONE";
         const rows = [
           ["Application Status", rep.application_status],
           ["Case Summary", rep.case_summary],
@@ -975,8 +978,8 @@
           ["Arrears Amount", AED(rep.arrears_amount_aed)],
           ["Remaining Loan Balance", AED(rep.remaining_balance_aed)],
           ["Remaining Repayment Period", `${rep.remaining_term_months} months`],
-          ["Proposed Deduction Rate", RATE(rep.proposed_deduction_rate)],
-          ["Proposed Repayment Plan", planText(pl)],
+          ["Proposed Deduction Rate", noPlan ? "Not applicable" : RATE(rep.proposed_deduction_rate)],
+          ["Proposed Repayment Plan", noPlan ? "Not generated" : planText(pl)],
           ["20% Rule Compliance", rep.twenty_pct_compliance],
           ["Period Rule Compliance", rep.period_compliance],
           ["Recommendation", rep.recommendation],
