@@ -140,6 +140,42 @@ The **two 25-point criteria** (50 points) are the heart of the rubric, and they'
 
 ---
 
+## v1.1 functional completion (current branch)
+
+The branch grew the demo from 5 to **13 deterministic cases**, all derived from the v1.1 PRD assessment matrix, exercising every branch of `decide()`.
+
+| Case | Fires | Recommendation | Path |
+|---|---|---|---|
+| HIGH_OBLIGATIONS | OBL-01 + CAP-02 + AFF-01 | Refer to employee | UPDATE_INSTALLMENT |
+| PERIOD_BREACH    | TEN-01 + CAP-02 + AFF-01 | Refer to employee | UPDATE_INSTALLMENT (period Fail) |
+| HARDSHIP         | HARD-02                  | Approve           | TRANSFER_ARREARS |
+| ZERO_OR_MISSING_INCOME | DOC-02             | Request documents | NONE |
+| LOW_INCOME_PER_MEMBER  | FAM-01 + CAP-02 + AFF-01 | Approve     | UPDATE_INSTALLMENT (confidence lowered) |
+| UNVERIFIED_HARDSHIP    | HARD-01           | Refer to employee | TRANSFER_ARREARS |
+| PROMPT_INJECTION_ONLY  | RSK-01 + CAP-02 + AFF-01 | Approve     | UPDATE_INSTALLMENT (policy unchanged by injection) |
+| HIGH_CAPACITY_UPDATE   | CAP-02 + AFF-01   | Approve           | UPDATE_INSTALLMENT (real headroom) |
+
+### Audit drawer — six evidence-linked trace sections
+
+1. **State timeline** — derived from real `AuditEvent.state_to` transitions (v1.1 §7): Submitted → IdentityLinked → DataRetrieved → Validating → PolicyRun → RecommendationReady / NeedsDocuments / Refer / Rejected.
+2. **Adapter source map** — the five integrations and what each returns.
+3. **Rule trace** — every fired rule with plain-language meaning + colour-coded effect.
+4. **Calculation trace** (Rule 1) — income, EMI, 20% cap, headroom, arrears, premium, months, deduction rate.
+5. **Period trace** (Rule 2) — remaining term, additional months, pass/fail + explanation.
+6. **Security trace** — injection flag, income variance, contradiction flag, extraction source, and the explicit statement that document text never overrides policy.
+
+### v1.1 §5.5 endpoints (safe, read-only subset)
+
+`/demo/run/{case_id}` remains the main demo path. Added: `GET /benchmark`, `GET /cases/{id}`, `GET /cases/{id}/audit`, `POST /cases/{id}/decide` (same envelope as `/demo/run`). Write/lifecycle endpoints and persistence are deferred — see [`V1_1_COMPLETION_SUMMARY.md`](./V1_1_COMPLETION_SUMMARY.md).
+
+The officer card shows a per-scenario banner derived from fired rules. The beneficiary view still hides all internal math; the plain-language reason varies per scenario.
+
+Full design rationale and per-case expected outputs: [`V1_1_COMPLETION_SUMMARY.md`](./V1_1_COMPLETION_SUMMARY.md) and [`V1_1_FUNCTIONAL_EXPANSION_SUMMARY.md`](./V1_1_FUNCTIONAL_EXPANSION_SUMMARY.md).
+
+The deterministic policy engine, period module, rule catalog, config, and benchmark scripts are **unchanged**. Honest benchmark claim wording is **unchanged**. No tooling addendum (LangGraph / LangSmith / LlamaIndex / etc.) was added.
+
+---
+
 ## Files of record
 
 | Concern | File |

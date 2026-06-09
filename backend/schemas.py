@@ -54,6 +54,10 @@ class HardshipEvidence(BaseModel):
     unemployed_flag: bool = False
     temporary_circumstance_flag: bool = False
     unverified: bool = False
+    # v1.1 — short, human-readable description of the verified circumstance.
+    # Officer-facing only; never shown to beneficiary. Empty for the original
+    # 5 v0.8 cases so behavior is unchanged.
+    note: str = Field(default="", max_length=400)
 
 
 class DocumentManifest(BaseModel):

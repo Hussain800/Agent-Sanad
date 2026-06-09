@@ -5,6 +5,14 @@
     {"id":"NOHEAD","label":"No headroom — TRANSFER / Refer","expect":"TRANSFER_ARREARS, Refer (EMI>salary)"},
     {"id":"MISSING","label":"Missing salary certificate","expect":"Request documents, Incomplete"},
     {"id":"ACTIVE","label":"Active request","expect":"Reject at gate 1 (ACTIVE-01)"},
-    {"id":"CONTRA","label":"Contradiction + injection","expect":"Refer (INC-01, RSK-01)"}
+    {"id":"CONTRA","label":"Contradiction + injection","expect":"Refer (INC-01, RSK-01)"},
+    {"id":"HIGH_OBLIGATIONS","label":"High obligations — Refer (OBL-01)","expect":"UPDATE plan computed but obligations > 60% routes to officer"},
+    {"id":"PERIOD_BREACH","label":"Period breach — Refer (TEN-01)","expect":"UPDATE math runs past remaining term -> Refer, Period Fail"},
+    {"id":"HARDSHIP","label":"Verified hardship — Approve (HARD-02)","expect":"TRANSFER_ARREARS, postpone increase, within cap and term"},
+    {"id":"ZERO_OR_MISSING_INCOME","label":"Income unverifiable — Request docs (DOC-02)","expect":"Cert received but verified income is empty -> request re-upload"},
+    {"id":"LOW_INCOME_PER_MEMBER","label":"Low income per member — Approve (FAM-01)","expect":"Per-member < AED 2,500 lowers confidence; plan still compliant"},
+    {"id":"UNVERIFIED_HARDSHIP","label":"Unverified hardship — Refer (HARD-01)","expect":"Claimed but not verified -> TRANSFER + Refer"},
+    {"id":"PROMPT_INJECTION_ONLY","label":"Injection only — Approve, RSK-01 logged","expect":"Injected text logged; values match; policy unchanged -> Approve"},
+    {"id":"HIGH_CAPACITY_UPDATE","label":"High capacity — Approve, full headroom","expect":"Engine uses real headroom (4k), not fixed payment"}
   ]
 }

@@ -1,6 +1,6 @@
 # Agent Sanad Coding Handoff
 
-Last updated: 2026-06-09
+Last updated: 2026-06-09 (v1.1 functional expansion)
 
 This file is a working handoff for continuing Agent Sanad in another coding tool such as Claude Code. Read this before changing code.
 
@@ -8,8 +8,9 @@ This file is a working handoff for continuing Agent Sanad in another coding tool
 
 - Local path: `C:\Hussain new\Agent-Sanad`
 - GitHub repo: `https://github.com/Hussain800/Agent-Sanad`
-- Branch: `main`
-- Latest pushed commit: `10f0140 Complete final demo hardening`
+- Active branch: `v1.1-functional-expansion` (NOT merged; awaiting manual QA per the v1.1 brief)
+- Stable trunk: `main` (clean v0.8 — the LangGraph tooling branch was deleted)
+- Tooling addendum (LangGraph / LangSmith / LlamaIndex etc.) is **paused** — see `Agent_Sanad_PRD_v1.1_Tooling_Addendum.md` for the future plan.
 - Working tree at handoff: clean except intentionally ignored local files:
   - `.claude/`
   - `RescheduleArrears (1).xlsx`
@@ -62,12 +63,29 @@ Hard policy rules:
   - Fixture-backed UAE PASS, loan, arrears, document validation, salary extraction, and salary verification flow.
   - Assembles `Case` objects and append-only audit logs.
 
-- Five demo cases:
+- Five v0.8 demo cases:
   - `GOLDEN`: approve, `UPDATE_INSTALLMENT`
   - `NOHEAD`: refer, `TRANSFER_ARREARS`
   - `MISSING`: request documents
   - `ACTIVE`: reject at active-request gate
   - `CONTRA`: refer for contradiction + injected text
+- Three v1.1 functional-expansion cases:
+  - `HIGH_OBLIGATIONS`: refer (OBL-01); plan computed inside the cap
+  - `PERIOD_BREACH`: refer (TEN-01); period compliance Fail
+  - `HARDSHIP`: approve via TRANSFER_ARREARS; HARD-02 branch
+- Five v1.1 completion cases (on `v1.1-functional-expansion`):
+  - `ZERO_OR_MISSING_INCOME`: request documents (DOC-02); cert received but income unverifiable
+  - `LOW_INCOME_PER_MEMBER`: approve (FAM-01 lowers confidence); plan still within cap
+  - `UNVERIFIED_HARDSHIP`: refer (HARD-01 + unverified); arrears transferred
+  - `PROMPT_INJECTION_ONLY`: approve with RSK-01 logged; policy unchanged by injected text
+  - `HIGH_CAPACITY_UPDATE`: approve via UPDATE; engine uses real headroom (AED 4,000)
+- **13 demo cases total.** Each expected output is hand-traced through `decide()` before its test is written. See `docs/V1_1_COMPLETION_SUMMARY.md`.
+
+### v1.1 state machine + safe endpoints
+
+- `backend/audit.py` — `AuditEvent` now carries optional `state_from`/`state_to`; `AuditLog.transition()` helper. The canonical journey (Submitted → IdentityLinked → DataRetrieved → Validating → PolicyRun → terminal) is emitted across `build_case` + `app.py`.
+- New read-only endpoints (do not replace `/demo/run/{case_id}`, the main demo path): `GET /benchmark`, `GET /cases/{id}`, `GET /cases/{id}/audit`, `POST /cases/{id}/decide` (same envelope as `/demo/run`).
+- Audit drawer now has 6 trace sections: state timeline, adapter source map, rule trace, calculation trace, period trace, security trace, plus the raw audit feed.
 
 ### Live/Cached Salary Extraction
 
