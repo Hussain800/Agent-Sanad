@@ -50,3 +50,20 @@ def test_all_cases_build():
         r = run(cid)
         assert r.case_id == cid and r.recommendation in (
             "Approve", "Refer to employee", "Request documents", "Reject")
+
+
+def test_golden_extraction_cached_by_default(monkeypatch):
+    monkeypatch.delenv("SANAD_LIVE_EXTRACTION", raising=False)
+    case, log = build_case("GOLDEN")
+    assert case.income.salary_certificate_income_aed == 16711
+    events = [e for e in log.events() if e["step"] == "extract.salary_certificate"]
+    assert events and "cached" in events[0]["detail"]
+
+
+def test_golden_live_extraction_with_fallback_switch(monkeypatch):
+    monkeypatch.setenv("SANAD_LIVE_EXTRACTION", "1")
+    monkeypatch.delenv("SANAD_CERT_PATH", raising=False)
+    case, log = build_case("GOLDEN")
+    assert case.income.salary_certificate_income_aed == 16711
+    events = [e for e in log.events() if e["step"] == "extract.salary_certificate"]
+    assert events and "live parsed monthly income AED 16,711" in events[0]["detail"]

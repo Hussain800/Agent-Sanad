@@ -1,0 +1,9 @@
+Synthetic Salary Certificate
+Document type: salary_certificate
+Beneficiary reference: APP-0001
+Employer: Federal Services Entity
+Issue date: 2026-06-08
+Verified monthly income: AED 16,711
+Income trend: stable
+
+This demo fixture is synthetic and contains no real beneficiary identifiers.

@@ -7,6 +7,7 @@ endpoint in pilot; the workflow core never changes.
 from backend.schemas import (Case, ApplicantProfile, LoanData, ArrearsData,
                              IncomeEvidence, HardshipEvidence, DocumentManifest)
 from backend.audit import AuditLog
+from backend.extraction import extract_salary_certificate
 
 # ---- seeded fixtures keyed by case_id (values mirror real workbook rows; ids synthetic) ----
 FIXTURES = {
@@ -111,6 +112,15 @@ def doc_validate(case_id, log: AuditLog) -> dict:
     return {"received_docs": list(f["received_docs"]), "injection_flag": inj}
 
 
+def salary_extract(case_id, fallback_income, received_docs, log: AuditLog) -> dict:
+    result = extract_salary_certificate(case_id, fallback_income, received_docs)
+    detail = f"{result.mode}: {result.detail}"
+    if result.income_aed is not None:
+        detail += f"; extracted={result.income_aed:,.0f}"
+    log.add(case_id, "extract.salary_certificate", "adapter", detail)
+    return {"cert_income": result.income_aed, "mode": result.mode, "detail": result.detail}
+
+
 def build_case(case_id: str):
     """Assemble a Case by calling the five adapters in order. Returns (Case, AuditLog)."""
     if case_id not in FIXTURES:
@@ -122,10 +132,11 @@ def build_case(case_id: str):
     loan_d = loan(case_id, log)
     arr_d = arrears(case_id, log)
     docs = doc_validate(case_id, log)
-    ver = salary_verify(case_id, f.get("cert_income"), log)
+    ext = salary_extract(case_id, f.get("cert_income"), docs["received_docs"], log)
+    ver = salary_verify(case_id, ext["cert_income"], log)
     variance = ver["variance_pct"]
     income = IncomeEvidence(
-        salary_certificate_income_aed=f.get("cert_income"),
+        salary_certificate_income_aed=ext["cert_income"],
         verified_monthly_income_aed=ver["verified_income"],
         income_trend=f.get("income_trend", "unknown"),
         variance_pct=variance,

@@ -243,6 +243,38 @@
       border-radius: 8px;
       font-weight: 800;
     }
+    .runtime-error {
+      display: none;
+      margin-bottom: 16px;
+      border: 1px solid #f4b5af;
+      background: var(--red-bg);
+      color: var(--red);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-weight: 750;
+    }
+    .runtime-error.show {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .retry {
+      border: 1px solid currentColor;
+      background: transparent;
+      color: inherit;
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .busy {
+      display: none;
+      color: var(--muted);
+      font-weight: 750;
+      margin-top: 10px;
+    }
+    .loading .busy { display: block; }
 
     @media (max-width: 900px) {
       .casebar, .casecopy, .grid { grid-template-columns: 1fr; }
@@ -271,6 +303,7 @@
       <div class="panel pad">
         <p class="eyebrow">Demo case</p>
         <div class="casebuttons" id="cases"></div>
+        <div class="busy">Running policy checks...</div>
       </div>
       <div class="panel pad casecopy">
         <div>
@@ -280,6 +313,11 @@
         <div class="chips" id="casePoints"></div>
       </div>
     </section>
+
+    <div class="runtime-error" id="runtimeError">
+      <span id="runtimeErrorText">Unable to reach the local API.</span>
+      <button class="retry" type="button" id="retryButton">Retry</button>
+    </div>
 
     <section class="grid">
       <div class="stack">
@@ -344,6 +382,35 @@
     const API = "";
     const AED = value => value == null || value === 0 ? "N/A" : "AED " + Number(value).toLocaleString();
     const RATE = value => value == null ? "N/A" : (Number(value) * 100).toFixed(1) + "%";
+    let lastCaseId = "GOLDEN";
+
+    function esc(value) {
+      return String(value ?? "").replace(/[&<>"']/g, ch => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      }[ch]));
+    }
+
+    async function fetchJson(url, options) {
+      const response = await fetch(url, options);
+      if (!response.ok) {
+        throw new Error(`${response.status} ${response.statusText}`);
+      }
+      return response.json();
+    }
+
+    function showRuntimeError(message) {
+      const box = document.getElementById("runtimeError");
+      document.getElementById("runtimeErrorText").textContent = message;
+      box.classList.add("show");
+    }
+
+    function clearRuntimeError() {
+      document.getElementById("runtimeError").classList.remove("show");
+    }
 
     const meta = {
       GOLDEN: {
@@ -415,13 +482,18 @@
 
     function setLoading(on) {
       document.body.classList.toggle("loading", on);
+      document.body.setAttribute("aria-busy", on ? "true" : "false");
+      document.querySelectorAll("#cases button").forEach(button => {
+        button.disabled = on;
+      });
     }
 
     async function load() {
       try {
-        const health = await fetch(API + "/healthz").then(r => r.json());
+        clearRuntimeError();
+        const health = await fetchJson(API + "/healthz");
         document.getElementById("mode").textContent = health.mock_mode ? "offline mock mode" : "live mode";
-        const data = await fetch(API + "/cases").then(r => r.json());
+        const data = await fetchJson(API + "/cases");
         const el = document.getElementById("cases");
         el.innerHTML = "";
         data.cases.forEach(id => {
@@ -433,26 +505,29 @@
         });
         if (data.cases[0]) run(data.cases[0], el.querySelector("button"));
       } catch (err) {
-        document.getElementById("caseDescription").innerHTML = `<div class="error">Unable to reach the local API.</div>`;
+        showRuntimeError("Unable to reach the local API. Start uvicorn and retry.");
       }
     }
 
     async function run(id, btn) {
+      lastCaseId = id;
       setLoading(true);
+      clearRuntimeError();
       document.querySelectorAll("#cases button").forEach(b => b.classList.remove("active"));
       if (btn) btn.classList.add("active");
 
       try {
-        const d = await fetch(API + "/demo/run/" + id, { method: "POST" }).then(r => r.json());
+        const d = await fetchJson(API + "/demo/run/" + id, { method: "POST" });
         const rep = d.report;
         const c = d.case;
         const pl = rep.proposed_plan;
         const current = meta[id] || meta.GOLDEN;
         const [benefitStatus, benefitReason] = beneficiary(rep);
+        const extractionEvent = d.audit.find(e => e.step === "extract.salary_certificate");
 
         document.getElementById("caseTitle").textContent = current.title;
         document.getElementById("caseDescription").textContent = current.description;
-        document.getElementById("casePoints").innerHTML = current.points.map(x => `<span class="chip info">${x}</span>`).join("");
+        document.getElementById("casePoints").innerHTML = current.points.map(x => `<span class="chip info">${esc(x)}</span>`).join("");
 
         const statusBand = document.getElementById("statusBand");
         statusBand.className = "panel statusband";
@@ -484,7 +559,7 @@
           ["Recommendation", rep.recommendation],
           ["Reasoning", rep.reasoning]
         ];
-        document.getElementById("officialFields").innerHTML = rows.map(([k, v]) => `<div>${k}</div><div>${v}</div>`).join("");
+        document.getElementById("officialFields").innerHTML = rows.map(([k, v]) => `<div>${esc(k)}</div><div>${esc(v)}</div>`).join("");
 
         const journeySteps = [
           ["UAE PASS", "Identity verified"],
@@ -492,18 +567,19 @@
           ["Salary certificate", c.documents.received_document_types.includes("salary_certificate") ? "Document received" : "Document missing"],
           ["Status", benefitStatus]
         ];
-        document.getElementById("journey").innerHTML = journeySteps.map(([k, v]) => `<div class="step"><b>${k}</b><span>${v}</span></div>`).join("");
+        document.getElementById("journey").innerHTML = journeySteps.map(([k, v]) => `<div class="step"><b>${esc(k)}</b><span>${esc(v)}</span></div>`).join("");
         document.getElementById("beneficiaryStatus").textContent = `${benefitStatus}: ${benefitReason}`;
 
         document.getElementById("facts").innerHTML =
           `<div>Verified income</div><div>${AED(c.income.verified_monthly_income_aed)}</div>` +
           `<div>Income on certificate</div><div>${AED(c.income.salary_certificate_income_aed)}</div>` +
+          `<div>Extraction source</div><div>${esc(extractionEvent ? extractionEvent.detail : "N/A")}</div>` +
           `<div>Current installment</div><div>${AED(c.loan && c.loan.current_installment_aed)}</div>` +
           `<div>Arrears</div><div>${AED(c.arrears && c.arrears.arrears_amount_aed)}</div>` +
-          `<div>Family size</div><div>${c.applicant ? c.applicant.family_size : "N/A"}</div>` +
-          `<div>Income trend</div><div>${c.income.income_trend}</div>`;
+          `<div>Family size</div><div>${esc(c.applicant ? c.applicant.family_size : "N/A")}</div>` +
+          `<div>Income trend</div><div>${esc(c.income.income_trend)}</div>`;
 
-        document.getElementById("flags").innerHTML = "Fired rules: " + rep.fired_rules.map(x => `<span class="rule">${x}</span>`).join("");
+        document.getElementById("flags").innerHTML = "Fired rules: " + rep.fired_rules.map(x => `<span class="rule">${esc(x)}</span>`).join("");
 
         const audit = d.audit.map(e => `- ${e.step} (${e.actor}): ${e.detail}`).join("\n");
         document.getElementById("drawer").textContent = `${audit}\n\n${rep.reasoning}`;
@@ -518,11 +594,21 @@
         document.getElementById("benchnote").textContent =
           `Benchmarked on ${b.n_held_out} held-out ${b.validated_on} decisions. Path-match, not exact reproduction.`;
       } catch (err) {
-        document.getElementById("decisionText").innerHTML = `<span class="error">Case run failed.</span>`;
+        showRuntimeError(`Case run failed for ${id}: ${err.message}`);
+        document.getElementById("decisionText").textContent = "Case run failed.";
       } finally {
         setLoading(false);
       }
     }
+
+    document.getElementById("retryButton").addEventListener("click", () => {
+      const activeButton = [...document.querySelectorAll("#cases button")].find(b => b.textContent === lastCaseId);
+      if (activeButton) {
+        run(lastCaseId, activeButton);
+      } else {
+        load();
+      }
+    });
 
     load();
   </script>

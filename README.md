@@ -34,9 +34,19 @@ python benchmark/run.py benchmark/data/RescheduleArrears.xlsx
 
 Expected held-out 2025 result: path-match 94.6%, 20% compliance 100% for UPDATE plans, premium deviation AED 557, months deviation 10.
 
-## What To Build Next
+## Offline And Live Extraction
 
-Polish the frontend, add loading and exception-case styling, and wire optional live salary-certificate extraction for the golden case only with cached fallback.
+The demo is offline-safe by default. Golden-case salary extraction uses cached fixture values unless live extraction is explicitly enabled.
+
+```bash
+# Optional: parse the synthetic golden salary certificate from disk.
+$env:SANAD_LIVE_EXTRACTION="1"
+python -m uvicorn backend.app:app --reload
+```
+
+The sample certificate is synthetic and lives at `backend/fixtures/salary_certificates/GOLDEN.txt`. Any extraction failure automatically falls back to the cached fixture value.
+
+## Guardrails
 
 Do not change `backend/policy/engine.py` without re-running tests. Personally review `decide()`, the 20% cap, period logic, rule IDs, and recommendation wording.
 
