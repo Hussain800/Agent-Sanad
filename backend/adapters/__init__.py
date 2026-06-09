@@ -66,6 +66,57 @@ FIXTURES = {
         "cert_income": 15000, "verified_income": 4000, "income_trend": "unknown",
         "received_docs": ["salary_certificate"], "injection": True,
     },
+    # ── v1.1 functional expansion: three new realistic scenarios ─────────────
+    "HIGH_OBLIGATIONS": {  # plenty of headroom but obligations > 60% -> Refer (OBL-01)
+        # Engine trace: cap=4,000, base=1,800, headroom=2,200 (>50) -> UPDATE.
+        # add_prem=2,200, add_months=ceil(5,500/2,200)=3, new_total=4,000.
+        # risk=[OBL-01]; refer_risk=[OBL-01] -> Refer to employee.
+        # 20% = 4,000/20,000 = 0.20 (Pass). Period: 3 <= 200 (Pass).
+        "applicant": dict(applicant_ref="APP-0006", name_masked="F***", uae_national=True,
+                          marital_status="married", family_size=3),
+        "loan": dict(agreement_id="AGR-OBL", remaining_balance_aed=350000,
+                     original_approved_term_months=240, remaining_term_months=200,
+                     loan_original_end_date="2034-09-01", current_installment_aed=1800),
+        "arrears": dict(agreement_id="AGR-OBL", arrears_amount_aed=5500,
+                        unpaid_installments=3, active_request_exists=False),
+        "cert_income": 20000, "verified_income": 20000, "income_trend": "stable",
+        "received_docs": ["salary_certificate"], "injection": False,
+        # Assessment-matrix knob: obligations_ratio is 0.65 -> OBL-01 fires.
+        "obligations_ratio": 0.65,
+    },
+    "PERIOD_BREACH": {  # UPDATE math runs the catch-up past the remaining term -> Refer (TEN-01)
+        # Engine trace: cap=2,000, base=1,800, headroom=200 (>50) -> UPDATE.
+        # add_prem=200, add_months=ceil(30,000/200)=150, new_total=2,000.
+        # period_ok: 150 > 24 -> False -> Refer + TEN-01.
+        # 20% = 2,000/10,000 = 0.20 (Pass). Period: Fail.
+        "applicant": dict(applicant_ref="APP-0007", name_masked="G***", uae_national=True,
+                          marital_status="married", family_size=2),
+        "loan": dict(agreement_id="AGR-PER", remaining_balance_aed=120000,
+                     original_approved_term_months=240, remaining_term_months=24,
+                     loan_original_end_date="2027-06-01", current_installment_aed=1800),
+        "arrears": dict(agreement_id="AGR-PER", arrears_amount_aed=30000,
+                        unpaid_installments=12, active_request_exists=False),
+        "cert_income": 10000, "verified_income": 10000, "income_trend": "stable",
+        "received_docs": ["salary_certificate"], "injection": False,
+    },
+    "HARDSHIP": {  # verified temporary circumstance -> Approve via TRANSFER_ARREARS (HARD-02)
+        # Engine trace: hardship.temporary_circumstance_flag=True, unverified=False.
+        # Engine takes the HARD-02 branch (after EMI<=salary check). Path=TRANSFER,
+        # installment unchanged, period check uses ceil(8,000/2,000)=4 months <= 100.
+        # 20% = 2,000/15,000 = 0.13 (Pass). Period: Pass.
+        "applicant": dict(applicant_ref="APP-0008", name_masked="H***", uae_national=True,
+                          marital_status="married", family_size=3),
+        "loan": dict(agreement_id="AGR-HARD", remaining_balance_aed=240000,
+                     original_approved_term_months=240, remaining_term_months=100,
+                     loan_original_end_date="2030-04-01", current_installment_aed=2000),
+        "arrears": dict(agreement_id="AGR-HARD", arrears_amount_aed=8000,
+                        unpaid_installments=4, active_request_exists=False),
+        "cert_income": 15000, "verified_income": 15000, "income_trend": "decreased",
+        "received_docs": ["salary_certificate", "supporting_document"], "injection": False,
+        # Assessment-matrix knob: verified temporary circumstance (e.g. official assignment).
+        "hardship": {"temporary_circumstance_flag": True, "unverified": False,
+                     "note": "verified medical leave; 6-month assignment abroad"},
+    },
 }
 
 INCOME_VARIANCE_THRESHOLD = 0.30
@@ -135,17 +186,29 @@ def build_case(case_id: str):
     ext = salary_extract(case_id, f.get("cert_income"), docs["received_docs"], log)
     ver = salary_verify(case_id, ext["cert_income"], log)
     variance = ver["variance_pct"]
-    income = IncomeEvidence(
+    income_kwargs = dict(
         salary_certificate_income_aed=ext["cert_income"],
         verified_monthly_income_aed=ver["verified_income"],
         income_trend=f.get("income_trend", "unknown"),
         variance_pct=variance,
         contradiction_flag=(variance / 100) > INCOME_VARIANCE_THRESHOLD,
     )
+    # v1.1 — assessment-matrix signal: financial obligations ratio (Rule OBL-01).
+    # Optional in the fixture; flowing through here lets HIGH_OBLIGATIONS fire
+    # without touching engine.py.
+    if "obligations_ratio" in f:
+        income_kwargs["obligations_ratio"] = f["obligations_ratio"]
+    income = IncomeEvidence(**income_kwargs)
+
     manifest = DocumentManifest(
         received_document_types=docs["received_docs"],
         injection_flags=["RSK-01"] if docs["injection_flag"] else [],
     )
+
+    # v1.1 — assessment-matrix signal: hardship flags. Optional in the fixture,
+    # default empty so the original 5 cases are unchanged.
+    hardship = HardshipEvidence(**f.get("hardship", {}))
+
     case = Case(case_id=case_id, applicant=applicant, loan=loan_d, arrears=arr_d,
-                income=income, hardship=HardshipEvidence(), documents=manifest)
+                income=income, hardship=hardship, documents=manifest)
     return case, log

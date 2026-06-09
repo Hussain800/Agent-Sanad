@@ -40,6 +40,28 @@ CACHED_REASONING = {
         "detected in the document. Agent Sanad treats document text as untrusted content, keeps "
         "the policy rules unchanged, and refers the case to an employee."
     ),
+    # ── v1.1 expansion cases ─────────────────────────────────────────────────
+    "HIGH_OBLIGATIONS": (
+        "Verified income is AED 20,000, current installment AED 1,800, so the 20% cap "
+        "leaves AED 2,200 of headroom for an UPDATE plan. However, total financial obligations "
+        "stand at 65% of income, exceeding the 60% policy threshold. Agent Sanad keeps the "
+        "compliant plan (raise to AED 4,000, clear arrears in 3 months) but refers the case to "
+        "an employee because the wider obligations picture is a human-judgement call."
+    ),
+    "PERIOD_BREACH": (
+        "Verified income is AED 10,000 with a current installment of AED 1,800; the 20% cap "
+        "leaves AED 200 of headroom. Clearing AED 30,000 of arrears at AED 200 per month would "
+        "take 150 months, but only 24 months remain on the original approved term. The plan "
+        "would breach Rule 2 (TEN-01) — the new schedule must not exceed the original repayment "
+        "period — so Agent Sanad refers the case to an employee."
+    ),
+    "HARDSHIP": (
+        "The beneficiary has a verified temporary circumstance (e.g. official assignment or "
+        "medical leave) supported by documentation. Per the assessment matrix, any increase is "
+        "postponed and arrears are transferred to the end of the loan. Income is sufficient, "
+        "the plan stays well within the 20% cap, and the loan still ends within the original "
+        "approved period. Recommendation: Approve via TRANSFER_ARREARS (HARD-02)."
+    ),
 }
 
 

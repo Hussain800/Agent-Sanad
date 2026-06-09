@@ -37,8 +37,16 @@ The structure is: **question · 1-sentence headline answer · 1-line evidence po
 **Evidence:** `LOCAL_MOCK_MODE=true`, default. `backend/extraction.py` has cached fallback on any error. `backend/reasoning.py` ships cached text per case.
 
 ### Q8 — "How do you handle hardship cases?"
-**Headline:** If income drops below the current installment, or unemployment is verified, the engine fires `HARD-01`, takes the TRANSFER path with no increase, and routes to a human if unverified.
-**Evidence:** `engine.py` lines 142–148. NOHEAD case is the test.
+**Headline:** Two branches per the official assessment matrix. Unemployment or EMI-above-income fires `HARD-01` — arrears transferred, referred if unverified (NOHEAD case). A **verified** temporary circumstance — medical leave, official assignment — fires `HARD-02`: arrears transferred to the end, installment unchanged, and the case is approved because the documentation supports it (HARDSHIP case).
+**Evidence:** `engine.py` HARD-01/02 branches. Test cases: NOHEAD and HARDSHIP.
+
+### Q8b — "What about obligations beyond the loan?"
+**Headline:** The engine tracks `obligations_ratio`. If total monthly obligations exceed 60% of income, `OBL-01` fires and the case is referred — even when there's enough headroom for a compliant 20%-cap plan. The plan is still computed and shown to the officer, but the wider obligations picture is human-judgement-sensitive.
+**Evidence:** HIGH_OBLIGATIONS test case · `engine.py` OBL-01 in `refer_risk`.
+
+### Q8c — "What stops the agent from pushing arrears past the original loan period?"
+**Headline:** Rule 2. `period.py` computes `period_ok` per path. On UPDATE, the catch-up months must fit inside the remaining term; on TRANSFER, the extension must fit inside the original end date. If not, `TEN-01` fires, `period_compliance` is Fail on the chip, and the case is referred. PERIOD_BREACH is the regression test.
+**Evidence:** `period.py` + PERIOD_BREACH case.
 
 ### Q9 — "What about family size and income per member?"
 **Headline:** We compute average income per family member when the data is present and surface it in the income analysis. If it falls below AED 2,500, `FAM-01` lowers confidence and lightens the plan.

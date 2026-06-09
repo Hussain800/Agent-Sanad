@@ -140,6 +140,24 @@ The **two 25-point criteria** (50 points) are the heart of the rubric, and they'
 
 ---
 
+## v1.1 functional expansion (current branch)
+
+Three additional realistic demo cases were added on top of the v0.8 base — all derived from the v1.1 PRD assessment matrix. They prove the engine handles the three scenario classes the original 5 did not exercise: financial obligations, period breach, and verified hardship.
+
+| Case | Fires | Recommendation | Path |
+|---|---|---|---|
+| HIGH_OBLIGATIONS | OBL-01 + CAP-02 + AFF-01 | Refer to employee | UPDATE_INSTALLMENT |
+| PERIOD_BREACH    | TEN-01 + CAP-02 + AFF-01 | Refer to employee | UPDATE_INSTALLMENT (period Fail) |
+| HARDSHIP         | HARD-02                  | Approve           | TRANSFER_ARREARS |
+
+The audit drawer was upgraded with five structured trace sections (state timeline, adapter source map, rule trace, calculation trace, period trace) plus the raw audit feed. The officer card now shows a per-scenario banner derived from the fired rules. The beneficiary view still hides all internal math but the plain-language reason now varies per scenario.
+
+Full design rationale and per-case expected outputs: [`V1_1_FUNCTIONAL_EXPANSION_SUMMARY.md`](./V1_1_FUNCTIONAL_EXPANSION_SUMMARY.md).
+
+The deterministic policy engine, period module, rule catalog, config, and benchmark scripts are unchanged. Honest benchmark claim wording is unchanged.
+
+---
+
 ## Files of record
 
 | Concern | File |

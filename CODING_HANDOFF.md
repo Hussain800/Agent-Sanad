@@ -1,6 +1,6 @@
 # Agent Sanad Coding Handoff
 
-Last updated: 2026-06-09
+Last updated: 2026-06-09 (v1.1 functional expansion)
 
 This file is a working handoff for continuing Agent Sanad in another coding tool such as Claude Code. Read this before changing code.
 
@@ -8,8 +8,9 @@ This file is a working handoff for continuing Agent Sanad in another coding tool
 
 - Local path: `C:\Hussain new\Agent-Sanad`
 - GitHub repo: `https://github.com/Hussain800/Agent-Sanad`
-- Branch: `main`
-- Latest pushed commit: `10f0140 Complete final demo hardening`
+- Active branch: `v1.1-functional-expansion` (NOT merged; awaiting manual QA per the v1.1 brief)
+- Stable trunk: `main` (clean v0.8 — the LangGraph tooling branch was deleted)
+- Tooling addendum (LangGraph / LangSmith / LlamaIndex etc.) is **paused** — see `Agent_Sanad_PRD_v1.1_Tooling_Addendum.md` for the future plan.
 - Working tree at handoff: clean except intentionally ignored local files:
   - `.claude/`
   - `RescheduleArrears (1).xlsx`
@@ -62,12 +63,16 @@ Hard policy rules:
   - Fixture-backed UAE PASS, loan, arrears, document validation, salary extraction, and salary verification flow.
   - Assembles `Case` objects and append-only audit logs.
 
-- Five demo cases:
+- Five v0.8 demo cases:
   - `GOLDEN`: approve, `UPDATE_INSTALLMENT`
   - `NOHEAD`: refer, `TRANSFER_ARREARS`
   - `MISSING`: request documents
   - `ACTIVE`: reject at active-request gate
   - `CONTRA`: refer for contradiction + injected text
+- Three v1.1 functional-expansion cases (on `v1.1-functional-expansion`):
+  - `HIGH_OBLIGATIONS`: refer (OBL-01); plan computed inside the cap
+  - `PERIOD_BREACH`: refer (TEN-01); period compliance Fail
+  - `HARDSHIP`: approve via TRANSFER_ARREARS; HARD-02 branch
 
 ### Live/Cached Salary Extraction
 

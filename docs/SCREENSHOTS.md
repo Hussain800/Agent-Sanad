@@ -21,7 +21,16 @@ Save as `docs/screenshots/NN-name.png`.
 | **7** | `07-contradiction-injection.png` | CONTRA selected. Status band (warning amber), INC-01 + RSK-01 in fired rules, reasoning paragraph mentions the injected text. | Adversarial safety beat. |
 | **8** | `08-ibm-7-skills-footer.png` | Any case, scrolled to bottom. The dark green USP strip with all 7 skills visible. | The architecture USP. Use this as the final slide too. |
 
-**Optional 9th:** `09-mobile-view.png` at 390×844 (iPhone size) showing the responsive collapse. Worth +1 point on Demo/UX if you have 30 seconds to set up Chrome devtools.
+**v1.1 functional expansion adds three more shots:**
+
+| # | File name | What's on screen | Notes |
+|---|---|---|---|
+| **9** | `09-high-obligations.png` | HIGH_OBLIGATIONS selected. Amber scenario banner ("High obligations: …"), Section 8 shows Refer + UPDATE plan within cap, rule trace highlights OBL-01 as Refer effect. | Proves the assessment matrix considers obligations, not just salary. |
+| **10** | `10-period-breach.png` | PERIOD_BREACH selected. Red scenario banner ("Period breach (Rule 2)…"), Period chip shows Fail, 20% shows Pass, calculation trace shows additional_months = 150 > 24 remaining. | Proves Rule 2 enforcement. |
+| **11** | `11-hardship-approve.png` | HARDSHIP selected. Green scenario banner ("Verified temporary hardship (HARD-02)…"), Approve + TRANSFER_ARREARS, beneficiary status "Your verified circumstance has been recognised…". | Proves human-centred case handling. |
+| **12** | `12-audit-drawer-v1-1.png` | Any case with audit drawer scrolled to show all 5 trace sections + raw feed. | The v1.1 trust upgrade. |
+
+**Optional 13th:** `13-mobile-view.png` at 390×844 (iPhone size) showing the responsive collapse. Worth +1 point on Demo/UX if you have 30 seconds to set up Chrome devtools.
 
 ---
 
