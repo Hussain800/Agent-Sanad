@@ -236,6 +236,34 @@
       opacity: .72;
       pointer-events: none;
     }
+    .usp {
+      margin-top: 18px;
+      padding: 12px 14px;
+      background: #0d2a20;
+      color: #dcece4;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .usp strong { color: #fff; }
+    .usp .skills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .usp .skill {
+      background: rgba(255,255,255,.08);
+      color: #e6f2ec;
+      border-radius: 999px;
+      padding: 3px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .03em;
+    }
+    .usp a { color: var(--gold); font-weight: 800; text-decoration: none; }
     .error {
       background: var(--red-bg);
       color: var(--red);
@@ -375,6 +403,25 @@
           <p class="subtle" id="benchnote" style="margin:12px 0 0"></p>
         </div>
       </aside>
+    </section>
+
+    <section class="usp" aria-label="Engineering architecture">
+      <div>
+        <strong>Built to the IBM Research agent-engineering playbook</strong>
+        <div style="margin-top:4px;color:#bcd6c9;font-size:12px">
+          LLM reads. Deterministic code decides. Human owns exceptions.
+          &nbsp;·&nbsp; <a href="/architecture" target="_blank" rel="noopener">/architecture</a>
+        </div>
+      </div>
+      <div class="skills">
+        <span class="skill">1 System design</span>
+        <span class="skill">2 Tool contracts</span>
+        <span class="skill">3 Retrieval</span>
+        <span class="skill">4 Reliability</span>
+        <span class="skill">5 Security</span>
+        <span class="skill">6 Observability</span>
+        <span class="skill">7 Product thinking</span>
+      </div>
     </section>
   </main>
 

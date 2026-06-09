@@ -4,6 +4,8 @@ __pycache__/
 .venv/
 venv/
 .claude/
+.uvicorn.log
+*.log
 
 # Real beneficiary data - never commit
 RescheduleArrears*.xlsx
