@@ -2677,7 +2677,7 @@
       <span class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;&#9733;&#9733;</span>
     </div>
     <div class="topbar-pills no-print">
-      <span class="topbar-pill" id="modePill">Offline Evaluation</span>
+      <span class="topbar-pill" id="modePill">Mock data demo</span>
       <span class="topbar-pill version">v<span id="versionPill">1.8.0</span></span>
       <span class="topbar-pill" id="rolePill" data-i18n="rbac.beneficiary">beneficiary</span>
     </div>
@@ -2685,9 +2685,9 @@
   </header>
 
   <div class="buildwarn" id="buildWarn">
-    ⚠ The API server is running an <b>older build</b> than this page
-    (<span id="buildWarnDetail"></span>). Stop the old uvicorn process and
-    restart it from the project folder: <code>.\run.ps1</code> — then reload this page.
+    ⚠ The service is temporarily out of sync with this page
+    (<span id="buildWarnDetail"></span>). Please refresh the page; if the
+    notice persists, contact the service team.
   </div>
 
   <div class="app-shell">
@@ -2698,7 +2698,7 @@
         <a class="sidenav-link active" href="#/" data-screen="landing"><span class="ni"></span> <span>Apply</span></a>
         <a class="sidenav-link" href="#/officer" data-screen="officer"><span class="ni"></span> <span>Review</span></a>
         <a class="sidenav-link" href="#/evidence-vault" data-screen="evidence-vault"><span class="ni"></span> <span>Evidence</span></a>
-        <a class="sidenav-link" href="#/rescue-radar" data-screen="rescue-radar"><span class="ni"></span> <span>Appeal</span></a>
+        <a class="sidenav-link" href="#/rescue-radar" data-screen="rescue-radar"><span class="ni"></span> <span>Rescue Radar</span></a>
       </div>
       <div class="sidenav-group">
         <div class="sidenav-label">Trust</div>
@@ -2724,7 +2724,7 @@
             <div>
               <p class="t-label">Sheikh Zayed Housing Programme</p>
               <h1>Service Console</h1>
-              <p class="t-caption">Arrears rescheduling and decision engine</p>
+              <p class="t-caption">This service checks a housing-loan arrears rescheduling request using Programme-held data, verified income, and MOEI rules.</p>
             </div>
             <div class="flex-center gap-8">
               <span class="badge approve">Mock Pilot</span>
@@ -2746,7 +2746,7 @@
               <div class="form-field mb-20">
                 <label class="form-label" for="consoleCaseSelect">Case record</label>
                 <select class="form-select" id="consoleCaseSelect"></select>
-                <span class="form-hint">13 seeded cases available. Each runs through the deterministic policy engine.</span>
+                <span class="form-hint">Seeded sample scenarios — each runs through the same deterministic policy engine.</span>
               </div>
 
               <div class="case-info-panel">
@@ -2760,6 +2760,7 @@
                 <button class="btn primary btn-lg" id="consoleBtnStart">Process via UAE PASS</button>
                 <button class="btn secondary btn-lg" id="consoleBtnCustom">Custom application</button>
               </div>
+              <p class="t-caption" style="margin-top:14px">The 20% salary cap and repayment-period rules are enforced by deterministic policy code. Clear cases produce a draft automatically; exceptions go to an officer. The LLM reads and explains — it never decides.</p>
             </div>
 
             <div class="console-side">
@@ -4009,7 +4010,9 @@
     $("decApplicant").textContent = S.caseData?.applicant?.name_masked || "A*** (Custom Profile)";
     $("decArrears").textContent = AED(rep.arrears_amount_aed != null ? rep.arrears_amount_aed : S.form.arrears_amount_aed);
     $("decCurrentEmi").textContent = AED(rep.current_installment_aed != null ? rep.current_installment_aed : S.form.current_installment_aed);
-    $("decNewEmi").textContent = rep.new_installment_aed != null ? AED(rep.new_installment_aed) : "N/A (No installment adjustment)";
+    const planForDecree = rep.proposed_plan || {};
+    const decreeNewEmi = (planForDecree.path && planForDecree.path !== "NONE") ? planForDecree.new_total_installment_aed : null;
+    $("decNewEmi").textContent = decreeNewEmi != null ? AED(decreeNewEmi) : "N/A (No installment adjustment)";
     $("decBalance").textContent = AED(rep.remaining_balance_aed != null ? rep.remaining_balance_aed : S.form.remaining_balance_aed);
     $("decDecision").textContent = rep.recommendation || "Pending review";
     
@@ -4124,10 +4127,10 @@
       S.officerLoaded = true;
       try {
         const health = await fetchJson(API + "/healthz");
-        $("modePill").textContent = health.mock_mode ? "Offline Evaluation" : "Live Portal";
+        $("modePill").textContent = health.mock_mode ? "Mock data demo" : "Live Portal";
         S.graphAvailable = !!health.graph_available;
         if (S.graphAvailable) {
-          $("graphToggleWrap").style.display = "flex";
+          /* Orchestrator toggle stays hidden in the demo UI; plain engine is the default. */
           S.useGraph = (health.orchestrator === "graph");
           $("graphToggle").checked = S.useGraph;
           $("graphToggle").addEventListener("input", e => {
@@ -4139,7 +4142,6 @@
       loadConnectorHealth();
       loadSupervisorMetrics();
       await ensureCases();
-      await loadPastApps();
       renderQueue();
       if (S.result) {
         if (S.resultSource === "custom") {
@@ -5058,15 +5060,16 @@
       const salary = (c.income && c.income.salary_certificate_income_aed) ?? "N/A";
       const arrears = (c.arrears && c.arrears.arrears_amount_aed) ?? "N/A";
       const emi = (c.loan && c.loan.current_installment_aed) ?? "N/A";
-      const obligations = (c.obligations && c.obligations.other_debts_monthly_aed) ?? 0;
-      const nationality = (c.applicant && c.applicant.nationality) ?? "N/A";
-      
+      const oblRatio = c.income ? c.income.obligations_ratio : null;
+      const obligations = oblRatio != null ? (Number(oblRatio) * 100).toFixed(0) + "% of income" : "Not declared";
+      const nationality = (c.applicant && c.applicant.uae_national) ? "UAE National ✓" : "Pending verification";
+
       $("consoleCaseDetails").innerHTML = `
         <div>Nationality / الجنسية</div><div><b>${esc(nationality)}</b></div>
         <div>Declared Income / الدخل المعلن</div><div><b>${AED(salary)}</b></div>
         <div>Current EMI / القسط الحالي</div><div><b>${AED(emi)}</b></div>
         <div>Total Arrears / إجمالي المتأخرات</div><div style="color:var(--red);font-weight:700"><b>${AED(arrears)}</b></div>
-        <div>Other Obligations / التزامات أخرى</div><div><b>${AED(obligations)}</b></div>
+        <div>Obligations / الالتزامات</div><div><b>${esc(obligations)}</b></div>
         <div>Family Size / أفراد الأسرة</div><div><b>${esc(c.applicant ? c.applicant.family_size : "N/A")}</b></div>
       `;
     } catch (e) {
@@ -5327,7 +5330,7 @@
   (async function boot() {
     try {
       const health = await fetchJson(API + "/healthz");
-      $("modePill").textContent = health.mock_mode ? "Offline Evaluation" : "Live Portal";
+      $("modePill").textContent = health.mock_mode ? "Mock data demo" : "Live Portal";
       if (health.app_version !== CLIENT_BUILD) {
         $("buildWarnDetail").textContent =
           `server ${health.app_version || "pre-1.1.0"} vs page ${CLIENT_BUILD}`;
