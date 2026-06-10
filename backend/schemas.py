@@ -120,6 +120,32 @@ class PolicyConfig(BaseModel):
     policy_version: str = "sanad-v0.8"
 
 
+class MockApplication(BaseModel):
+    """v1.1 app flow — a beneficiary's mock application form.
+
+    Strictly synthetic input for the demo: validated here, mapped onto the
+    canonical Case in backend/applications.py, then decided by the EXISTING
+    deterministic engine. This schema never reaches the engine directly and
+    contains no PII fields by construction.
+    """
+    model_config = ConfigDict(extra="forbid")
+    monthly_income_aed: confloat(ge=0, le=10_000_000)
+    current_installment_aed: confloat(ge=0, le=1_000_000)
+    arrears_amount_aed: confloat(ge=0, le=100_000_000)
+    remaining_balance_aed: confloat(ge=0, le=100_000_000) = 200_000
+    remaining_term_months: conint(ge=0, le=600) = 120
+    original_approved_term_months: conint(ge=1, le=600) = 240
+    unpaid_installments: conint(ge=0, le=600) = 0
+    family_size: conint(ge=1, le=20) = 1
+    obligations_ratio: Optional[confloat(ge=0, le=5)] = None
+    income_trend: IncomeTrend = "unknown"
+    active_request_exists: bool = False
+    salary_certificate_present: bool = True
+    hardship_type: Literal["none", "unemployment", "temporary_circumstance"] = "none"
+    hardship_verified: bool = False
+    suspicious_document_text: bool = False
+
+
 class OfficerAction(BaseModel):                     # v1.1 PRD §6 — human-in-the-loop record
     model_config = ConfigDict(extra="forbid")
     case_id: str

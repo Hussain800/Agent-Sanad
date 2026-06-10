@@ -81,6 +81,62 @@ Hard policy rules:
   - `HIGH_CAPACITY_UPDATE`: approve via UPDATE; engine uses real headroom (AED 4,000)
 - **13 demo cases total.** Each expected output is hand-traced through `decide()` before its test is written. See `docs/V1_1_COMPLETION_SUMMARY.md`.
 
+### Final hardening + tooling (branch v1.1-final-hardening-tooling)
+
+- Four A-level defects fixed (RequestValidationError envelope, #/processing
+  deep-link guard, double-submit interlock, unhandledrejection banner) — see
+  `docs/FINAL_HARDENING_REPORT.md`.
+- **T1 LangGraph**: `backend/graph/` + `POST /demo/run-graph/{id}` +
+  `GET /demo/compare/{id}` + `SANAD_ORCHESTRATOR` flag (plain default) +
+  officer-portal toggle. `run_policy_engine` calls the existing `decide()`;
+  equivalence on all 13 cases is test-enforced; failures fall back to plain.
+- **T2 observability**: `backend/observability/` — mandatory PII redaction +
+  LangSmith-ready adapter, `LANGSMITH_TRACING=false` by default, refuse-to-emit
+  interlock if redaction is disabled. No hard langsmith dependency.
+- T3 LlamaIndex / T4 LangChain intentionally skipped — rationale in
+  `docs/TOOLING_IMPLEMENTATION_SUMMARY.md`. MCP stays roadmap-only.
+- Tests: **84 passing** across 6 files.
+
+### Production hardening (pass 4)
+
+- `APP_VERSION` in `backend/app.py` must always equal `CLIENT_BUILD` in
+  `frontend/index.html` — a test enforces this. Bump BOTH together on release.
+- All errors return `{error_code, message, path, app_version}` via the
+  exception handlers in `backend/app.py`.
+- Launch with `.\run.ps1` (Windows) or `./run.sh` — they refuse to start if
+  port 8000 is already bound, because a stale server process serves NEW static
+  files with OLD API routes (this caused two confusing field reports).
+- Pilot-gap assessment: `docs/PRODUCTION_READINESS.md`.
+
+### v1.1 app experience (frontend rebuild)
+
+The frontend is no longer a one-page case-button simulator. `frontend/index.html`
+is now a hash-routed multi-screen SPA (still a single offline file, zero deps):
+
+1. **Landing** — SZHP-branded service entry; "Continue with UAE PASS" + officer-portal link.
+2. **UAE PASS mock** — simulated identity verification (clearly labeled mock; no credentials).
+3. **Application stepper** — Programme data (retrieved) → Financial details (editable form)
+   → Documents (cards with statuses incl. injection toggle) → Review & submit.
+   Two sources: "Sample case" (loads any of the 13 fixtures via `GET /cases/{id}`)
+   and "Custom application" (form values). Editing any field auto-switches to custom.
+4. **Processing** — animated agent timeline driven by the REAL audit state transitions.
+5. **Beneficiary result** — status + plain-language reason only (no internal math).
+6. **Officer portal** — case-queue sidebar (13 samples grouped + "Last submitted
+   application"), Section-8 table, 6-section trace, raw audit, benchmark panel,
+   officer actions (approve/adjust/escalate → `/cases/{id}/officer-action`),
+   IBM 7-skills strip. All the dense v0.8-era content lives here now.
+
+Custom flow backend (stateless, engine untouched):
+- `backend/schemas.py` — `MockApplication` (extra="forbid"; no PII fields).
+- `backend/applications.py` — maps a validated form onto a synthetic Case with
+  the same audit transitions as `build_case`; `decide()` does the money.
+- `POST /applications/mock` — assembled-case snapshot (no policy run).
+- `POST /applications/mock/decide` — full envelope, same shape as `/demo/run`.
+- `GET /cases` now also returns `details` (label/group) for the app's picker;
+  the original `cases` id list is unchanged.
+- Tests: `tests/test_applications.py` (custom approve/missing-docs/active-reject/
+  obligations-refer/period-breach-refer/injection-no-override and more).
+
 ### v1.1 state machine + safe endpoints
 
 - `backend/audit.py` — `AuditEvent` now carries optional `state_from`/`state_to`; `AuditLog.transition()` helper. The **full canonical 8-state journey** (Submitted → IdentityLinked → DataRetrieved → Extracting → Validating → PolicyRun → terminal → Closed) is emitted across `build_case` + `app.py`. The UI timeline is reconstructed from these real audit events.
