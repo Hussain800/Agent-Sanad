@@ -189,6 +189,28 @@ def healthz():
 
 
 # Human-facing labels for the app's sample-case picker (mirrors seeds/cases_v1.json).
+# Known fired rules per case (used by Exception Studio for server-driven filtering).
+_KNOWN_FIRED = {
+    "GOLDEN": [], "NOHEAD": ["HARD-01","CAP-01"], "MISSING": ["DOC-01"],
+    "ACTIVE": ["ACTIVE-01"], "CONTRA": ["INC-01","RSK-01"],
+    "HIGH_OBLIGATIONS": ["OBL-01"], "PERIOD_BREACH": ["TEN-01"],
+    "HARDSHIP": ["HARD-02"], "ZERO_OR_MISSING_INCOME": ["DOC-02"],
+    "LOW_INCOME_PER_MEMBER": ["FAM-01"], "UNVERIFIED_HARDSHIP": ["HARD-01"],
+    "PROMPT_INJECTION_ONLY": ["RSK-01"], "HIGH_CAPACITY_UPDATE": [],
+}
+_EXCEPTION_GROUP_MAP: dict[str, str] = {}
+for _cid, _rules in _KNOWN_FIRED.items():
+    if "ACTIVE-01" in _rules or "TEN-01" in _rules:
+        _EXCEPTION_GROUP_MAP[_cid] = "Policy hard stop"
+    elif "DOC-01" in _rules or "DOC-02" in _rules or "INC-01" in _rules:
+        _EXCEPTION_GROUP_MAP[_cid] = "Evidence problem"
+    elif "OBL-01" in _rules:
+        _EXCEPTION_GROUP_MAP[_cid] = "Affordability risk"
+    elif "HARD-01" in _rules or "HARD-02" in _rules or "FAM-01" in _rules:
+        _EXCEPTION_GROUP_MAP[_cid] = "Social hardship"
+    elif "RSK-01" in _rules:
+        _EXCEPTION_GROUP_MAP[_cid] = "Security risk"
+
 CASE_META = {
     "GOLDEN":                 {"label": "Clean update — approve",            "group": "Standard"},
     "NOHEAD":                 {"label": "No headroom — transfer & refer",    "group": "Hardship"},
@@ -211,7 +233,11 @@ def cases():
     return {
         "cases": list(FIXTURES.keys()),
         "details": [
-            {"id": cid, **CASE_META.get(cid, {"label": cid, "group": "Other"})}
+            {
+                "id": cid,
+                **CASE_META.get(cid, {"label": cid, "group": "Other"}),
+                "exception_group": _EXCEPTION_GROUP_MAP.get(cid, ""),
+            }
             for cid in FIXTURES.keys()
         ],
     }

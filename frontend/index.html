@@ -1382,18 +1382,7 @@
   function renderQueue() {
     const groups = {};
     const filtered = !S_exceptionFilter ? S.caseDetails
-      : S.caseDetails.filter(d => {
-          // Check if this case's known fired rules match the filter
-          const knownFired = {
-            "GOLDEN":[],"NOHEAD":["HARD-01","CAP-01"],"MISSING":["DOC-01"],
-            "ACTIVE":["ACTIVE-01"],"CONTRA":["INC-01","RSK-01"],
-            "HIGH_OBLIGATIONS":["OBL-01"],"PERIOD_BREACH":["TEN-01"],
-            "HARDSHIP":["HARD-02"],"ZERO_OR_MISSING_INCOME":["DOC-02"],
-            "LOW_INCOME_PER_MEMBER":["FAM-01"],"UNVERIFIED_HARDSHIP":["HARD-01"],
-            "PROMPT_INJECTION_ONLY":["RSK-01"],"HIGH_CAPACITY_UPDATE":[],
-          };
-          return exceptionGroup(knownFired[d.id] || []).includes(S_exceptionFilter);
-        });
+      : S.caseDetails.filter(d => d.exception_group === S_exceptionFilter);
     filtered.forEach(d => { (groups[d.group] = groups[d.group] || []).push(d); });
     let html = "";
     // Exception filter bar
