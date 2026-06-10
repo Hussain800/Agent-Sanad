@@ -515,6 +515,31 @@
     </div>
   </section>
 
+  <!-- ════════ B2 · CONSENT ════════ -->
+  <section class="screen" id="screen-consent">
+    <div class="wrap narrow">
+      <div class="card hero" style="padding:32px">
+        <p class="eyebrow" data-i18n="consent.title">Data sharing consent</p>
+        <h2 style="margin-bottom:16px" data-i18n="consent.grant">Grant purpose-bound consent</h2>
+        <div style="background:var(--blue-bg);border-radius:10px;padding:14px 16px;margin-bottom:16px;font-size:13.5px">
+          <b data-i18n="consent.purpose">Purpose:</b> Housing loan arrears rescheduling assessment<br>
+          <b>Programme:</b> Sheikh Zayed Housing Programme
+        </div>
+        <div class="kv" id="consentScope" style="margin-bottom:20px">
+          <div>Identity verification</div><div style="color:var(--green-ok)">✓ UAE PASS</div>
+          <div>Loan &amp; arrears data</div><div style="color:var(--green-ok)">✓ SZHP Programme</div>
+          <div>Salary verification</div><div style="color:var(--green-ok)">✓ Financial services</div>
+          <div>Document validation</div><div style="color:var(--green-ok)">✓ UAE Verify</div>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <button class="btn primary" id="btnConsentGrant">Grant consent &amp; continue</button>
+          <button class="btn subtle" id="btnConsentBack">Back</button>
+        </div>
+        <p class="subtle" style="margin-top:14px;font-size:12px" data-i18n="consent.revoke">Consent can be revoked at any time. Demo — no real data is shared.</p>
+      </div>
+    </div>
+  </section>
+
   <!-- ════════ C–E · APPLICATION ════════ -->
   <section class="screen" id="screen-apply">
     <div class="wrap">
@@ -699,6 +724,14 @@
                   duration remain officer-discretion-sensitive.
                 </p>
               </div>
+              <div class="card pad" id="connectorHealthCard" style="display:none">
+                <p class="eyebrow" data-i18n="connector.title">Connector health</p>
+                <div class="kv" id="connectorHealthList"></div>
+              </div>
+              <div class="card pad" id="supervisorCard" style="display:none">
+                <p class="eyebrow" data-i18n="supervisor.title">Supervisor dashboard</p>
+                <div class="kv" id="supervisorMetrics"></div>
+              </div>
               <div class="usp">
                 <div>
                   <strong>Built to the IBM Research agent-engineering playbook</strong>
@@ -812,6 +845,10 @@
     const h = location.hash || "#/";
     if (h.startsWith("#/officer"))        { show("officer"); initOfficer(); }
     else if (h.startsWith("#/uaepass"))   { show("uaepass"); }
+    else if (h.startsWith("#/consent"))   {
+      if (!S.identityVerified) { location.hash = "#/uaepass"; return; }
+      show("consent");
+    }
     else if (h.startsWith("#/apply"))     {
       if (!S.identityVerified) { location.hash = "#/uaepass"; return; }
       show("apply"); renderStepper(); renderStep();
@@ -849,9 +886,13 @@
   };
   $("btnPassContinue").onclick = async () => {
     await ensureCases();
+    location.hash = "#/consent";
+  };
+  $("btnConsentGrant").onclick = async () => {
     await loadSample(S.sampleId);
     location.hash = "#/apply";
   };
+  $("btnConsentBack").onclick = () => { location.hash = "#/uaepass"; };
 
   /* ═══════════════ sample cases ═══════════════ */
   async function ensureCases() {
@@ -1321,6 +1362,35 @@
     return `Raise installment to ${AED(pl.new_total_installment_aed)} with ${AED(pl.additional_premium_aed)} premium for ${pl.additional_months} months.`;
   }
 
+  async function loadConnectorHealth() {
+    try {
+      const r = await fetch(API + "/supervisor/connector-health", { headers: { "x-sanad-role": "supervisor" } });
+      if (r.ok) {
+        const data = await r.json();
+        const list = data.connectors || [];
+        $("connectorHealthCard").style.display = "block";
+        $("connectorHealthList").innerHTML = list.map(c =>
+          `<div>${esc(c.name)}</div><div><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${c.status === 'up' ? 'var(--green-ok)' : 'var(--amber)'};margin-right:6px"></span>${esc(c.status)}${c.failure_mode ? ' ('+esc(c.failure_mode)+')' : ''}</div>`
+        ).join("");
+      }
+    } catch (e) { /* connector health unavailable */ }
+  }
+  async function loadSupervisorMetrics() {
+    try {
+      const r = await fetch(API + "/supervisor/metrics", { headers: { "x-sanad-role": "supervisor" } });
+      if (r.ok) {
+        const data = await r.json();
+        $("supervisorCard").style.display = "block";
+        $("supervisorMetrics").innerHTML = [
+          ["Total applications", data.total_applications],
+          ["Approvals", data.approvals],
+          ["Referrals", data.referrals],
+          ["Rejections", data.rejections],
+          ["Document requests", data.request_docs],
+        ].map(([k,v]) => `<div>${esc(k)}</div><div><b>${v}</b></div>`).join("");
+      }
+    } catch (e) { /* supervisor metrics unavailable */ }
+  }
   async function initOfficer() {
     if (!S.officerLoaded) {
       S.officerLoaded = true;
@@ -1339,6 +1409,8 @@
           });
         }
       } catch (e) { /* pill stays default */ }
+      loadConnectorHealth();
+      loadSupervisorMetrics();
       await ensureCases();
       await loadPastApps();
       renderQueue();
