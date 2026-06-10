@@ -46,7 +46,7 @@ Invoke-RestMethod http://127.0.0.1:8000/healthz    # ok=true, mock_mode=true, ap
 | `SANAD_LLM` | `0` | Optional LLM reasoning (cached fallback always present) |
 | `SANAD_DB_PATH` | `data/agent_sanad.db` | Override SQLite database path |
 
-## API endpoints (17 routes)
+## API endpoints (85+ routes — key demo routes below)
 
 | Method | Path | Purpose |
 |---|---|---|
@@ -72,7 +72,7 @@ Invoke-RestMethod http://127.0.0.1:8000/healthz    # ok=true, mock_mode=true, ap
 
 ```
 backend/
-  app.py              — FastAPI app (55+ routes, JSON logger, error envelope, store, connectors, consent, RBAC, audit chain, simulator, decision packages)
+  app.py              — FastAPI app (85+ routes, JSON logger, error envelope, store, connectors, consent, RBAC, audit chain, simulator, decision packages)
   store.py            — SQLite persistence layer (applications, recommendations, audit, officer actions, +11 v1.4 tables)
   actions.py          — Evidence Repair Loop: maps fired rules to beneficiary-facing next_required_actions
   connectors.py       — v1.4: Connector registry + 6 mock connectors with health/simulate/reset/failure modes
@@ -98,7 +98,7 @@ backend/
 frontend/
   index.html          — Single-file hash-routed SPA (~1576 lines, vanilla HTML/CSS/JS, zero deps)
   i18n.json           — Arabic/English translation strings (95 keys)
-tests/                — 12 test files (168 passing)
+tests/                — 21 test files (231 passing)
   test_policy.py      — 13 case assertions + endpoint contract tests
   test_demo_api.py    — API contract + CLIENT_BUILD handshake test
   test_governance.py  — No workbook tracked, no PII, risky cases routed to human
@@ -108,9 +108,18 @@ tests/                — 12 test files (168 passing)
   test_benchmark_replay.py   — Benchmark replay logic (18 tests, 7 scenarios)
   test_store.py              — SQLite persistence (12 tests)
   test_security.py           — Security, PII, XSS, error envelope (11 tests)
-  test_connectors.py         — v1.4: Connector registry, health, simulate, UAE PASS, GSB, UAE Verify (10 tests)
+  test_connectors.py         — v1.4: Connector registry, health, simulate (15 tests)
+  test_connector_contracts.py — v1.5: Pydantic model contracts for all connectors
   test_consent.py            — v1.4: Consent create/get/revoke/events (5 tests)
-  test_v1_4_integration.py   — v1.4: RBAC, simulator, decision package, audit chain, supervisor (14 tests)
+  test_consent_guard.py      — v1.5: Consent guard v2 enforcement (7 tests)
+  test_v1_4_integration.py   — v1.4: RBAC, simulator, decision package, audit chain (14 tests)
+  test_abac.py               — v1.5: Attribute-based access control
+  test_sessions.py           — v1.5: UAE PASS session v3 lifecycle
+  test_signature_integrity.py — v1.5: Hash binding + tamper detection
+  test_action_workflow.py    — v1.5: Upload-mock, reject, resubmit, waive
+  test_appeals.py            — v1.5: Appeals workbench lifecycle
+  test_supervisor_command.py — v1.5: Supervisor backlog, SLA, fairness, overrides
+  test_accessibility_i18n.py — v1.5: Accessibility + Arabic i18n validation
 benchmark/            — Historical replay + scoring (94.6% path-match on held-out 2025)
 seeds/cases_v1.json   — Human-facing demo case index (13 cases)
 ```
@@ -129,7 +138,7 @@ seeds/cases_v1.json   — Human-facing demo case index (13 cases)
 - The 20% salary cap is the hard policy rule. Monthly deduction must not exceed it. Never relax this.
 - **SQLite persistence** is in `backend/store.py`. DB lives at `data/agent_sanad.db` (gitignored). Gracefully degrades if DB can't be created. Three new endpoints: `GET /applications`, `GET /applications/{id}`, `GET /officer-actions`.
 - **Arabic localization** is in `frontend/i18n.json` (95 keys). Language toggle in the top bar loads translations client-side. RTL direction support. Key static text and beneficiary result strings are translated.
-- **New test files**: `test_benchmark_replay.py` (18 tests), `test_store.py` (12), `test_security.py` (11). Run full suite to verify 125 tests pass.
+- **New test files**: `test_benchmark_replay.py` (18 tests), `test_store.py` (12), `test_security.py` (11). Run full suite to verify 231 tests pass.
 - **Evidence Repair Loop**: `backend/actions.py` maps fired rules to structured `next_required_actions` in every API response and graph route. Rendered in beneficiary result cards and officer portal trace section 7. Case-aware: HARD-01+CAP-01 (capacity issue) suppresses hardship action. Backed by integration tests.
 - **Exception Studio**: Officer portal queue has filter buttons (Policy hard stop, Evidence problem, Affordability risk, Social hardship, Security risk) with server-provided `exception_group` metadata from `GET /cases`. No hard-coded frontend maps.
 - **v1.4 Connectors**: 6 mock connectors (UAEPASS, GSB, SZHP-core, UAE-Verify, financial-capacity, notifications) with registry, health endpoints, simulate/reset, and failure modes. Consent required before connector data returns.

@@ -8,7 +8,7 @@
 
 ## TL;DR
 
-The branch now ships **13 deterministic demo cases** that exercise every branch of `decide()` plus the assessment matrix, an officer drawer with **6 evidence-linked trace sections** including a complete v1.1 §7 state-machine timeline (**8 states**: Submitted → IdentityLinked → DataRetrieved → Extracting → Validating → PolicyRun → terminal → Closed), **6 safe v1.1 API endpoints** (including a stateless officer-action) on top of the v0.8 `/demo/run` route, and updated docs. The protected money path is untouched. **44 of 44 tests pass** (v1.1 milestone snapshot; current suite: **139 tests, 9 files**). Benchmark wording is unchanged.
+The branch now ships **13 deterministic demo cases** that exercise every branch of `decide()` plus the assessment matrix, an officer drawer with **6 evidence-linked trace sections** including a complete v1.1 §7 state-machine timeline (**8 states**: Submitted → IdentityLinked → DataRetrieved → Extracting → Validating → PolicyRun → terminal → Closed), **6 safe v1.1 API endpoints** (including a stateless officer-action) on top of the v0.8 `/demo/run` route, and updated docs. The protected money path is untouched. **44 of 44 tests pass** (v1.1 milestone snapshot; current suite: **231 tests, 21 files**). Benchmark wording is unchanged.
 
 ### Fourth pass — production hardening
 

@@ -20,7 +20,7 @@
 
 <br/>
 
-[![Tests](https://img.shields.io/badge/tests-168%20passing-1f7a4d?style=flat-square&logo=pytest&logoColor=white)](#-quality--testing)
+[![Tests](https://img.shields.io/badge/tests-231%20passing-1f7a4d?style=flat-square&logo=pytest&logoColor=white)](#-quality--testing)
 [![Python](https://img.shields.io/badge/python-3.11+-0b3d2e?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-async-0b3d2e?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![Pydantic v2](https://img.shields.io/badge/Pydantic-v2-0b3d2e?style=flat-square&logo=pydantic&logoColor=white)](https://docs.pydantic.dev/)
@@ -149,7 +149,7 @@ flowchart TB
         I18N["AR / EN i18n + RTL"]
     end
 
-    subgraph API["FastAPI Service · 17 routes · uniform error envelope · JSON logs"]
+    subgraph API["FastAPI Service · 85+ routes · uniform error envelope · JSON logs"]
         ORCH["Orchestrator<br/>retrieve, validate, extract, decide, report"]
         REPAIR["Evidence Repair Loop<br/>fired rules to next_required_actions"]
         GRAPHQ["LangGraph wrapper<br/>optional · equivalence-tested"]
@@ -381,7 +381,7 @@ provably not hard-coded.
 
 ---
 
-## 🔌 API Surface (17 routes)
+## 🔌 API Surface (85+ routes)
 
 Every payload is a Pydantic v2 model. Every error returns the same envelope.
 
@@ -510,11 +510,11 @@ python benchmark/run.py benchmark/data/RescheduleArrears.xlsx
 
 ## ✅ Quality &amp; Testing
 
-**168 tests across 12 files**, all passing. Run them:
+**231 tests across 21 files** (v1.5.0 target: 220+), all passing. Run them:
 
 ```powershell
 $env:PYTHONPATH="."
-python -B -m pytest tests\ -q -p no:cacheprovider      # → 168 passed
+python -B -m pytest tests\ -q -p no:cacheprovider      # → 231 passed
 ```
 
 | Test file | Focus |
@@ -522,12 +522,24 @@ python -B -m pytest tests\ -q -p no:cacheprovider      # → 168 passed
 | `test_policy.py` | 13 case assertions + endpoint contracts (hand-traced expectations) |
 | `test_demo_api.py` | API contract + build-version handshake |
 | `test_applications.py` | Custom application flow (proves not hard-coded) |
-| `test_graph_equivalence.py` | Plain ≡ LangGraph for **all 13 cases** + fallback |
+| `test_graph_equivalence.py` | Plain ≡ LangGraph for all 13 cases + fallback |
 | `test_observability.py` | Tracing off by default · redaction safety · refuse-to-emit |
 | `test_governance.py` | No workbook tracked · no PII · risky cases route to human |
 | `test_security.py` | XSS escaping · error envelope · PII absence |
 | `test_store.py` | SQLite persistence + graceful degradation |
 | `test_benchmark_replay.py` | Benchmark replay logic across 7 scenarios |
+| `test_connectors.py` | 6 mock connectors: health, simulate, reset, failure modes |
+| `test_connector_contracts.py` | Pydantic model contracts for all connector types |
+| `test_consent.py` | Consent ledger: create, get, revoke, events |
+| `test_consent_guard.py` | v1.5 consent guard v2: purpose, scope, expiry, revocation |
+| `test_v1_4_integration.py` | RBAC, simulator, decision package, audit chain, supervisor |
+| `test_abac.py` | v1.5 attribute-based access control enforcement |
+| `test_sessions.py` | v1.5 UAE PASS session v3: nonce, expiry, replay protection |
+| `test_signature_integrity.py` | v1.5 hash binding + tamper detection for signatures |
+| `test_action_workflow.py` | v1.5 action workflow: upload-mock, reject, resubmit, waive |
+| `test_appeals.py` | v1.5 appeals workbench: create, evidence, review, decision |
+| `test_supervisor_command.py` | v1.5 supervisor: backlog, SLA, fairness, incidents, overrides |
+| `test_accessibility_i18n.py` | v1.5 accessibility + Arabic i18n validation |
 
 > **Protected files** — the deterministic core — are never modified without a
 > full suite re-run and manual review:
@@ -556,7 +568,7 @@ python -B -m pytest tests\ -q -p no:cacheprovider      # → 168 passed
 ```text
 agent-sanad/
 ├── backend/
-│   ├── app.py                 # FastAPI app — 17 routes, error envelope, structured logs
+│   ├── app.py                 # FastAPI app — 85+ routes, error envelope, structured logs
 │   ├── schemas.py             # Pydantic v2 contracts (extra="forbid" everywhere)
 │   ├── applications.py        # Custom application form → synthetic Case
 │   ├── actions.py             # Evidence Repair Loop (fired rules → next actions)
@@ -577,7 +589,7 @@ agent-sanad/
 │   ├── index.html             # Single-file hash-routed SPA (zero deps)
 │   └── i18n.json              # AR/EN translation strings (RTL support)
 ├── benchmark/                 # 🔒 Historical replay, normalize, score (94.6%)
-├── tests/                     # 12 files · 168 tests
+├── tests/                     # 21 files · 231 tests
 ├── docs/                      # Architecture, readiness, tooling, demo, Q&A
 ├── seeds/cases_v1.json        # Human-facing demo case index
 ├── run.ps1 · run.sh           # One-command launchers (stale-port guard)
@@ -600,7 +612,7 @@ experiment. The mapping is live and machine-readable at `GET /architecture`.
 | 3 | **Retrieval engineering** | 5 fixture-backed adapters; salary extraction with cached fallback |
 | 4 | **Reliability engineering** | Offline-first default; cached fallbacks; stale-port guard; auto graph-fallback |
 | 5 | **Security &amp; safety** | Untrusted docs (RSK-01); read-only LLM; trace redaction; XSS-escaped UI |
-| 6 | **Evaluation &amp; observability** | 94.6% historical benchmark; append-only audit; 168 tests; structured logs |
+| 6 | **Evaluation &amp; observability** | 94.6% historical benchmark; append-only audit; 231 tests; structured logs |
 | 7 | **Product thinking** | Beneficiary vs officer surfaces; Evidence Repair Loop; AR/EN i18n |
 
 ---

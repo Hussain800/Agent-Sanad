@@ -234,7 +234,7 @@ trace, observe — they must never decide the money"*:
 | API surface (one endpoint) | [`backend/app.py`](../backend/app.py) |
 | Demo UI (single page) | [`frontend/index.html`](../frontend/index.html) |
 | Historical benchmark harness | [`benchmark/`](../benchmark/) |
-| Test suite (139 passing, 9 files) | [`tests/`](../tests/) |
+| Test suite (231 passing, 21 files) | [`tests/`](../tests/) |
 
 ---
 
