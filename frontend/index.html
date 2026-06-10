@@ -1308,6 +1308,7 @@
         }
       } catch (e) { /* pill stays default */ }
       await ensureCases();
+      await loadPastApps();
       renderQueue();
       if (S.result) {
         if (S.resultSource === "custom") {
@@ -1325,14 +1326,28 @@
       renderQueue();
     }
   }
+  async function loadPastApps() {
+    try {
+      const r = await fetch(API + "/applications");
+      const data = await r.json();
+      S.pastApps = (data.applications || []).filter(a => a.id !== (S.result && S.result.application_id));
+    } catch (e) { S.pastApps = []; }
+  }
   function renderQueue() {
     const groups = {};
     S.caseDetails.forEach(d => { (groups[d.group] = groups[d.group] || []).push(d); });
     let html = "";
     if (S.result && S.resultSource === "custom") {
       html += `<div class="queue-group">Submitted now</div>
-        <button class="queue-item" data-id="__last__">Last submitted application
+        <button class="queue-item" data-id="__last__">${__("queue.last")}
         <span class="sub">${esc(S.result.application_id || "custom")}</span></button>`;
+    }
+    if (S.pastApps && S.pastApps.length) {
+      html += `<div class="queue-group">${__("queue.past")}</div>` +
+        S.pastApps.slice(0, 5).map(a =>
+          `<button class="queue-item" data-id="__past__${esc(a.id)}">${esc(a.id)}
+            <span class="sub">${esc(a.created_at || "")}</span></button>`
+        ).join("");
     }
     Object.entries(groups).forEach(([g, items]) => {
       html += `<div class="queue-group">${esc(g)}</div>` + items.map(d =>
@@ -1342,7 +1357,8 @@
     [...document.querySelectorAll(".queue-item")].forEach(btn => {
       btn.onclick = () => {
         const id = btn.dataset.id;
-        if (id === "__last__") { renderOfficer(S.result, "Last submitted application"); markQueue(id); }
+        if (id === "__last__") { renderOfficer(S.result, __("queue.last")); markQueue(id); }
+        else if (id && id.startsWith("__past__")) { selectPastApp(id.replace("__past__", "")); }
         else selectCase(id);
       };
     });
@@ -1350,6 +1366,27 @@
   function markQueue(id) {
     [...document.querySelectorAll(".queue-item")].forEach(b =>
       b.classList.toggle("on", b.dataset.id === id));
+  }
+  async function selectPastApp(appId) {
+    try {
+      $("officerError").classList.remove("show");
+      const r = await fetch(API + "/applications/" + appId);
+      if (!r.ok) throw new Error("not found");
+      const d = await r.json();
+      // Build a renderable envelope from the stored application data.
+      const envelope = {
+        case: d.payload || {},
+        report: d.report,
+        audit: d.audit || [],
+        impact: { mock_mode: true, benchmark: null, latency_ms: 0 },
+      };
+      S.officerCaseId = appId;
+      renderOfficer(envelope, appId);
+      markQueue("__past__" + appId);
+    } catch (e) {
+      $("officerErrorText").textContent = "Failed to load past application " + appId + ": " + e.message;
+      $("officerError").classList.add("show");
+    }
   }
   async function selectCase(id) {
     try {
