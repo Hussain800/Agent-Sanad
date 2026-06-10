@@ -30,6 +30,7 @@ from backend.decision_package import (create_decision_package, get_decision_pack
                                        request_signature, verify_signature, verify_decision_package,
                                        seal_package)
 
+
 # T1 — optional LangGraph orchestration (Tooling Addendum). Import-guarded so a
 # missing/broken langgraph dependency can never break the demo: the routes
 # fall back to the plain orchestrator and /healthz reports why.
@@ -56,7 +57,7 @@ if ORCHESTRATOR not in ("plain", "graph"):
 # /healthz at boot. A mismatch means a stale server process is running old
 # routes while serving new static files (the classic local-dev failure mode);
 # the UI then shows an actionable banner instead of leaking raw 404s.
-APP_VERSION = "1.4.0"
+APP_VERSION = "1.5.0"
 
 
 # ---- structured JSON logger (IBM agent skill 6: observability) ---------------
@@ -624,21 +625,33 @@ def post_connector_reset(name: str, request: Request):
     return connector_reset(name)
 
 
-# ── UAE PASS mock ─────────────────────────────────────────────────────────
+# ── UAE PASS mock (v3 session engine) ──────────────────────────────────────
 
 @app.post("/sessions/uaepass/mock/start")
 def uaepass_start(body: dict):
+    from backend.uaepass_session import start_session
     purpose = body.get("purpose_code", "identity.verify")
-    return uaepass_auth_start(purpose)
+    beneficiary = body.get("beneficiary_ref", "")
+    return start_session(purpose, beneficiary)
 
 
 @app.post("/sessions/uaepass/mock/callback")
 def uaepass_callback(body: dict):
-    return uaepass_auth_callback(body.get("session_id", ""), body.get("code", ""), body.get("nonce", ""))
+    from backend.uaepass_session import consume_callback
+    return consume_callback(body.get("session_id", ""), body.get("code", ""), body.get("nonce", ""))
 
 
 @app.get("/connectors/uaepass/mock/userinfo/{session_id}")
 def get_uaepass_userinfo(session_id: str):
+    from backend.uaepass_session import get_session
+    s = get_session(session_id)
+    if s:
+        return {
+            "subject_ref": f"SUB-{session_id[-8:]}", "name_masked": "A***",
+            "nationality": "UAE", "mobile_masked": "05XX-XXX-1234",
+            "assurance_level": s.get("assurance_level", "SOP2"), "email_masked": "a***@example.ae",
+            "mock": True,
+        }
     return uaepass_userinfo(session_id)
 
 
@@ -922,6 +935,11 @@ def healthz_v14():
         "ok": True, "mock_mode": MOCK_MODE, "app_version": APP_VERSION,
         "connectors": conn_count, "v1.4": True,
     }
+
+
+# ── v1.5 routes ──────────────────────────────────────────────────────────
+from backend.routes_v1_5 import register_routes
+register_routes(app, MOCK_MODE, APP_VERSION)
 
 
 # serve the single-page frontend if present
