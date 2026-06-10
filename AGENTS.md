@@ -72,8 +72,9 @@ Invoke-RestMethod http://127.0.0.1:8000/healthz    # ok=true, mock_mode=true, ap
 
 ```
 backend/
-  app.py              — FastAPI app (17 routes, JSON logger, error envelope, store integration)
+  app.py              — FastAPI app (17 routes, JSON logger, error envelope, store integration, evidence repair loop)
   store.py            — SQLite persistence layer (applications, recommendations, audit, officer actions)
+  actions.py          — Evidence Repair Loop: maps fired rules to beneficiary-facing next_required_actions
   adapters/__init__.py — 5 mock adapters (UAE PASS, Loan, Arrears, Salary Verify, Doc Validate) + 13 fixtures
   applications.py     — Custom application form → synthetic Case
   schemas.py          — Pydantic v2 schemas (extra="forbid" on ALL payloads)
@@ -119,6 +120,8 @@ seeds/cases_v1.json   — Human-facing demo case index (13 cases)
 - **SQLite persistence** is in `backend/store.py`. DB lives at `data/agent_sanad.db` (gitignored). Gracefully degrades if DB can't be created. Three new endpoints: `GET /applications`, `GET /applications/{id}`, `GET /officer-actions`.
 - **Arabic localization** is in `frontend/i18n.json` (95 keys). Language toggle in the top bar loads translations client-side. RTL direction support. Key static text and beneficiary result strings are translated.
 - **New test files**: `test_benchmark_replay.py` (18 tests), `test_store.py` (12), `test_security.py` (11). Run full suite to verify 125 tests pass.
+- **Evidence Repair Loop**: `backend/actions.py` maps fired rules to structured `next_required_actions` in every API response. MISSING→upload certificate, CONTRA→confirm income, ACTIVE→contact Programme, UNVERIFIED_HARDSHIP→upload evidence. Clean cases return empty array.
+- **Exception Studio**: Officer portal queue has filter buttons (Policy hard stop, Evidence problem, Affordability risk, Social hardship, Security risk) that group cases by their known fired rules. Active filter highlighted in brand color.
 
 ## 13 demo cases
 
