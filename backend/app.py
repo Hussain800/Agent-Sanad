@@ -1496,4 +1496,7 @@ if os.path.isdir(_FE):
     @app.get("/")
     def index():
         return FileResponse(os.path.join(_FE, "index.html"))
+    @app.get("/i18n.json")
+    def i18n():
+        return FileResponse(os.path.join(_FE, "i18n.json"))
     app.mount("/static", StaticFiles(directory=_FE), name="static")
