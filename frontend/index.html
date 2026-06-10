@@ -1527,7 +1527,7 @@ f.hardship_verified = (f.hardship_type !== "none") && !(c.hardship && c.hardship
   $("officerRetry").onclick = () => selectCase(S.officerCaseId || "GOLDEN");
 
   function renderOfficer(d, label) {
-    const rep = d.report, c = d.case, pl = rep.proposed_plan;
+    const rep = d.report || {}, c = d.case || {}, pl = (rep && rep.proposed_plan) || {};
     const banner = scenarioBanner(rep);
     const band = $("statusBand");
     band.className = "card statusband" + (banner ? { danger:" danger", warn:" warning", ok:"", info:" info" }[banner[0]] ?? "" : "");
