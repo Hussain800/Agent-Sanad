@@ -1,5 +1,5 @@
 #!/usr/bin/env pwsh
-# Agent Sanad v1.6 Release Check
+# Agent Sanad v1.7 Release Check
 # Run from repo root:  .\scripts\release-check.ps1
 $ErrorActionPreference = "Stop"
 $ROOT = Split-Path -Parent (Split-Path -Parent $PSCommandPath)
@@ -11,19 +11,19 @@ function check($name, $condition) {
     else { $script:failed++; Write-Host "  FAIL  $name" -ForegroundColor Red }
 }
 
-Write-Host "===== Agent Sanad v1.6 Release Check =====" -ForegroundColor Cyan
+Write-Host "===== Agent Sanad v1.7 Release Check =====" -ForegroundColor Cyan
 
 # 1. Version handshake (must be 1.5.0)
-check "APP_VERSION == CLIENT_BUILD == 1.6.0" { 
+check "APP_VERSION == CLIENT_BUILD == 1.7.0" { 
     $av = Select-String -Path backend\app.py -Pattern 'APP_VERSION = "(.+)"' | ForEach-Object { $_.Matches.Groups[1].Value }
     $cv = Select-String -Path frontend\index.html -Pattern 'CLIENT_BUILD = "(.+)"' | ForEach-Object { $_.Matches.Groups[1].Value }
-    ($av -eq $cv) -and ($av -eq "1.6.0")
+    ($av -eq $cv) -and ($av -eq "1.7.0")
 }
 
 # 2. Full test suite (220+)
-check "Full test suite 280+" {
+check "Full test suite 340+" {
     $result = & python -B -m pytest tests\ -q -p no:cacheprovider 2>&1 | Out-String
-    ($result -match "passed") -and ($result -match "(\d+) passed") -and ([int]$matches[1] -ge 280)
+    ($result -match "passed") -and ($result -match "(\d+) passed") -and ([int]$matches[1] -ge 340)
 }
 
 # 3. No workbook tracked
@@ -163,6 +163,66 @@ check "UAE PASS/signature v4 tests" {
 # 25. Fairness analytics tests
 check "Fairness analytics tests" {
     $result = & python -B -m pytest tests\test_fairness_analytics.py -q -p no:cacheprovider 2>&1 | Out-String
+    $result -match "passed"
+}
+
+# 26. Evidence graph v2
+check "Evidence graph v2 tests" {
+    $result = & python -B -m pytest tests\test_evidence_graph_v2.py -q -p no:cacheprovider 2>&1 | Out-String
+    $result -match "passed"
+}
+
+# 27. Ops observability
+check "Ops observability tests" {
+    $result = & python -B -m pytest tests\test_ops_observability.py -q -p no:cacheprovider 2>&1 | Out-String
+    $result -match "passed"
+}
+
+# 28. Security drills
+check "Security drills tests" {
+    $result = & python -B -m pytest tests\test_security_drills.py -q -p no:cacheprovider 2>&1 | Out-String
+    $result -match "passed"
+}
+
+# 29. Fairness impact v3
+check "Fairness impact v3 tests" {
+    $result = & python -B -m pytest tests\test_fairness_impact_v3.py -q -p no:cacheprovider 2>&1 | Out-String
+    $result -match "passed"
+}
+
+# 30. Materials v1.7
+check "Materials v1.7 tests" {
+    $result = & python -B -m pytest tests\test_materials_v1_7.py -q -p no:cacheprovider 2>&1 | Out-String
+    $result -match "passed"
+}
+
+# 31. Lifecycle enforcement
+check "Lifecycle enforcement v1.7" {
+    $result = & python -B -m pytest tests\test_lifecycle_enforcement_v17.py -q -p no:cacheprovider 2>&1 | Out-String
+    $result -match "passed"
+}
+
+# 32. No raw dict routes
+check "No raw dict routes" {
+    $result = & python -B -m pytest tests\test_no_raw_dict_routes.py -q -p no:cacheprovider 2>&1 | Out-String
+    $result -match "passed"
+}
+
+# 33. Zero warnings check
+check "Zero stale test counts" {
+    $result = & python -B -m pytest tests\test_zero_warnings_v17.py -q -p no:cacheprovider 2>&1 | Out-String
+    $result -match "passed"
+}
+
+# 34. Pilot docs exist
+check "Pilot docs exist" {
+    $result = & python -B -m pytest tests\test_pilot_docs_v17.py -q -p no:cacheprovider 2>&1 | Out-String
+    $result -match "passed"
+}
+
+# 35. Version consistency
+check "Version consistency v1.7" {
+    $result = & python -B -m pytest tests\test_version_consistency_v17.py -q -p no:cacheprovider 2>&1 | Out-String
     $result -match "passed"
 }
 

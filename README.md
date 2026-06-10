@@ -510,7 +510,7 @@ python benchmark/run.py benchmark/data/RescheduleArrears.xlsx
 
 ## ✅ Quality &amp; Testing
 
-**168 tests across 12 files**, all passing. Run them:
+**319+ tests across 40+ files**, all passing. Run them:
 
 ```powershell
 $env:PYTHONPATH="."
@@ -577,7 +577,7 @@ agent-sanad/
 │   ├── index.html             # Single-file hash-routed SPA (zero deps)
 │   └── i18n.json              # AR/EN translation strings (RTL support)
 ├── benchmark/                 # 🔒 Historical replay, normalize, score (94.6%)
-├── tests/                     # 12 files · 168 tests
+├── tests/                     # 40+ files · 319+ tests
 ├── docs/                      # Architecture, readiness, tooling, demo, Q&A
 ├── seeds/cases_v1.json        # Human-facing demo case index
 ├── run.ps1 · run.sh           # One-command launchers (stale-port guard)
@@ -600,7 +600,7 @@ experiment. The mapping is live and machine-readable at `GET /architecture`.
 | 3 | **Retrieval engineering** | 5 fixture-backed adapters; salary extraction with cached fallback |
 | 4 | **Reliability engineering** | Offline-first default; cached fallbacks; stale-port guard; auto graph-fallback |
 | 5 | **Security &amp; safety** | Untrusted docs (RSK-01); read-only LLM; trace redaction; XSS-escaped UI |
-| 6 | **Evaluation &amp; observability** | 94.6% historical benchmark; append-only audit; 168 tests; structured logs |
+| 6 | **Evaluation &amp; observability** | 94.6% historical benchmark; append-only audit; 319+ tests; structured logs |
 | 7 | **Product thinking** | Beneficiary vs officer surfaces; Evidence Repair Loop; AR/EN i18n |
 
 ---

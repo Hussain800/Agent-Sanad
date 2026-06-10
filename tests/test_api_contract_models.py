@@ -65,4 +65,4 @@ def test_openapi_has_schemas():
 def test_api_guide_current():
     r = client.get("/materials/api-guide")
     assert r.status_code == 200
-    assert r.json()["version"] == "1.6.0"
+    assert r.json()["version"] == "1.7.0"

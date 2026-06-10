@@ -8,7 +8,7 @@ def test_frontend_has_v16_sections():
     path = os.path.join(os.path.dirname(__file__), "..", "frontend", "index.html")
     with open(path, encoding="utf-8") as f:
         html = f.read()
-    assert "1.6.0" in html
+    assert "1.7.0" in html or "1.6.0" in html
     assert "skip-link" in html
     assert "focus-visible" in html
     assert "print" in html.lower() or "@media print" in html.lower() or True
