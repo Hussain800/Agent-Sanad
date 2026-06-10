@@ -21,7 +21,7 @@ SQLite persistence for custom apps and officer actions. Single-file frontend ser
 # Manual
 $env:PYTHONPATH="."; uvicorn backend.app:app --host 127.0.0.1 --port 8000
 
-# Full test suite (340+ expected for v1.7)
+# Full test suite (431 expected for v1.8)
 $env:PYTHONPATH="."; python -B -m pytest tests\ -q -p no:cacheprovider
 
 # Single test
@@ -31,7 +31,7 @@ $env:PYTHONPATH="."; python -B -m pytest tests\test_policy.py::test_golden_updat
 $env:PYTHONPATH="."; python -B -m pytest tests\test_observability.py -q -p no:cacheprovider
 
 # Check live health
-Invoke-RestMethod http://127.0.0.1:8000/healthz    # ok=true, mock_mode=true, app_version=1.1.0, orchestrator=plain
+Invoke-RestMethod http://127.0.0.1:8000/healthz    # ok=true, mock_mode=true, app_version=1.8.0, orchestrator=plain
 ```
 
 ## Env flags (`.env.example`)

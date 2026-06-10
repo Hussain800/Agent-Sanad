@@ -115,7 +115,7 @@ check "Arabic i18n coverage" {
 # 17. Docs current
 check "Docs version references current" {
     $readme = Get-Content README.md -Raw
-    ($readme -match "1\.6\.0") -or ($readme -match "280\+ tests")
+    ($readme -match "1\.8\.0") -and ($readme -match "431")
 }
 
 # 18. Docs drift check
