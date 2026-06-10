@@ -1,5 +1,5 @@
 #!/usr/bin/env pwsh
-# Agent Sanad v1.7 Release Check
+# Agent Sanad v1.8 Release Check
 # Run from repo root:  .\scripts\release-check.ps1
 $ErrorActionPreference = "Stop"
 $ROOT = Split-Path -Parent (Split-Path -Parent $PSCommandPath)
@@ -11,19 +11,19 @@ function check($name, $condition) {
     else { $script:failed++; Write-Host "  FAIL  $name" -ForegroundColor Red }
 }
 
-Write-Host "===== Agent Sanad v1.7 Release Check =====" -ForegroundColor Cyan
+Write-Host "===== Agent Sanad v1.8 Release Check =====" -ForegroundColor Cyan
 
 # 1. Version handshake (must be 1.5.0)
-check "APP_VERSION == CLIENT_BUILD == 1.7.0" { 
+check "APP_VERSION == CLIENT_BUILD == 1.8.0" { 
     $av = Select-String -Path backend\app.py -Pattern 'APP_VERSION = "(.+)"' | ForEach-Object { $_.Matches.Groups[1].Value }
     $cv = Select-String -Path frontend\index.html -Pattern 'CLIENT_BUILD = "(.+)"' | ForEach-Object { $_.Matches.Groups[1].Value }
-    ($av -eq $cv) -and ($av -eq "1.7.0")
+    ($av -eq $cv) -and ($av -eq "1.8.0")
 }
 
 # 2. Full test suite (220+)
-check "Full test suite 340+" {
+check "Full test suite 400+" {
     $result = & python -B -m pytest tests\ -q -p no:cacheprovider 2>&1 | Out-String
-    ($result -match "passed") -and ($result -match "(\d+) passed") -and ([int]$matches[1] -ge 340)
+    ($result -match "passed") -and ($result -match "(\d+) passed") -and ([int]$matches[1] -ge 380)
 }
 
 # 3. No workbook tracked

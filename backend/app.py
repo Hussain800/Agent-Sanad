@@ -73,7 +73,7 @@ if ORCHESTRATOR not in ("plain", "graph"):
 # /healthz at boot. A mismatch means a stale server process is running old
 # routes while serving new static files (the classic local-dev failure mode);
 # the UI then shows an actionable banner instead of leaking raw 404s.
-APP_VERSION = "1.7.0"
+APP_VERSION = "1.8.0"
 
 
 # ---- structured JSON logger (IBM agent skill 6: observability) ---------------
@@ -1249,6 +1249,11 @@ def post_security_drills():
 @app.get("/security-drills/latest")
 def get_security_drills_latest():
     return get_latest_drills()
+
+
+# ── v1.8 routes ──────────────────────────────────────────────────────────
+from backend.routes_v1_8 import register_v18_routes
+register_v18_routes(app)
 
 
 # ── v1.7 fairness / impact v3 ──────────────────────────────────────────

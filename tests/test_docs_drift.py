@@ -11,7 +11,7 @@ def test_readme_has_v16():
     path = os.path.join(os.path.dirname(__file__), "..", "README.md")
     with open(path, encoding="utf-8") as f:
         text = f.read()
-    assert "1.6.0" in text or "1.7.0" in text
+    assert "1.6.0" in text or "1.8.0" in text
 def test_agentsmd_no_stale_labels():
     path = os.path.join(os.path.dirname(__file__), "..", "AGENTS.md")
     with open(path, encoding="utf-8") as f:
@@ -27,3 +27,4 @@ def test_decision_package_no_140():
     with open(path, encoding="utf-8") as f:
         text = f.read()
     assert '1.4.0' not in text
+

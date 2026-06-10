@@ -27,4 +27,5 @@ def test_ops_incidents():
 def test_ops_release_check():
     r = client.get("/ops/release-check/latest")
     assert r.status_code == 200
-    assert r.json()["version"] == "1.7.0"
+    assert r.json()["version"] == "1.8.0"
+
