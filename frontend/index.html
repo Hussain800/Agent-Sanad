@@ -674,6 +674,7 @@
                 <section class="trace-section"><h4>4 · Calculation trace (Rule 1: 20% deduction cap)</h4><div class="calc-trace" id="traceCalc">—</div></section>
                 <section class="trace-section"><h4>5 · Period rule trace (Rule 2)</h4><div class="calc-trace" id="tracePeriod">—</div></section>
                 <section class="trace-section"><h4>6 · Security trace</h4><div class="calc-trace" id="traceSecurity">—</div></section>
+                <section class="trace-section" id="traceActionsSection" style="display:none"><h4>7 · Required actions</h4><div class="calc-trace" id="traceActions">—</div></section>
                 <section class="trace-section"><h4>Raw audit feed</h4><div class="drawer" id="drawer">Select a case.</div></section>
               </div>
             </div>
@@ -1564,6 +1565,18 @@
     $("traceSecurity").innerHTML = secRows.map(([k,v,b]) => {
       const cls = b === "Pass" ? "highlight-pass" : b === "Fail" ? "highlight-fail" : "";
       return `<div>${esc(k)}</div><div class="${cls}">${esc(v)}</div>`; }).join("");
+    // Evidence Repair Loop trace (section 7)
+    const actions = d.next_required_actions || [];
+    const actSection = $("traceActionsSection");
+    const actDiv = $("traceActions");
+    if (actions.length) {
+      actSection.style.display = "block";
+      actDiv.innerHTML = actions.map(a =>
+        `<div>${esc(a.label)}</div><div>${esc(a.description)}${a.repair_hint ? '<br><span style="color:var(--brand);font-size:12px">→ '+esc(a.repair_hint)+'</span>' : ''}</div>`
+      ).join("");
+    } else {
+      actSection.style.display = "none";
+    }
     const auditText = (d.audit || []).map(e => {
       const t = e.state_to ? `  [${e.state_from || "·"} → ${e.state_to}]` : "";
       return `- ${e.step} (${e.actor}): ${e.detail}${t}`; }).join("\n");
