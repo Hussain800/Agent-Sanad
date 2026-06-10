@@ -20,7 +20,6 @@ from backend.policy.rules import load_policy
 from backend.schemas import MockApplication, OfficerAction, PolicyConfig
 from backend.store import STORE
 from backend.actions import next_actions
-<<<<<<< HEAD
 from backend.rbac import check_access, get_role, get_user
 from backend.connectors import (list_connectors, get_connector, health as connector_health,
                                  simulate as connector_simulate, reset as connector_reset,
@@ -33,11 +32,8 @@ from backend.simulator import simulate_options
 from backend.decision_package import (create_decision_package, get_decision_package,
                                        request_signature, verify_signature, verify_decision_package,
                                        seal_package)
-
-=======
 from backend.simulate import what_if
 from backend.admin import get_policy_config, update_policy_config
->>>>>>> a1e986f (v1.4 Advanced backend: SSE streaming, what-if simulator, live policy config, batch analysis, Docker, golden-brown UI, 165 tests)
 
 # T1 — optional LangGraph orchestration (Tooling Addendum). Import-guarded so a
 # missing/broken langgraph dependency can never break the demo: the routes
@@ -614,7 +610,7 @@ def run(case_id: str, request: Request):
     }, headers={"x-request-id": request_id})
 
 
-<<<<<<< HEAD
+
 # ═════════════════════════════════════════════════════════════════════════════
 # v1.4 Connector Registry
 # ═════════════════════════════════════════════════════════════════════════════
@@ -1344,8 +1340,6 @@ def get_materials_pilot_sandbox_packet():
     }
 
 
-# serve the single-page frontend if present
-=======
 # ── SSE streaming: real-time agent decision trace ───────────────────────
 # Streams each step of the decision pipeline as Server-Sent Events so the
 # frontend can render a live "agent thinking" animation. This is the most
@@ -1496,7 +1490,7 @@ def admin_update_policy(body: dict):
 
 
 # ── serve the single-page frontend if present ─────────────────────────
->>>>>>> a1e986f (v1.4 Advanced backend: SSE streaming, what-if simulator, live policy config, batch analysis, Docker, golden-brown UI, 165 tests)
+
 _FE = os.path.join(os.path.dirname(__file__), "..", "frontend")
 if os.path.isdir(_FE):
     @app.get("/")

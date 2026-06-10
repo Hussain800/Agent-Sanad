@@ -1,5 +1,5 @@
 # Agent Sanad policy configuration. OFFICIAL rules must not change without MOEI.
-deduction_cap_pct:          0.20      # OFFICIAL — Rule 1 (20% of income, total deduction)
+deduction_cap_pct: 0.2  # OFFICIAL — Rule 1 (20% of income, total deduction)
 respect_approved_period:    true      # OFFICIAL — Rule 2
 auto_reject_active_request: true      # OFFICIAL — Rule 3
 # data-implied defaults; flip on mentor confirmation (no rebuild)
@@ -9,8 +9,16 @@ period_basis:               remaining_term     # remaining_term | original_term_
 active_request_policy:      always_reject       # always_reject | status_conditional
 rounding:                   premium_floor_months_ceil
 # prototype thresholds — to be validated with MOEI Finance & Collection
-min_headroom_aed:           50
+min_headroom_aed: 50
 high_obligations_pct:       0.60
 low_income_per_member_aed:  2500
 income_variance_threshold:  0.30
-policy_version:             "sanad-v0.8"
+policy_version: sanad-v0.8
+
+
+
+
+
+
+
+
