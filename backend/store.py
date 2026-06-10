@@ -261,6 +261,71 @@ CREATE TABLE IF NOT EXISTS material_exports (
     generated_at    TEXT NOT NULL,
     checksum        TEXT
 );
+
+CREATE TABLE IF NOT EXISTS case_lifecycle (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    case_id         TEXT NOT NULL,
+    previous_state  TEXT,
+    current_state   TEXT NOT NULL,
+    transitioned_at TEXT NOT NULL,
+    actor           TEXT NOT NULL DEFAULT 'system',
+    detail          TEXT DEFAULT ''
+);
+
+CREATE TABLE IF NOT EXISTS access_decisions (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    case_id         TEXT NOT NULL,
+    object_type     TEXT NOT NULL,
+    object_id       TEXT NOT NULL,
+    role            TEXT NOT NULL,
+    user_ref        TEXT,
+    decision        TEXT NOT NULL,
+    reason          TEXT,
+    created_at      TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS connector_incidents (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    connector_name  TEXT NOT NULL,
+    incident_type   TEXT NOT NULL,
+    detail          TEXT,
+    resolved        INTEGER DEFAULT 0,
+    created_at      TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS connector_failure_profiles (
+    name            TEXT PRIMARY KEY,
+    failure_mode    TEXT,
+    latency_ms      INTEGER DEFAULT 100,
+    error_rate      REAL DEFAULT 1.0,
+    created_at      TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS synthetic_cohorts (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    cohort_name     TEXT NOT NULL,
+    size            INTEGER NOT NULL,
+    config          TEXT NOT NULL,
+    created_at      TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS reasoning_eval_runs (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    case_id         TEXT NOT NULL,
+    eval_type       TEXT NOT NULL,
+    passed          INTEGER NOT NULL,
+    detail          TEXT,
+    created_at      TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS release_provenance (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    version         TEXT NOT NULL,
+    commit_hash     TEXT,
+    test_count      INTEGER,
+    release_check   TEXT,
+    generation_time TEXT NOT NULL
+);
 """
 
 

@@ -27,7 +27,7 @@
 [![LangGraph](https://img.shields.io/badge/LangGraph-optional-b8902f?style=flat-square)](#-tooling-langgraph--observability)
 [![Offline-first](https://img.shields.io/badge/demo-offline--first-b8902f?style=flat-square)](#-quick-start)
 [![Benchmark](https://img.shields.io/badge/path--match-94.6%25-1f7a4d?style=flat-square)](#-benchmark--proof-against-reality)
-[![Status](https://img.shields.io/badge/status-production--shaped%20prototype-5f6e66?style=flat-square)](#-production-boundary)
+[![Status](https://img.shields.io/badge/v1.6.0-pilot%20command-1f7a4d?style=flat-square)](#-production-boundary)
 
 <br/>
 

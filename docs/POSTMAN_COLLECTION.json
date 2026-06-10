@@ -1,6 +1,6 @@
 {
   "info": {
-    "name": "Agent Sanad v1.5",
+    "name": "Agent Sanad v1.6",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -784,6 +784,177 @@
         "method": "GET",
         "url": {
           "raw": "http://127.0.0.1:8000/materials/security-one-pager"
+        }
+      }
+    },
+    {
+      "name": "GET /cases/{case_id}/lifecycle",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/cases/{case_id}/lifecycle"
+        }
+      }
+    },
+    {
+      "name": "POST /cases/{case_id}/lifecycle/transition",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/cases/{case_id}/lifecycle/transition"
+        }
+      }
+    },
+    {
+      "name": "GET /cases/{case_id}/timeline",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/cases/{case_id}/timeline"
+        }
+      }
+    },
+    {
+      "name": "GET /cases/{case_id}/evidence-graph",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/cases/{case_id}/evidence-graph"
+        }
+      }
+    },
+    {
+      "name": "GET /cases/{case_id}/evidence-graph/export",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/cases/{case_id}/evidence-graph/export"
+        }
+      }
+    },
+    {
+      "name": "GET /decision-packages/{package_id}/evidence-graph",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/decision-packages/{package_id}/evidence-graph"
+        }
+      }
+    },
+    {
+      "name": "GET /audit/export/{case_id}",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/audit/export/{case_id}"
+        }
+      }
+    },
+    {
+      "name": "GET /audit/export/{case_id}/zip-manifest",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/audit/export/{case_id}/zip-manifest"
+        }
+      }
+    },
+    {
+      "name": "POST /audit/export/{case_id}/verify",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/audit/export/{case_id}/verify"
+        }
+      }
+    },
+    {
+      "name": "GET /access-decisions/{case_id}",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/access-decisions/{case_id}"
+        }
+      }
+    },
+    {
+      "name": "POST /connectors/{name}/failure-profile",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/connectors/{name}/failure-profile"
+        }
+      }
+    },
+    {
+      "name": "GET /connectors/{name}/incidents",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/connectors/{name}/incidents"
+        }
+      }
+    },
+    {
+      "name": "POST /connectors/{name}/retry",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/connectors/{name}/retry"
+        }
+      }
+    },
+    {
+      "name": "POST /connectors/{name}/circuit-breaker/reset",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/connectors/{name}/circuit-breaker/reset"
+        }
+      }
+    },
+    {
+      "name": "POST /fairness/synthetic-cohort/generate",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/fairness/synthetic-cohort/generate"
+        }
+      }
+    },
+    {
+      "name": "GET /fairness/slices",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/fairness/slices"
+        }
+      }
+    },
+    {
+      "name": "GET /fairness/appeals",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/fairness/appeals"
+        }
+      }
+    },
+    {
+      "name": "GET /fairness/overrides",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/fairness/overrides"
+        }
+      }
+    },
+    {
+      "name": "GET /fairness/report",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/fairness/report"
         }
       }
     },

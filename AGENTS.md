@@ -4,7 +4,7 @@
 
 FastAPI hackathon MVP: deterministic policy engine for Sheikh Zayed Housing Programme arrears rescheduling. 13 demo cases, fixture-backed offline mode.
 
-**231 tests passing** across 21 test files. Target: 220+ for v1.5.
+**280+ tests** expected across 30+ test files (v1.6 target).
 
 ## Core doctrine
 
@@ -21,8 +21,8 @@ SQLite persistence for custom apps and officer actions. Single-file frontend ser
 # Manual
 $env:PYTHONPATH="."; uvicorn backend.app:app --host 127.0.0.1 --port 8000
 
-# Full test suite (220+ expected for v1.5)
-$env:PYTHONPATH="."; python -B -m pytest tests\ -q -p no:cacheprovider
+# Full test suite (280+ expected for v1.6)
+$env:PYTHONPATH="."; python -B -m pytest tests\ -q -p no:cacheprovider -W default::PytestReturnNotNoneWarning
 
 # Single test
 $env:PYTHONPATH="."; python -B -m pytest tests\test_policy.py::test_golden_update_approve -q -p no:cacheprovider
@@ -129,7 +129,7 @@ seeds/cases_v1.json   — Human-facing demo case index (13 cases)
 - The 20% salary cap is the hard policy rule. Monthly deduction must not exceed it. Never relax this.
 - **SQLite persistence** is in `backend/store.py`. DB lives at `data/agent_sanad.db` (gitignored). Gracefully degrades if DB can't be created. Three new endpoints: `GET /applications`, `GET /applications/{id}`, `GET /officer-actions`.
 - **Arabic localization** is in `frontend/i18n.json` (95 keys). Language toggle in the top bar loads translations client-side. RTL direction support. Key static text and beneficiary result strings are translated.
-- **New test files**: `test_benchmark_replay.py` (18 tests), `test_store.py` (12), `test_security.py` (11). Run full suite to verify 125 tests pass.
+- **New test files**: `test_benchmark_replay.py` (18 tests), `test_store.py` (12), `test_security.py` (11). Run full suite to verify 280+ tests pass.
 - **Evidence Repair Loop**: `backend/actions.py` maps fired rules to structured `next_required_actions` in every API response and graph route. Rendered in beneficiary result cards and officer portal trace section 7. Case-aware: HARD-01+CAP-01 (capacity issue) suppresses hardship action. Backed by integration tests.
 - **Exception Studio**: Officer portal queue has filter buttons (Policy hard stop, Evidence problem, Affordability risk, Social hardship, Security risk) with server-provided `exception_group` metadata from `GET /cases`. No hard-coded frontend maps.
 - **v1.4 Connectors**: 6 mock connectors (UAEPASS, GSB, SZHP-core, UAE-Verify, financial-capacity, notifications) with registry, health endpoints, simulate/reset, and failure modes. Consent required before connector data returns.
@@ -141,7 +141,8 @@ seeds/cases_v1.json   — Human-facing demo case index (13 cases)
 - **v1.5 Connectors**: 7th connector (case-management) added. All connectors use Pydantic models. Contract tests in test_connectors.py.
 - **v1.5 Workflows**: Action workflow v4 (upload-mock/reject/resubmit/waive), appeals workbench (create/list/evidence/review/decision/supervisor-approve), case assignment/SLA.
 - **v1.5 Supervisor**: Backlog, SLA risk, fairness, connector incidents, officer workload, override review added.
-- **v1.5 Release**: `scripts/release-check.ps1` runs 17 automated checks. Version is 1.5.0. Target test count 220+.
+- **v1.6**: Contract-first APIs, route modules, case lifecycle, evidence graph, audit export, ABAC v2, UAE PASS/signature v4, connector reliability lab, fairness analytics v2, reasoning evals.
+- **v1.6 Release**: `scripts/release-check.ps1` runs 25+ automated checks. Version is 1.6.0. Target test count 280+.
 
 ## 13 demo cases
 
