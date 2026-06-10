@@ -46,14 +46,30 @@ python -B -m pytest tests\ -q -p no:cacheprovider    # full suite must be green
 | **Officer portal** (`#/officer`) | Case queue (13 samples + your last submitted application), official Section-8 recommendation, 6-section evidence trace, raw audit feed, benchmark panel, approve/adjust/escalate |
 | **Custom applications** | Enter any values — they are Pydantic-validated, mapped to a synthetic case, and decided by the same engine. The demo is not hard-coded. |
 
-### API (12 endpoints)
+### API (14 endpoints)
 
 `GET /healthz` · `GET /` · `GET /architecture` · `GET /cases` · `GET /benchmark`
 · `GET /cases/{id}` · `GET /cases/{id}/audit` · `POST /demo/run/{id}` ·
+`POST /demo/run-graph/{id}` · `GET /demo/compare/{id}` ·
 `POST /cases/{id}/decide` · `POST /cases/{id}/officer-action` ·
 `POST /applications/mock` · `POST /applications/mock/decide`
 
 All errors return `{error_code, message, path, app_version}`.
+
+### Tooling (addendum, governed)
+
+- **LangGraph** orchestrates the same workflow as the plain route; the
+  deterministic engine still makes every financial decision. Equivalence on
+  all 13 cases is test-enforced; `GET /demo/compare/{id}` proves it live.
+  Toggle per-case in the officer portal, or set `SANAD_ORCHESTRATOR=graph`
+  (plain stays the default; graph failures fall back to plain automatically).
+- **Tracing is off by default** (`LANGSMITH_TRACING=false`). If enabled, every
+  payload passes mandatory PII redaction (allow-list + Emirates-ID/Arabic/
+  document-text scrubbing); disabling redaction makes the adapter refuse to
+  emit. Verify: `python -B -m pytest tests/test_observability.py -q`.
+- LlamaIndex / LangChain / CrewAI / AutoGen / Semantic Kernel / DSPy / MCP
+  servers: intentionally **not** implemented — rationale in
+  [docs/TOOLING_IMPLEMENTATION_SUMMARY.md](docs/TOOLING_IMPLEMENTATION_SUMMARY.md).
 
 ## Benchmark (honest claim)
 

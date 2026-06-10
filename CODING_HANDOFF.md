@@ -81,6 +81,22 @@ Hard policy rules:
   - `HIGH_CAPACITY_UPDATE`: approve via UPDATE; engine uses real headroom (AED 4,000)
 - **13 demo cases total.** Each expected output is hand-traced through `decide()` before its test is written. See `docs/V1_1_COMPLETION_SUMMARY.md`.
 
+### Final hardening + tooling (branch v1.1-final-hardening-tooling)
+
+- Four A-level defects fixed (RequestValidationError envelope, #/processing
+  deep-link guard, double-submit interlock, unhandledrejection banner) — see
+  `docs/FINAL_HARDENING_REPORT.md`.
+- **T1 LangGraph**: `backend/graph/` + `POST /demo/run-graph/{id}` +
+  `GET /demo/compare/{id}` + `SANAD_ORCHESTRATOR` flag (plain default) +
+  officer-portal toggle. `run_policy_engine` calls the existing `decide()`;
+  equivalence on all 13 cases is test-enforced; failures fall back to plain.
+- **T2 observability**: `backend/observability/` — mandatory PII redaction +
+  LangSmith-ready adapter, `LANGSMITH_TRACING=false` by default, refuse-to-emit
+  interlock if redaction is disabled. No hard langsmith dependency.
+- T3 LlamaIndex / T4 LangChain intentionally skipped — rationale in
+  `docs/TOOLING_IMPLEMENTATION_SUMMARY.md`. MCP stays roadmap-only.
+- Tests: **84 passing** across 6 files.
+
 ### Production hardening (pass 4)
 
 - `APP_VERSION` in `backend/app.py` must always equal `CLIENT_BUILD` in

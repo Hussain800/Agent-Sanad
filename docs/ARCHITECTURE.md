@@ -192,6 +192,31 @@ The deterministic policy engine, period module, rule catalog, config, and benchm
 
 ---
 
+## v1.1+ tooling layer (final hardening branch)
+
+Per the Tooling Addendum, executed under the rule *"frameworks may orchestrate,
+trace, observe — they must never decide the money"*:
+
+- **LangGraph (T1)** — `backend/graph/` wraps the same workflow as the plain
+  orchestrator in 10 explicit nodes; `run_policy_engine` calls the existing
+  `decide()`. `POST /demo/run-graph/{id}` mirrors `/demo/run`'s envelope and
+  falls back to plain on any failure. Equivalence for **all 13 cases** is
+  test-enforced and demonstrable live via `GET /demo/compare/{id}`. Default
+  orchestrator stays `plain` (`SANAD_ORCHESTRATOR`).
+- **Observability (T2)** — `backend/observability/` adds a LangSmith-ready
+  trace adapter behind mandatory PII redaction (allow-list + Emirates-ID /
+  Arabic / document-text scrubbing). `LANGSMITH_TRACING=false` by default;
+  redaction-off + tracing-on refuses to emit. Local audit remains the source
+  of truth.
+- **Not implemented by decision:** LlamaIndex/LlamaParse (duplicates the
+  existing Pydantic-gated extraction for one synthetic certificate), LangChain
+  (no boilerplate to remove), CrewAI/AutoGen/Semantic Kernel/DSPy/OpenAI
+  Agents SDK (wrong shape for a single governed pipeline). **MCP remains a
+  production roadmap item** — the five adapter boundaries are MCP-shaped for a
+  future pilot. Full rationale: [`TOOLING_IMPLEMENTATION_SUMMARY.md`](./TOOLING_IMPLEMENTATION_SUMMARY.md).
+
+---
+
 ## Files of record
 
 | Concern | File |

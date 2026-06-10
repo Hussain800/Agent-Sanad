@@ -84,6 +84,14 @@ The structure is: **question · 1-sentence headline answer · 1-line evidence po
 **Headline:** It cannot compute installments, decide a path, approve, reject, write state, or call the policy engine. It can read text and write the reasoning paragraph. That's it.
 **Evidence:** `ARCHITECTURE.md` boundary table. `backend/reasoning.py` doesn't touch any number.
 
+### Q13b — "You use LangGraph — doesn't the framework decide?"
+**Headline:** No. LangGraph only orchestrates the workflow states; the node that matters (`run_policy_engine`) calls our existing deterministic `decide()` and nothing else. We prove it: all 13 sample cases produce byte-equivalent reports on the plain route and the graph route — same recommendation, path, fired rules, 20% and period compliance — and `GET /demo/compare/{id}` shows the diff live. If the graph ever fails, the route falls back to the plain orchestrator automatically.
+**Evidence:** `tests/test_graph_equivalence.py` (13 parametrized equivalence tests + forced-failure fallback test) · `/demo/compare/GOLDEN`.
+
+### Q13c — "Is observability sending beneficiary data anywhere?"
+**Headline:** Tracing is **off by default**. If enabled, every payload passes mandatory redaction: allow-listed keys only, Emirates-ID patterns scrubbed, Arabic narratives scrubbed, document text and name-like keys dropped entirely. And there's an interlock — tracing on with redaction off refuses to emit at all.
+**Evidence:** `backend/observability/redaction.py` + `tests/test_observability.py`.
+
 ### Q14 — "What is the IBM 7-skills mapping for?"
 **Headline:** IBM Research published the seven engineering disciplines that separate a prompt experiment from an agent that survives production. We built to all seven, and we surface the mapping on the UI footer and at `/architecture`. Most teams will hit 2–3 of those skills. That's our USP.
 **Evidence:** [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md). Live: `curl http://127.0.0.1:8000/architecture`.

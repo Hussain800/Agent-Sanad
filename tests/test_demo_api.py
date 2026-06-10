@@ -39,6 +39,23 @@ def test_error_envelope_contract():
     assert r2.json()["error_code"] == "VALIDATION_ERROR"
 
 
+def test_malformed_body_also_returns_envelope():
+    """RequestValidationError (missing/malformed JSON body) must use the same
+    §5.5 envelope — not FastAPI's default {detail: [...]} shape."""
+    # No body at all on a dict-body endpoint.
+    r = client.post("/applications/mock/decide")
+    assert r.status_code == 422
+    body = r.json()
+    assert body["error_code"] == "VALIDATION_ERROR"
+    assert "detail" not in body
+    # Body that isn't a JSON object.
+    r2 = client.post("/applications/mock",
+                     content="not json at all",
+                     headers={"Content-Type": "application/json"})
+    assert r2.status_code == 422
+    assert r2.json()["error_code"] == "VALIDATION_ERROR"
+
+
 def test_demo_run_returns_contract_and_benchmark():
     response = client.post("/demo/run/GOLDEN")
     assert response.status_code == 200

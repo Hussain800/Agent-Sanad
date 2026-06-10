@@ -604,7 +604,13 @@
             Default-autonomous, exception-routed: clear cases auto-draft; you review the exceptions.
           </p>
         </div>
-        <a class="btn ghost" href="#/">Beneficiary service</a>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <label class="check" id="graphToggleWrap" style="display:none;font-size:12.5px">
+            <input type="checkbox" id="graphToggle"> Run via LangGraph orchestrator
+          </label>
+          <span class="chip info" id="orchChip" style="display:none"></span>
+          <a class="btn ghost" href="#/">Beneficiary service</a>
+        </div>
       </div>
 
       <div class="runtime-error" id="officerError">
@@ -754,9 +760,23 @@
     caseDetails: [],           // [{id,label,group}]
     result: null,              // last decision envelope
     resultSource: null,        // 'sample' | 'custom'
+    submitting: false,         // double-submit + #/processing deep-link guard
     officerLoaded: false,
     officerCaseId: null,
+    useGraph: false,           // T1: officer-portal orchestrator toggle
+    graphAvailable: false,
   };
+
+  // Global safety net: a rejected promise outside a try/catch must surface as
+  // a visible banner, never a silent console error (A-level audit fix).
+  window.addEventListener("unhandledrejection", ev => {
+    const msg = (ev.reason && ev.reason.message) ? ev.reason.message : String(ev.reason);
+    const onOfficer = (location.hash || "").startsWith("#/officer");
+    const box = $(onOfficer ? "officerError" : "applyError");
+    const txt = $(onOfficer ? "officerErrorText" : "applyErrorText");
+    if (box && txt) { txt.textContent = "Unexpected error: " + msg; box.classList.add("show"); }
+    ev.preventDefault();
+  });
 
   /* ═══════════════ router ═══════════════ */
   const SCREENS = ["landing","uaepass","apply","processing","result","officer"];
@@ -772,7 +792,12 @@
       if (!S.identityVerified) { location.hash = "#/uaepass"; return; }
       show("apply"); renderStepper(); renderStep();
     }
-    else if (h.startsWith("#/processing")){ show("processing"); }
+    else if (h.startsWith("#/processing")){
+      // Guard: direct deep-link with no in-flight submission would strand the
+      // user on an empty animation screen — send them to the service entry.
+      if (!S.submitting && !S.result) { location.hash = "#/"; return; }
+      show("processing");
+    }
     else if (h.startsWith("#/result"))    {
       if (!S.result) { location.hash = "#/"; return; }
       show("result");
@@ -1091,6 +1116,10 @@
     Closed:               ["Case recorded", "Finalized in the audit trail"],
   };
   async function submitApplication() {
+    if (S.submitting) return;            // double-click guard (A-level audit fix)
+    S.submitting = true;
+    const submitBtn = $("navNext");
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "Submitting…"; }
     clearApplyError();
     location.hash = "#/processing";
     $("procList").innerHTML = "";
@@ -1108,11 +1137,14 @@
         S.resultSource = "custom";
       }
     } catch (e) {
+      S.submitting = false;
       location.hash = "#/apply";
+      renderStep();                       // re-enables the submit button
       applyFail("Submission failed: " + e.message +
         (S.mode === "custom" ? " — check the entered values." : ""));
       return;
     }
+    S.submitting = false;
     S.result = envelope;
     // Animate the REAL state journey from the audit feed.
     const states = [];
@@ -1244,6 +1276,17 @@
       try {
         const health = await fetchJson(API + "/healthz");
         $("modePill").textContent = health.mock_mode ? "offline mock mode" : "live mode";
+        // T1: surface the orchestrator toggle only when the graph layer loaded.
+        S.graphAvailable = !!health.graph_available;
+        if (S.graphAvailable) {
+          $("graphToggleWrap").style.display = "flex";
+          S.useGraph = (health.orchestrator === "graph");
+          $("graphToggle").checked = S.useGraph;
+          $("graphToggle").addEventListener("input", e => {
+            S.useGraph = e.target.checked;
+            if (S.officerCaseId) selectCase(S.officerCaseId);
+          });
+        }
       } catch (e) { /* pill stays default */ }
       await ensureCases();
       renderQueue();
@@ -1292,7 +1335,8 @@
   async function selectCase(id) {
     try {
       $("officerError").classList.remove("show");
-      const d = await fetchJson(API + "/demo/run/" + id, { method: "POST" });
+      const route = (S.useGraph && S.graphAvailable) ? "/demo/run-graph/" : "/demo/run/";
+      const d = await fetchJson(API + route + id, { method: "POST" });
       S.officerCaseId = id;
       renderOfficer(d, id);
       markQueue(id);
@@ -1426,6 +1470,23 @@
       $("benchnote").textContent =
         `Benchmarked on ${bch.n_held_out} held-out ${bch.validated_on} decisions (calibrated ${bch.calibrated_on}). Path-match, not exact reproduction.`;
     }
+    // T1: orchestrator transparency — which engine ran, and whether the graph
+    // route fell back to the plain orchestrator.
+    const orch = d.impact && d.impact.orchestrator;
+    const chipEl = $("orchChip");
+    if (orch) {
+      chipEl.style.display = "inline-flex";
+      if (d.impact.fallback_used) {
+        chipEl.className = "chip warn";
+        chipEl.textContent = "orchestrator: plain (graph fallback)";
+        chipEl.title = d.impact.fallback_reason || "";
+      } else {
+        chipEl.className = "chip info";
+        chipEl.textContent = "orchestrator: " + orch;
+        chipEl.title = (d.impact.graph_path || []).join(" → ");
+      }
+    } else { chipEl.style.display = "none"; }
+
     // officer actions — sample cases only (custom applications are stateless)
     const isSample = S.caseDetails.some(x => x.id === S.officerCaseId) && label !== "Last submitted application";
     ["actApprove","actAdjust","actEscalate"].forEach(id => $(id).disabled = !isSample);

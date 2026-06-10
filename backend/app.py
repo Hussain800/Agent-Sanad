@@ -5,6 +5,7 @@ import os
 import time
 import uuid
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import ValidationError
@@ -15,8 +16,27 @@ from backend.policy.engine import decide
 from backend.policy.rules import load_policy
 from backend.schemas import MockApplication, OfficerAction
 
+# T1 — optional LangGraph orchestration (Tooling Addendum). Import-guarded so a
+# missing/broken langgraph dependency can never break the demo: the routes
+# fall back to the plain orchestrator and /healthz reports why.
+try:
+    from backend.graph import run_graph_case, GRAPH_AVAILABLE, graph_import_error
+    from backend.graph.compare_outputs import diff_summary
+except Exception as _graph_exc:  # pragma: no cover
+    run_graph_case = None  # type: ignore[assignment]
+    GRAPH_AVAILABLE = False
+    diff_summary = None  # type: ignore[assignment]
+    _graph_err = f"{_graph_exc.__class__.__name__}: {_graph_exc}"
+    def graph_import_error() -> str:  # type: ignore[no-redef]
+        return _graph_err
+
 POLICY = load_policy()
 MOCK_MODE = os.getenv("LOCAL_MOCK_MODE", "true").lower() == "true"
+# T1 flag — which orchestrator the UI should prefer. plain stays the default;
+# the plain /demo/run route is always available regardless of this setting.
+ORCHESTRATOR = os.getenv("SANAD_ORCHESTRATOR", "plain").lower()
+if ORCHESTRATOR not in ("plain", "graph"):
+    ORCHESTRATOR = "plain"
 
 # Build version — the frontend pins the same string and compares it against
 # /healthz at boot. A mismatch means a stale server process is running old
@@ -121,6 +141,22 @@ async def http_exception_envelope(request: Request, exc: HTTPException):
     )
 
 
+@app.exception_handler(RequestValidationError)
+async def request_validation_envelope(request: Request, exc: RequestValidationError):
+    """Malformed/missing JSON bodies on dict-param endpoints raise
+    RequestValidationError (not HTTPException) — without this handler they'd
+    bypass the PRD §5.5 envelope and leak FastAPI's default shape."""
+    return JSONResponse(
+        status_code=422,
+        content={
+            "error_code": "VALIDATION_ERROR",
+            "message": "Request body is missing or malformed JSON.",
+            "path": str(request.url.path),
+            "app_version": APP_VERSION,
+        },
+    )
+
+
 @app.exception_handler(Exception)
 async def unhandled_exception_envelope(request: Request, exc: Exception):
     _log.error("unhandled exception", extra={
@@ -144,6 +180,9 @@ def healthz():
         "mock_mode": MOCK_MODE,
         "policy_version": POLICY.policy_version,
         "app_version": APP_VERSION,
+        "orchestrator": ORCHESTRATOR,
+        "graph_available": bool(GRAPH_AVAILABLE),
+        "graph_import_error": None if GRAPH_AVAILABLE else graph_import_error(),
     }
 
 
@@ -347,6 +386,97 @@ _TERMINAL_STATE = {
     "Request documents":  "NeedsDocuments",
     "Reject":             "Rejected",
 }
+
+
+# ── T1: LangGraph routes (Tooling Addendum) ─────────────────────────────────
+# Same envelope as /demo/run plus impact.graph_path. Any failure falls back to
+# the plain orchestrator with impact.fallback_used=true — the demo cannot
+# break because of the framework. The framework never decides the money.
+
+@app.post("/demo/run-graph/{case_id}")
+def run_graph(case_id: str, request: Request):
+    case_id = case_id.upper()
+    request_id = request.headers.get("x-request-id") or uuid.uuid4().hex[:12]
+    if case_id not in FIXTURES:
+        raise HTTPException(404, f"unknown case '{case_id}'")
+    if not GRAPH_AVAILABLE or run_graph_case is None:
+        return _plain_envelope(case_id, request_id,
+                               fallback="graph_unavailable: " + str(graph_import_error()))
+    try:
+        envelope = run_graph_case(case_id, mock_mode=MOCK_MODE, request_id=request_id)
+        envelope["impact"]["benchmark"] = BENCHMARK
+        envelope["impact"]["request_id"] = request_id
+        envelope["impact"]["policy_version"] = POLICY.policy_version
+        envelope["impact"]["fallback_used"] = False
+        _log.info("graph.complete", extra={
+            "request_id": request_id, "case_id": case_id, "step": "graph.complete",
+            "recommendation": envelope["report"]["recommendation"],
+            "path": envelope["report"]["proposed_plan"]["path"],
+            "fired_rules": envelope["report"]["fired_rules"],
+            "latency_ms": envelope["impact"]["latency_ms"], "mock_mode": MOCK_MODE,
+        })
+        return JSONResponse(envelope, headers={"x-request-id": request_id})
+    except Exception as exc:
+        _log.error("graph.failed", extra={
+            "request_id": request_id, "case_id": case_id, "step": "graph.failed",
+        })
+        return _plain_envelope(case_id, request_id,
+                               fallback=f"graph_error: {exc.__class__.__name__}")
+
+
+def _plain_envelope(case_id: str, request_id: str, *,
+                    fallback: str | None = None) -> JSONResponse:
+    """The plain orchestrator path, reusable by the graph fallback."""
+    t0 = time.time()
+    case, log = build_case(case_id)
+    log.transition(case_id, "Validating", "PolicyRun", actor="policy",
+                   detail="deterministic decide() called", mock_mode=MOCK_MODE)
+    report = decide(case, POLICY)
+    latency_ms = int((time.time() - t0) * 1000)
+    terminal = _TERMINAL_STATE.get(report.recommendation, "RecommendationReady")
+    log.add(case_id, "policy.decide", "policy",
+            f"{report.recommendation} / {report.proposed_plan.path}",
+            latency_ms=latency_ms, mock_mode=MOCK_MODE,
+            state_from="PolicyRun", state_to=terminal)
+    log.transition(case_id, terminal, "Closed", mock_mode=MOCK_MODE,
+                   detail="case finalized in the audit record")
+    envelope = {
+        "case": case.model_dump(mode="json"),
+        "report": report.model_dump(mode="json"),
+        "audit": log.events(),
+        "impact": {
+            "latency_ms": latency_ms, "mock_mode": MOCK_MODE,
+            "benchmark": BENCHMARK, "orchestrator": "plain",
+            "request_id": request_id, "policy_version": POLICY.policy_version,
+        },
+    }
+    if fallback:
+        envelope["impact"]["fallback_used"] = True
+        envelope["impact"]["fallback_reason"] = fallback
+    return JSONResponse(envelope, headers={"x-request-id": request_id})
+
+
+@app.get("/demo/compare/{case_id}")
+def compare(case_id: str):
+    """Side-by-side equivalence proof for plain vs graph (officer/judge view)."""
+    case_id = case_id.upper()
+    if case_id not in FIXTURES:
+        raise HTTPException(404, f"unknown case '{case_id}'")
+    t0 = time.time()
+    case, log = build_case(case_id)
+    report = decide(case, POLICY)
+    plain = {
+        "case": case.model_dump(mode="json"),
+        "report": report.model_dump(mode="json"),
+        "audit": log.events(),
+        "impact": {"latency_ms": int((time.time() - t0) * 1000),
+                   "mock_mode": MOCK_MODE, "orchestrator": "plain"},
+    }
+    if not GRAPH_AVAILABLE or run_graph_case is None or diff_summary is None:
+        return {"equivalent": None, "graph_available": False,
+                "reason": graph_import_error()}
+    graph_env = run_graph_case(case_id, mock_mode=MOCK_MODE)
+    return diff_summary(plain, graph_env)
 
 
 @app.post("/demo/run/{case_id}")
