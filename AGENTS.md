@@ -4,7 +4,7 @@
 
 FastAPI hackathon MVP: deterministic policy engine for Sheikh Zayed Housing Programme arrears rescheduling. 13 demo cases, fixture-backed offline mode.
 
-**139 tests passing** across 9 test files.
+**168 tests passing** across 12 test files.
 
 ## Core doctrine
 
@@ -21,7 +21,7 @@ SQLite persistence for custom apps and officer actions. Single-file frontend ser
 # Manual
 $env:PYTHONPATH="."; uvicorn backend.app:app --host 127.0.0.1 --port 8000
 
-# Full test suite (139 expected)
+# Full test suite (168 expected)
 $env:PYTHONPATH="."; python -B -m pytest tests\ -q -p no:cacheprovider
 
 # Single test
@@ -72,9 +72,16 @@ Invoke-RestMethod http://127.0.0.1:8000/healthz    # ok=true, mock_mode=true, ap
 
 ```
 backend/
-  app.py              — FastAPI app (17 routes, JSON logger, error envelope, store integration, evidence repair loop)
-  store.py            — SQLite persistence layer (applications, recommendations, audit, officer actions)
+  app.py              — FastAPI app (55+ routes, JSON logger, error envelope, store, connectors, consent, RBAC, audit chain, simulator, decision packages)
+  store.py            — SQLite persistence layer (applications, recommendations, audit, officer actions, +11 v1.4 tables)
   actions.py          — Evidence Repair Loop: maps fired rules to beneficiary-facing next_required_actions
+  connectors.py       — v1.4: Connector registry + 6 mock connectors with health/simulate/reset/failure modes
+  consent.py          — v1.4: Purpose-bound consent ledger
+  rbac.py             — v1.4: Role-based access control (5 roles, header-based)
+  audit_chain.py      — v1.4: SHA256 hash chain for immutable audit
+  simulator.py        — v1.4: Fair Plan Simulator (2-3 compliant options per case)
+  decision_package.py — v1.4: Digital closeout (packages, signatures, e-Seal)
+  security.py         — v1.4: Correlation ID, rate-limit, security headers, request-size limit
   adapters/__init__.py — 5 mock adapters (UAE PASS, Loan, Arrears, Salary Verify, Doc Validate) + 13 fixtures
   applications.py     — Custom application form → synthetic Case
   schemas.py          — Pydantic v2 schemas (extra="forbid" on ALL payloads)
@@ -91,7 +98,7 @@ backend/
 frontend/
   index.html          — Single-file hash-routed SPA (~1576 lines, vanilla HTML/CSS/JS, zero deps)
   i18n.json           — Arabic/English translation strings (95 keys)
-tests/                — 9 test files (139 passing)
+tests/                — 12 test files (168 passing)
   test_policy.py      — 13 case assertions + endpoint contract tests
   test_demo_api.py    — API contract + CLIENT_BUILD handshake test
   test_governance.py  — No workbook tracked, no PII, risky cases routed to human
@@ -101,6 +108,9 @@ tests/                — 9 test files (139 passing)
   test_benchmark_replay.py   — Benchmark replay logic (18 tests, 7 scenarios)
   test_store.py              — SQLite persistence (12 tests)
   test_security.py           — Security, PII, XSS, error envelope (11 tests)
+  test_connectors.py         — v1.4: Connector registry, health, simulate, UAE PASS, GSB, UAE Verify (10 tests)
+  test_consent.py            — v1.4: Consent create/get/revoke/events (5 tests)
+  test_v1_4_integration.py   — v1.4: RBAC, simulator, decision package, audit chain, supervisor (14 tests)
 benchmark/            — Historical replay + scoring (94.6% path-match on held-out 2025)
 seeds/cases_v1.json   — Human-facing demo case index (13 cases)
 ```
@@ -119,9 +129,15 @@ seeds/cases_v1.json   — Human-facing demo case index (13 cases)
 - The 20% salary cap is the hard policy rule. Monthly deduction must not exceed it. Never relax this.
 - **SQLite persistence** is in `backend/store.py`. DB lives at `data/agent_sanad.db` (gitignored). Gracefully degrades if DB can't be created. Three new endpoints: `GET /applications`, `GET /applications/{id}`, `GET /officer-actions`.
 - **Arabic localization** is in `frontend/i18n.json` (95 keys). Language toggle in the top bar loads translations client-side. RTL direction support. Key static text and beneficiary result strings are translated.
-- **New test files**: `test_benchmark_replay.py` (18 tests), `test_store.py` (12), `test_security.py` (11). Run full suite to verify 139 tests pass.
+- **New test files**: `test_benchmark_replay.py` (18 tests), `test_store.py` (12), `test_security.py` (11). Run full suite to verify 125 tests pass.
 - **Evidence Repair Loop**: `backend/actions.py` maps fired rules to structured `next_required_actions` in every API response and graph route. Rendered in beneficiary result cards and officer portal trace section 7. Case-aware: HARD-01+CAP-01 (capacity issue) suppresses hardship action. Backed by integration tests.
 - **Exception Studio**: Officer portal queue has filter buttons (Policy hard stop, Evidence problem, Affordability risk, Social hardship, Security risk) with server-provided `exception_group` metadata from `GET /cases`. No hard-coded frontend maps.
+- **v1.4 Connectors**: 6 mock connectors (UAEPASS, GSB, SZHP-core, UAE-Verify, financial-capacity, notifications) with registry, health endpoints, simulate/reset, and failure modes. Consent required before connector data returns.
+- **v1.4 RBAC**: Role-based access via `x-sanad-role` header. Roles: beneficiary, officer, supervisor, auditor, admin. Enforced on supervisor/consent/connector routes.
+- **v1.4 Audit Chain**: SHA256 hash chain with `GET /cases/{id}/audit-chain` and `POST /audit/verify`. Tampered events fail verification.
+- **v1.4 Simulator**: Fair Plan Simulator via `POST /cases/{id}/simulate-plan`. Returns 2-3 compliant options. Official recommendation remains deterministic.
+- **v1.4 Decision Packages**: Digital closeout with packages, signatures, e-Seal, hash verification.
+- **v1.4 Release**: `scripts/release-check.ps1` runs 8 automated checks. Version is 1.4.0.
 
 ## 13 demo cases
 

@@ -59,6 +59,142 @@ CREATE INDEX IF NOT EXISTS idx_audit_events_app
     ON audit_events(application_id);
 CREATE INDEX IF NOT EXISTS idx_officer_actions_case
     ON officer_actions(case_id);
+
+-- v1.4 tables
+CREATE TABLE IF NOT EXISTS sessions (
+    id              TEXT PRIMARY KEY,
+    beneficiary_ref TEXT NOT NULL,
+    state           TEXT NOT NULL DEFAULT 'started',
+    created_at      TEXT NOT NULL,
+    auth_time       TEXT,
+    consent_id      TEXT,
+    assurance_level TEXT DEFAULT 'low',
+    nonce           TEXT,
+    expiry          TEXT
+);
+
+CREATE TABLE IF NOT EXISTS consents (
+    id              TEXT PRIMARY KEY,
+    beneficiary_ref TEXT NOT NULL,
+    purpose_code    TEXT NOT NULL,
+    data_categories TEXT NOT NULL,
+    connector_scopes TEXT NOT NULL,
+    granted_at      TEXT NOT NULL,
+    expires_at      TEXT,
+    revoked_at      TEXT,
+    created_at      TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS connector_calls (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    connector_name  TEXT NOT NULL,
+    service         TEXT NOT NULL,
+    consent_id      TEXT,
+    purpose_code    TEXT,
+    correlation_id  TEXT,
+    status          TEXT NOT NULL DEFAULT 'pending',
+    request_summary TEXT,
+    response_summary TEXT,
+    latency_ms      INTEGER DEFAULT 0,
+    failure_mode    TEXT,
+    created_at      TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS connector_state (
+    name            TEXT PRIMARY KEY,
+    status          TEXT NOT NULL DEFAULT 'up',
+    failure_mode    TEXT,
+    latency_budget_ms INTEGER DEFAULT 100,
+    last_call_at    TEXT
+);
+
+CREATE TABLE IF NOT EXISTS case_actions (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    case_id         TEXT NOT NULL,
+    action_id       TEXT NOT NULL,
+    status          TEXT NOT NULL DEFAULT 'open',
+    action_type     TEXT NOT NULL,
+    label           TEXT NOT NULL,
+    description     TEXT,
+    repair_hint     TEXT,
+    owner           TEXT DEFAULT 'beneficiary',
+    due_date        TEXT,
+    officer_note    TEXT,
+    created_at      TEXT NOT NULL,
+    updated_at      TEXT
+);
+
+CREATE TABLE IF NOT EXISTS document_checks (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    case_id         TEXT NOT NULL,
+    document_type   TEXT NOT NULL,
+    issuer          TEXT,
+    hash            TEXT,
+    tamper_result   TEXT,
+    signature_valid INTEGER DEFAULT 0,
+    confidence      REAL DEFAULT 0.0,
+    trust_status    TEXT DEFAULT 'pending',
+    checked_at      TEXT
+);
+
+CREATE TABLE IF NOT EXISTS decision_packages (
+    id              TEXT PRIMARY KEY,
+    case_id         TEXT NOT NULL,
+    decision_summary TEXT NOT NULL,
+    letter_arabic   TEXT,
+    letter_english  TEXT,
+    package_hash    TEXT,
+    created_at      TEXT NOT NULL,
+    signed_at       TEXT
+);
+
+CREATE TABLE IF NOT EXISTS signatures (
+    id              TEXT PRIMARY KEY,
+    case_id         TEXT NOT NULL,
+    package_id      TEXT,
+    signatory_ref   TEXT,
+    signature_value TEXT,
+    signature_type  TEXT DEFAULT 'mock',
+    status          TEXT DEFAULT 'pending',
+    created_at      TEXT NOT NULL,
+    verified_at     TEXT
+);
+
+CREATE TABLE IF NOT EXISTS audit_chain (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    case_id         TEXT NOT NULL,
+    previous_hash   TEXT NOT NULL DEFAULT '',
+    event_hash      TEXT NOT NULL,
+    timestamp       TEXT NOT NULL,
+    actor           TEXT NOT NULL,
+    action          TEXT NOT NULL,
+    payload_digest  TEXT DEFAULT '',
+    policy_version  TEXT,
+    app_version     TEXT
+);
+
+CREATE TABLE IF NOT EXISTS appeals (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    case_id         TEXT NOT NULL,
+    reason          TEXT NOT NULL,
+    new_evidence    TEXT,
+    status          TEXT DEFAULT 'open',
+    created_at      TEXT NOT NULL,
+    decided_at      TEXT,
+    decision        TEXT,
+    decision_by     TEXT
+);
+
+CREATE TABLE IF NOT EXISTS notifications (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    case_id         TEXT NOT NULL,
+    channel         TEXT NOT NULL,
+    template        TEXT NOT NULL,
+    status          TEXT NOT NULL DEFAULT 'pending',
+    sent_at         TEXT,
+    read_at         TEXT,
+    created_at      TEXT NOT NULL
+);
 """
 
 

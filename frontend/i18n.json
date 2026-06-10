@@ -116,6 +116,76 @@
     "mock.docval": "محاكاة — حالة مستندات اصطناعية",
     "mock.salary": "محاكاة — دخل ومطابقة اصطناعية",
 
+    "connector.title": "الموصلات",
+    "connector.health": "حالة الموصل",
+    "connector.up": "نشط",
+    "connector.degraded": "متدهور",
+    "connector.down": "متوقف",
+    "connector.simulate": "محاكاة عطل",
+    "connector.reset": "إعادة تعيين",
+    "connector.failure.timeout": "مهلة اتصال",
+    "connector.failure.provider_down": "الموصل متوقف",
+    "connector.failure.stale_data": "بيانات قديمة",
+    "connector.failure.consent_missing": "الموافقة مفقودة",
+
+    "consent.title": "الموافقة على مشاركة البيانات",
+    "consent.grant": "منح الموافقة",
+    "consent.revoke": "إلغاء الموافقة",
+    "consent.purpose": "غرض المعالجة",
+    "consent.scope": "نطاق البيانات",
+    "consent.granted_at": "تاريخ المنح",
+    "consent.expires_at": "تاريخ الانتهاء",
+    "consent.status.active": "نشط",
+    "consent.status.revoked": "ملغى",
+
+    "supervisor.title": "لوحة المشرف",
+    "supervisor.metrics": "المقاييس",
+    "supervisor.overrides": "التجاوزات",
+    "supervisor.connector_health": "حالة الموصلات",
+    "supervisor.policy_drift": "انحراف السياسة",
+
+    "uaepass.identity": "التحقق من الهوية",
+    "uaepass.session": "جلسة UAE PASS",
+    "uaepass.assurance": "مستوى التحقق",
+    "uaepass.signature": "التوقيع الرقمي",
+    "uaepass.eseal": "الختم الإلكتروني",
+
+    "decision.package": "حزمة القرار",
+    "decision.sign": "توقيع القرار",
+    "decision.verify": "التحقق من القرار",
+    "decision.seal": "ختم إلكتروني",
+
+    "audit.chain": "سلسلة التدقيق",
+    "audit.verify": "التحقق من سلسلة التدقيق",
+    "audit.intact": "سلسة التدقيق سليمة",
+    "audit.tampered": "تم العبث بسلسلة التدقيق",
+
+    "appeals.title": "الاستئنافات",
+    "appeals.submit": "تقديم استئناف",
+    "appeals.status.open": "مفتوح",
+    "appeals.status.decided": "مقرر",
+
+    "simulator.title": "محاكي الخطط",
+    "simulator.fastest": "الخطة الأسرع",
+    "simulator.lower": "الخطة المخففة",
+    "simulator.transfer": "تحويل المتأخرات",
+    "simulator.valid": "متوافق",
+    "simulator.invalid": "غير متوافق",
+
+    "notifications.title": "الإشعارات",
+    "notifications.sms": "رسالة نصية",
+    "notifications.email": "بريد إلكتروني",
+    "notifications.push": "إشعار فوري",
+
+    "rbac.role": "الدور",
+    "rbac.beneficiary": "مستفيد",
+    "rbac.officer": "موظف",
+    "rbac.supervisor": "مشرف",
+    "rbac.auditor": "مدقق",
+    "rbac.admin": "مدير النظام",
+
+    "privacy.export": "تصدير الخصوصية",
+
     "footer.text": "وكيل سند · عرض توضيحي لبرنامج الشيخ زايد للإسكان · يعمل دون اتصال · سجل التدقيق متاح في بوابة الموظف."
   }
 }

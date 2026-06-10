@@ -21,3 +21,7 @@ data/*.db-shm
 # Local planning documents
 PRD-Agent-Sanad-Hackathon-Winning.md
 docs/V1_3_PRODUCTION_GRADE_PLAN.md
+docs/V1_4_WINNING_PRD.md
+
+# OpenCode cache
+.omx/

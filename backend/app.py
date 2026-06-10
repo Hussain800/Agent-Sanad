@@ -17,6 +17,18 @@ from backend.policy.rules import load_policy
 from backend.schemas import MockApplication, OfficerAction
 from backend.store import STORE
 from backend.actions import next_actions
+from backend.rbac import check_access, get_role, get_user
+from backend.connectors import (list_connectors, get_connector, health as connector_health,
+                                 simulate as connector_simulate, reset as connector_reset,
+                                 uaepass_auth_start, uaepass_auth_callback, uaepass_userinfo,
+                                 uaepass_signature_request, uaepass_signature_verify, uaepass_eseal,
+                                 gsb_exchange, uae_verify_document, financial_capacity, send_notification)
+from backend.consent import create_consent, get_consent, revoke_consent, case_consent_events, check_consent
+from backend.audit_chain import add_chain_event, get_chain, verify_chain
+from backend.simulator import simulate_options
+from backend.decision_package import (create_decision_package, get_decision_package,
+                                       request_signature, verify_signature, verify_decision_package,
+                                       seal_package)
 
 # T1 — optional LangGraph orchestration (Tooling Addendum). Import-guarded so a
 # missing/broken langgraph dependency can never break the demo: the routes
@@ -44,7 +56,7 @@ if ORCHESTRATOR not in ("plain", "graph"):
 # /healthz at boot. A mismatch means a stale server process is running old
 # routes while serving new static files (the classic local-dev failure mode);
 # the UI then shows an actionable banner instead of leaking raw 404s.
-APP_VERSION = "1.1.0"
+APP_VERSION = "1.4.0"
 
 
 # ---- structured JSON logger (IBM agent skill 6: observability) ---------------
@@ -583,6 +595,333 @@ def run(case_id: str, request: Request):
             "policy_version": POLICY.policy_version,
         },
     }, headers={"x-request-id": request_id})
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# v1.4 Connector Registry
+# ═════════════════════════════════════════════════════════════════════════════
+
+@app.get("/connectors")
+def get_connectors(request: Request):
+    check_access("GET", "/connectors", get_role(request))
+    return {"connectors": list_connectors()}
+
+
+@app.get("/connectors/{name}/health")
+def get_connector_health(name: str):
+    return connector_health(name)
+
+
+@app.post("/connectors/{name}/simulate")
+def post_connector_simulate(name: str, body: dict, request: Request):
+    check_access("POST", "/connectors", get_role(request))
+    return connector_simulate(name, body.get("failure_mode"))
+
+
+@app.post("/connectors/{name}/reset")
+def post_connector_reset(name: str, request: Request):
+    check_access("POST", "/connectors", get_role(request))
+    return connector_reset(name)
+
+
+# ── UAE PASS mock ─────────────────────────────────────────────────────────
+
+@app.post("/sessions/uaepass/mock/start")
+def uaepass_start(body: dict):
+    purpose = body.get("purpose_code", "identity.verify")
+    return uaepass_auth_start(purpose)
+
+
+@app.post("/sessions/uaepass/mock/callback")
+def uaepass_callback(body: dict):
+    return uaepass_auth_callback(body.get("session_id", ""), body.get("code", ""), body.get("nonce", ""))
+
+
+@app.get("/connectors/uaepass/mock/userinfo/{session_id}")
+def get_uaepass_userinfo(session_id: str):
+    return uaepass_userinfo(session_id)
+
+
+# ── Consent ────────────────────────────────────────────────────────────────
+
+@app.post("/consents")
+def post_consent(body: dict, request: Request):
+    check_access("POST", "/consents", get_role(request))
+    return create_consent(
+        body.get("beneficiary_ref", get_user(request)),
+        body.get("purpose_code", "identity.verify"),
+        body.get("data_categories", ["profile"]),
+        body.get("connector_scopes", ["identity.verify"]),
+        body.get("expires_at"),
+    )
+
+
+@app.get("/consents/{consent_id}")
+def get_consent_by_id(consent_id: str):
+    c = get_consent(consent_id.upper())
+    if not c:
+        raise HTTPException(404, f"consent '{consent_id}' not found")
+    return c
+
+
+@app.post("/consents/{consent_id}/revoke")
+def post_revoke_consent(consent_id: str, request: Request):
+    check_access("POST", "/consents", get_role(request))
+    c = revoke_consent(consent_id.upper())
+    if not c:
+        raise HTTPException(404, f"consent '{consent_id}' not found")
+    return c
+
+
+@app.get("/cases/{case_id}/consent-events")
+def get_case_consent_events(case_id: str):
+    return {"consent_events": case_consent_events(case_id.upper())}
+
+
+# ── GSB exchange ──────────────────────────────────────────────────────────
+
+@app.post("/connectors/gsb/mock/exchange")
+def post_gsb_exchange(body: dict):
+    try:
+        return gsb_exchange(
+            body.get("provider", "szhp-core"),
+            body.get("service", "housing.loan"),
+            body.get("payload", {}),
+            body.get("consent_id"),
+            body.get("purpose_code"),
+            body.get("correlation_id"),
+        )
+    except ValueError as exc:
+        raise HTTPException(400, str(exc))
+
+
+# ── UAE Verify ────────────────────────────────────────────────────────────
+
+@app.post("/connectors/uae-verify/mock/verify-document")
+def post_verify_document(body: dict):
+    return uae_verify_document(body.get("document_type", "salary_certificate"), body.get("hash", ""))
+
+
+# ── Financial capacity ────────────────────────────────────────────────────
+
+@app.post("/connectors/financial-capacity/mock/assess")
+def post_financial_capacity(body: dict):
+    return financial_capacity(body.get("income", 0), body.get("obligations"))
+
+
+# ── Notifications ─────────────────────────────────────────────────────────
+
+@app.post("/connectors/notifications/mock/send")
+def post_notification(body: dict):
+    return send_notification(
+        body.get("case_id", ""), body.get("channel", "sms"), body.get("template", "status_update"))
+
+
+# ── Audit chain ───────────────────────────────────────────────────────────
+
+@app.get("/cases/{case_id}/audit-chain")
+def get_case_audit_chain(case_id: str):
+    return {"chain": get_chain(case_id.upper()), "case_id": case_id.upper()}
+
+
+@app.post("/audit/verify")
+def post_audit_verify(body: dict):
+    return verify_chain(body.get("case_id", "").upper())
+
+
+# ── Durable repair actions ────────────────────────────────────────────────
+
+@app.get("/cases/{case_id}/actions")
+def get_case_actions(case_id: str):
+    """Return persisted repair actions for a case."""
+    if STORE._db is None:
+        return {"actions": []}
+    rows = STORE._db.execute(
+        "SELECT action_id, status, action_type, label, description, repair_hint, owner, due_date, officer_note, created_at FROM case_actions WHERE case_id=? ORDER BY id",
+        (case_id.upper(),)).fetchall()
+    return {"actions": [{
+        "action_id": r[0], "status": r[1], "type": r[2], "label": r[3],
+        "description": r[4], "repair_hint": r[5], "owner": r[6],
+        "due_date": r[7], "officer_note": r[8], "created_at": r[9],
+    } for r in rows]}
+
+
+@app.post("/cases/{case_id}/actions/{action_id}/complete")
+def post_action_complete(case_id: str, action_id: str, body: dict):
+    if STORE._db:
+        STORE._db.execute("UPDATE case_actions SET status='completed', updated_at=? WHERE case_id=? AND action_id=?",
+                          (time.strftime("%Y-%m-%dT%H:%M:%S"), case_id.upper(), action_id))
+        STORE._db.commit()
+    return {"status": "completed", "action_id": action_id, "case_id": case_id.upper()}
+
+
+@app.post("/cases/{case_id}/actions/{action_id}/waive")
+def post_action_waive(case_id: str, action_id: str, body: dict):
+    if STORE._db:
+        STORE._db.execute("UPDATE case_actions SET status='waived', officer_note=?, updated_at=? WHERE case_id=? AND action_id=?",
+                          (body.get("reason", ""), time.strftime("%Y-%m-%dT%H:%M:%S"), case_id.upper(), action_id))
+        STORE._db.commit()
+    return {"status": "waived", "action_id": action_id, "case_id": case_id.upper()}
+
+
+# ── Plan Simulator ────────────────────────────────────────────────────────
+
+@app.post("/cases/{case_id}/simulate-plan")
+def post_simulate_plan(case_id: str):
+    case_id = case_id.upper()
+    if case_id not in FIXTURES:
+        raise HTTPException(404, f"unknown case '{case_id}'")
+    case, _ = build_case(case_id)
+    return {"options": simulate_options(case, POLICY), "case_id": case_id}
+
+
+@app.post("/applications/mock/simulate-plan")
+def post_mock_simulate_plan(body: dict):
+    try:
+        app_in = MockApplication(**(body or {}))
+    except ValidationError as exc:
+        raise HTTPException(422, f"invalid application: {exc.errors()}")
+    case, log, _ = build_case_from_application(app_in)
+    return {"options": simulate_options(case, POLICY), "case_id": case.case_id}
+
+
+# ── Digital Closeout ──────────────────────────────────────────────────────
+
+@app.post("/cases/{case_id}/decision-package")
+def post_decision_package(case_id: str):
+    case_id = case_id.upper()
+    if case_id not in FIXTURES:
+        raise HTTPException(404, f"unknown case '{case_id}'")
+    case, _ = build_case(case_id)
+    report = decide(case, POLICY)
+    pkg = create_decision_package(case_id, report.recommendation,
+                                   report.proposed_plan.model_dump(mode="json"),
+                                   report.reasoning)
+    add_chain_event(case_id, "system", "decision_package.created", {"package_id": pkg["package_id"]})
+    return pkg
+
+
+@app.get("/cases/{case_id}/decision-package")
+def get_case_decision_package(case_id: str):
+    case_id = case_id.upper()
+    if STORE._db is None:
+        raise HTTPException(404, "store unavailable")
+    row = STORE._db.execute(
+        "SELECT id FROM decision_packages WHERE case_id=? ORDER BY created_at DESC LIMIT 1",
+        (case_id,)).fetchone()
+    if not row:
+        raise HTTPException(404, f"no decision package for '{case_id}'")
+    pkg = get_decision_package(row[0])
+    if not pkg:
+        raise HTTPException(404, "package not found")
+    return pkg
+
+
+@app.post("/cases/{case_id}/signature/request")
+def post_signature_request(case_id: str):
+    return request_signature(case_id.upper())
+
+
+@app.post("/cases/{case_id}/signature/verify")
+def post_signature_verify(case_id: str, body: dict):
+    return verify_signature(body.get("signature_id", ""), body.get("package_hash", ""))
+
+
+# ── Supervisor Metrics ────────────────────────────────────────────────────
+
+@app.get("/supervisor/metrics")
+def get_supervisor_metrics(request: Request):
+    check_access("GET", "/supervisor/metrics", get_role(request))
+    m = {"total_applications": len(FIXTURES), "approvals": 0, "referrals": 0,
+         "rejections": 0, "request_docs": 0}
+    if STORE._db:
+        try:
+            recs = STORE._db.execute("SELECT report FROM recommendations ORDER BY id DESC LIMIT 50").fetchall()
+            for (r,) in recs:
+                rep = json.loads(r)
+                rec = rep.get("recommendation", "")
+                if rec == "Approve": m["approvals"] += 1
+                elif "Refer" in rec: m["referrals"] += 1
+                elif rec == "Reject": m["rejections"] += 1
+                elif "Request" in rec: m["request_docs"] += 1
+        except Exception:
+            pass
+    return m
+
+
+@app.get("/supervisor/overrides")
+def get_supervisor_overrides(request: Request):
+    check_access("GET", "/supervisor/overrides", get_role(request))
+    if STORE._db is None:
+        return {"overrides": []}
+    rows = STORE._db.execute(
+        "SELECT case_id, action, override_reason_code, notes, created_at FROM officer_actions WHERE override_reason_code IS NOT NULL ORDER BY created_at DESC LIMIT 20"
+    ).fetchall()
+    return {"overrides": [{"case_id": r[0], "action": r[1], "reason_code": r[2], "notes": r[3], "created_at": r[4]} for r in rows]}
+
+
+@app.get("/supervisor/connector-health")
+def get_supervisor_connector_health(request: Request):
+    check_access("GET", "/supervisor/connector-health", get_role(request))
+    return {"connectors": [connector_health(c["name"]) for c in list_connectors()]}
+
+
+@app.get("/supervisor/policy-drift")
+def get_supervisor_policy_drift(request: Request):
+    check_access("GET", "/supervisor/policy-drift", get_role(request))
+    return {
+        "policy_version": POLICY.policy_version,
+        "benchmark": BENCHMARK,
+        "note": "Policy drift monitoring is read-only in v1.4. No automatic config changes.",
+    }
+
+
+# ── Appeals ───────────────────────────────────────────────────────────────
+
+@app.post("/cases/{case_id}/appeals")
+def post_appeal(case_id: str, body: dict):
+    if STORE._db is None:
+        return {"status": "error", "message": "store unavailable"}
+    STORE._db.execute(
+        "INSERT INTO appeals (case_id, reason, new_evidence, status, created_at) VALUES (?,?,?,?,?)",
+        (case_id.upper(), body.get("reason", ""), json.dumps(body.get("new_evidence", {})),
+         "open", time.strftime("%Y-%m-%dT%H:%M:%S")))
+    STORE._db.commit()
+    return {"status": "open", "case_id": case_id.upper(), "message": "Appeal recorded"}
+
+
+@app.get("/cases/{case_id}/appeals")
+def get_appeals(case_id: str):
+    if STORE._db is None:
+        return {"appeals": []}
+    rows = STORE._db.execute(
+        "SELECT id, reason, status, created_at, decided_at, decision FROM appeals WHERE case_id=? ORDER BY id",
+        (case_id.upper(),)).fetchall()
+    return {"appeals": [{"id": r[0], "reason": r[1], "status": r[2], "created_at": r[3], "decided_at": r[4], "decision": r[5]} for r in rows]}
+
+
+# ── Privacy export ────────────────────────────────────────────────────────
+
+@app.get("/privacy/export/{beneficiary_ref}")
+def get_privacy_export(beneficiary_ref: str):
+    """Return all data stored for a beneficiary (GDPR-style)."""
+    return {
+        "beneficiary_ref": beneficiary_ref,
+        "exported_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
+        "message": "Privacy export — in production this would return all stored data for this reference.",
+        "note": "Agent Sanad stores minimal synthetic data. No real PII is persisted.",
+    }
+
+
+# ── v1.4 health check supplement ─────────────────────────────────────────
+
+@app.get("/healthz/v1.4")
+def healthz_v14():
+    conn_count = len(list_connectors())
+    return {
+        "ok": True, "mock_mode": MOCK_MODE, "app_version": APP_VERSION,
+        "connectors": conn_count, "v1.4": True,
+    }
 
 
 # serve the single-page frontend if present
