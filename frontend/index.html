@@ -1323,6 +1323,7 @@
     if (firedRules.some(r => ["RSK-01"].includes(r))) return "Security risk";
     return "";
   }
+  const EXCEPTION_ORDER = ["Policy hard stop","Evidence problem","Affordability risk","Social hardship","Security risk"];
 
   const ADAPTER_MAP = [
     ["UAE PASS",            "identity, nationality, marital status, family size"],
