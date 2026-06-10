@@ -56,7 +56,7 @@ if ORCHESTRATOR not in ("plain", "graph"):
 # /healthz at boot. A mismatch means a stale server process is running old
 # routes while serving new static files (the classic local-dev failure mode);
 # the UI then shows an actionable banner instead of leaking raw 404s.
-APP_VERSION = "1.1.0"
+APP_VERSION = "1.4.0"
 
 
 # ---- structured JSON logger (IBM agent skill 6: observability) ---------------
@@ -682,14 +682,17 @@ def get_case_consent_events(case_id: str):
 
 @app.post("/connectors/gsb/mock/exchange")
 def post_gsb_exchange(body: dict):
-    return gsb_exchange(
-        body.get("provider", "szhp-core"),
-        body.get("service", "housing.loan"),
-        body.get("payload", {}),
-        body.get("consent_id"),
-        body.get("purpose_code"),
-        body.get("correlation_id"),
-    )
+    try:
+        return gsb_exchange(
+            body.get("provider", "szhp-core"),
+            body.get("service", "housing.loan"),
+            body.get("payload", {}),
+            body.get("consent_id"),
+            body.get("purpose_code"),
+            body.get("correlation_id"),
+        )
+    except ValueError as exc:
+        raise HTTPException(400, str(exc))
 
 
 # ── UAE Verify ────────────────────────────────────────────────────────────
