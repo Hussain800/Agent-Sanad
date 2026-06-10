@@ -146,6 +146,20 @@ def test_mock_application_snapshot_endpoint():
                           "Extracting", "Validating"]
 
 
+def test_custom_application_returns_next_required_actions():
+    """Evidence Repair Loop: every custom app response includes
+    next_required_actions. Missing cert returns 1 action, clean returns 0."""
+    d = _decide()
+    assert "next_required_actions" in d
+    # Clean case (all docs present) should have 0 actions
+    assert isinstance(d["next_required_actions"], list)
+
+    # Missing cert case should have 1 action (DOC-01)
+    d2 = _decide(salary_certificate_present=False)
+    assert len(d2["next_required_actions"]) >= 1
+    assert d2["next_required_actions"][0]["id"] == "upload_salary_certificate"
+
+
 def test_custom_flow_emits_full_state_journey():
     d = _decide()
     states = [e["state_to"] for e in d["audit"] if e.get("state_to")]
