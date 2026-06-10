@@ -17,3 +17,6 @@ benchmark/data/*.xls
 data/*.db
 data/*.db-wal
 data/*.db-shm
+
+# Local planning documents
+PRD-Agent-Sanad-Hackathon-Winning.md
