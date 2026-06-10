@@ -1,7 +1,8 @@
 # Agent Sanad — Current Release
 
 **Version**: 1.8.0
-**Tests**: 382+
+**Tests**: 431 passing (verified: `pytest -q` → `431 passed`)
+**Routes**: 189 mounted API routes
 **Release Gates**: 45+
 
 ## Release History
