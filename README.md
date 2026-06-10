@@ -20,7 +20,7 @@
 
 <br/>
 
-[![Tests](https://img.shields.io/badge/tests-139%20passing-1f7a4d?style=flat-square&logo=pytest&logoColor=white)](#-quality--testing)
+[![Tests](https://img.shields.io/badge/tests-168%20passing-1f7a4d?style=flat-square&logo=pytest&logoColor=white)](#-quality--testing)
 [![Python](https://img.shields.io/badge/python-3.11+-0b3d2e?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-async-0b3d2e?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![Pydantic v2](https://img.shields.io/badge/Pydantic-v2-0b3d2e?style=flat-square&logo=pydantic&logoColor=white)](https://docs.pydantic.dev/)
@@ -510,11 +510,11 @@ python benchmark/run.py benchmark/data/RescheduleArrears.xlsx
 
 ## ✅ Quality &amp; Testing
 
-**139 tests across 9 files**, all passing. Run them:
+**168 tests across 12 files**, all passing. Run them:
 
 ```powershell
 $env:PYTHONPATH="."
-python -B -m pytest tests\ -q -p no:cacheprovider      # → 139 passed
+python -B -m pytest tests\ -q -p no:cacheprovider      # → 168 passed
 ```
 
 | Test file | Focus |
@@ -577,7 +577,7 @@ agent-sanad/
 │   ├── index.html             # Single-file hash-routed SPA (zero deps)
 │   └── i18n.json              # AR/EN translation strings (RTL support)
 ├── benchmark/                 # 🔒 Historical replay, normalize, score (94.6%)
-├── tests/                     # 9 files · 139 tests
+├── tests/                     # 12 files · 168 tests
 ├── docs/                      # Architecture, readiness, tooling, demo, Q&A
 ├── seeds/cases_v1.json        # Human-facing demo case index
 ├── run.ps1 · run.sh           # One-command launchers (stale-port guard)
@@ -600,7 +600,7 @@ experiment. The mapping is live and machine-readable at `GET /architecture`.
 | 3 | **Retrieval engineering** | 5 fixture-backed adapters; salary extraction with cached fallback |
 | 4 | **Reliability engineering** | Offline-first default; cached fallbacks; stale-port guard; auto graph-fallback |
 | 5 | **Security &amp; safety** | Untrusted docs (RSK-01); read-only LLM; trace redaction; XSS-escaped UI |
-| 6 | **Evaluation &amp; observability** | 94.6% historical benchmark; append-only audit; 139 tests; structured logs |
+| 6 | **Evaluation &amp; observability** | 94.6% historical benchmark; append-only audit; 168 tests; structured logs |
 | 7 | **Product thinking** | Beneficiary vs officer surfaces; Evidence Repair Loop; AR/EN i18n |
 
 ---
