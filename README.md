@@ -510,7 +510,7 @@ python benchmark/run.py benchmark/data/RescheduleArrears.xlsx
 
 ## ✅ Quality &amp; Testing
 
-**231 tests across 21 files** (v1.5.0 target: 220+), all passing. Run them:
+**231 tests across 21 files** (v1.8.0 — well above the 220+ target), all passing. Run them:
 
 ```powershell
 $env:PYTHONPATH="."
