@@ -120,8 +120,8 @@ seeds/cases_v1.json   — Human-facing demo case index (13 cases)
 - **SQLite persistence** is in `backend/store.py`. DB lives at `data/agent_sanad.db` (gitignored). Gracefully degrades if DB can't be created. Three new endpoints: `GET /applications`, `GET /applications/{id}`, `GET /officer-actions`.
 - **Arabic localization** is in `frontend/i18n.json` (95 keys). Language toggle in the top bar loads translations client-side. RTL direction support. Key static text and beneficiary result strings are translated.
 - **New test files**: `test_benchmark_replay.py` (18 tests), `test_store.py` (12), `test_security.py` (11). Run full suite to verify 125 tests pass.
-- **Evidence Repair Loop**: `backend/actions.py` maps fired rules to structured `next_required_actions` in every API response. MISSING→upload certificate, CONTRA→confirm income, ACTIVE→contact Programme, UNVERIFIED_HARDSHIP→upload evidence. Clean cases return empty array.
-- **Exception Studio**: Officer portal queue has filter buttons (Policy hard stop, Evidence problem, Affordability risk, Social hardship, Security risk) that group cases by their known fired rules. Active filter highlighted in brand color.
+- **Evidence Repair Loop**: `backend/actions.py` maps fired rules to structured `next_required_actions` in every API response and graph route. Rendered in beneficiary result cards and officer portal trace section 7. Case-aware: HARD-01+CAP-01 (capacity issue) suppresses hardship action. Backed by integration tests.
+- **Exception Studio**: Officer portal queue has filter buttons (Policy hard stop, Evidence problem, Affordability risk, Social hardship, Security risk) with server-provided `exception_group` metadata from `GET /cases`. No hard-coded frontend maps.
 
 ## 13 demo cases
 
