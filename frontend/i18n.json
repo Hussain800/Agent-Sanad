@@ -98,7 +98,7 @@
     "ibm.skill7": "التفكير المنتجي",
 
     "errors.server_mismatch": "الخادم قديم — يرجى إعادة تشغيل التطبيق",
-    "errors.api_unreachable": "تعذر الاتصال بالخادم — هل uvicorn قيد التشغيل؟",
+    "errors.api_unreachable": "تعذر الوصول إلى الخدمة في الوقت الحالي — يرجى تحديث الصفحة",
     "errors.unexpected": "خطأ غير متوقع",
     "errors.retry": "إعادة المحاولة",
 
@@ -453,7 +453,7 @@
     "ibm.skill6": "Observability",
     "ibm.skill7": "Product Thinking",
     "errors.server_mismatch": "Server mismatch — please restart the application",
-    "errors.api_unreachable": "API unreachable — is uvicorn running?",
+    "errors.api_unreachable": "The service is not reachable at the moment — please refresh the page",
     "errors.unexpected": "Unexpected error",
     "errors.retry": "Retry",
     "common.loading": "Loading...",

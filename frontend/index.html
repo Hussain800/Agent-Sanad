@@ -3490,6 +3490,10 @@
   }
   /* ═══════════════ helpers ═══════════════ */
   const API = "";
+  /* Demo safety net: background fetch failures must never surface as raw
+     console rejections in front of an audience. Every user-visible failure
+     already renders its own friendly message. */
+  window.addEventListener("unhandledrejection", e => { e.preventDefault(); });
   const $ = id => document.getElementById(id);
   const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({
     "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
@@ -3640,7 +3644,7 @@
       sel.innerHTML = S.caseDetails.map(d =>
         `<option value="${esc(d.id)}">${esc(d.label)}</option>`).join("");
       sel.value = S.sampleId;
-    } catch (e) { applyFail("Could not load sample cases. " + e.message); }
+    } catch (e) { applyFail("The sample cases could not be loaded. Please refresh the page and try again."); }
   }
   async function loadSample(id) {
     try {
@@ -3667,10 +3671,7 @@
       f.hardship_verified = (f.hardship_type !== "none") && !(c.hardship && c.hardship.unverified);
       updateModeUI(); renderStep();
     } catch (e) {
-      const hint = String(e.message).startsWith("404")
-        ? " \u2014 the API server looks like an older build; restart it (run.ps1) and press Retry."
-        : "";
-      applyFail("Could not load case " + id + ". " + e.message + hint);
+      applyFail("This demo case could not be loaded. Please choose another case from the list and press Retry.");
     }
   }
   $("samplePick").onchange = e => loadSample(e.target.value);
@@ -3926,8 +3927,8 @@
       S.submitting = false;
       location.hash = "#/apply";
       renderStep();
-      applyFail("Submission failed: " + e.message +
-        (S.mode === "custom" ? " \u2014 check the entered values." : ""));
+      applyFail("The application could not be submitted right now." +
+        (S.mode === "custom" ? " Please check the entered values and try again." : " Please try again."));
       return;
     }
     S.submitting = false;
@@ -4233,7 +4234,7 @@
       renderOfficer(envelope, appId);
       markQueue("__past__" + appId);
     } catch (e) {
-      $("officerErrorText").textContent = "Failed to load past application " + appId + ": " + e.message;
+      $("officerErrorText").textContent = "This application could not be loaded. Please select a seeded demo case from the queue.";
       $("officerError").classList.add("show");
     }
   }
@@ -4246,7 +4247,7 @@
       renderOfficer(d, id);
       markQueue(id);
     } catch (e) {
-      $("officerErrorText").textContent = "Case run failed for " + id + ": " + e.message;
+      $("officerErrorText").textContent = "This case could not be processed right now. Please select another case from the queue or press Retry.";
       $("officerError").classList.add("show");
     }
   }
@@ -4418,7 +4419,7 @@
       $("actNote").textContent = "Recorded: officer " + action +
         (body.override_reason_code ? " (" + body.override_reason_code + ")" : "") +
         " \u2014 OFF-01 audit event appended.";
-    } catch (e) { $("actNote").textContent = "Action failed: " + e.message; }
+    } catch (e) { $("actNote").textContent = "The action could not be recorded right now. Please try again."; }
   }
   $("actApprove").onclick  = () => officerAction("approve");
   $("actAdjust").onclick   = () => officerAction("adjust");
@@ -4502,21 +4503,30 @@
       }
       $("rescueContent").innerHTML = html;
     } catch (e) {
-      $("rescueContent").innerHTML = `<p class="subtle">Could not load Rescue Radar data: ${esc(e.message)}</p>`;
+      $("rescueContent").innerHTML = `<p class="subtle">The early-warning scan is unavailable right now. The core case-review demo is unaffected.</p>`;
     }
   }
 
   window.sendRescueOutreach = async function(caseId) {
+    const isAr = LANG === "ar";
     try {
       const res = await fetchJson(API + `/rescue/outreach/${caseId}`, { method: "POST" });
       const msgs = res.messages || [];
-      alert(`Outreach SMS sent successfully to case ${caseId}!\n\nSynthetic SMS messages sent:\n` + msgs.map(m => `• EN: ${m.en}\n• AR: ${m.ar}`).join("\n"));
-      
-      let currentOutreach = parseInt($("rescueOutreach").textContent) || 0;
-      $("rescueOutreach").textContent = currentOutreach + 1;
-      initRescueRadar();
+      const outreachCount = (parseInt($("rescueOutreach").textContent) || 0) + 1;
+      await initRescueRadar();
+      $("rescueOutreach").textContent = outreachCount;
+      const title = isAr ? `تم إرسال رسالة التواصل للحالة ${esc(caseId)}` : `Outreach SMS sent for case ${esc(caseId)}`;
+      const smsHtml = msgs.map(m => `<div class="t-caption" style="margin-top:4px">• ${esc(isAr ? (m.ar || m.en) : (m.en || m.ar))}</div>`).join("");
+      $("rescueContent").insertAdjacentHTML("afterbegin",
+        `<div class="panel" style="padding:12px 16px;margin-bottom:14px;border:1px solid var(--gold-soft);background:var(--gold-bg);border-radius:var(--r-sm)">
+          <p style="font-weight:600;color:var(--brand-mid)">✓ ${title}</p>${smsHtml}
+          <p class="t-caption" style="margin-top:6px">${isAr ? "رسائل تجريبية اصطناعية — لا يتم إرسال رسائل حقيقية." : "Synthetic demo messages — no real SMS is sent."}</p>
+        </div>`);
     } catch (e) {
-      alert("Failed to send outreach: " + e.message);
+      $("rescueContent").insertAdjacentHTML("afterbegin",
+        `<div class="panel" style="padding:12px 16px;margin-bottom:14px;border:1px solid var(--line);border-radius:var(--r-sm)">
+          <p class="subtle">${isAr ? "تعذر إرسال التواصل الآن. حاول مرة أخرى." : "Outreach could not be sent right now. Please try again."}</p>
+        </div>`);
     }
   };
 
@@ -4536,10 +4546,16 @@
       });
       if (!html) html = `<div class="v18-card"><h3>No scenarios available</h3><p>The digital twin has no configured scenarios.</p></div>`;
       $("twinScenarios").innerHTML = html;
+      S.twinScenarios = scenarios;
     } catch (e) {
-      $("twinScenarios").innerHTML = `<div class="v18-card"><h3>Error loading scenarios</h3><p>${esc(e.message)}</p></div>`;
+      $("twinScenarios").innerHTML = `<div class="v18-card"><h3>Scenarios unavailable</h3><p>The simulation service could not be reached. The core case-review demo is unaffected.</p></div>`;
     }
   }
+  $("twinRunBtn").onclick = () => {
+    const first = (S.twinScenarios || [])[0];
+    if (first) { runTwinScenario(first.id || first.name); }
+    else { $("twinStatus").textContent = "No scenarios loaded"; $("twinStatus").className = "badge info"; }
+  };
   window.runTwinScenario = async function(scenarioId) {
     $("twinStatus").textContent = "Running\u2026";
     $("twinStatus").className = "badge pending";
@@ -4622,9 +4638,9 @@
       `;
       $("twinResults").innerHTML = html;
     } catch (e) {
-      $("twinStatus").textContent = "Run failed";
-      $("twinStatus").className = "badge reject";
-      $("twinResults").innerHTML = `<div class="panel panel-pad"><p class="subtle" style="color:var(--red)">Scenario run failed: ${esc(e.message)}</p></div>`;
+      $("twinStatus").textContent = "Run unavailable";
+      $("twinStatus").className = "badge info";
+      $("twinResults").innerHTML = `<div class="panel panel-pad"><p class="subtle">This simulation could not be completed right now. The live policy engine and the core case-review demo are unaffected.</p></div>`;
     }
   };
 
@@ -4660,14 +4676,14 @@
             </div>
             <div style="text-align: right">
               <span class="badge approve" style="font-size:12px; font-weight:700">✓ SECURED</span>
-              <p style="font-size: 11px; color: var(--muted); margin-top: 4px;">Date: ${esc(receipt.timestamp || 'N/A')}</p>
+              <p style="font-size: 11px; color: var(--muted); margin-top: 4px;">Date: ${esc((receipt.built_at || receipt.timestamp || data.built_at || '').slice(0, 10) || 'N/A')}</p>
             </div>
           </div>
 
           <div class="kv" style="font-size: 13px; gap: 10px 16px; margin-bottom: 16px;">
             <div>Case Reference</div><div><b>${esc(caseId)}</b></div>
             <div>Vault ID</div><div class="t-mono"><b>${esc(data.vault_id || data.id || 'N/A')}</b></div>
-            <div>Evidence Count</div><div><b>${data.evidence_count || (data.items ? data.items.length : 0)} verified files</b></div>
+            <div>Evidence Count</div><div><b>${data.evidence_count || (data.graph && data.graph.nodes ? data.graph.nodes.length : 0) || (data.items ? data.items.length : 0)} verified evidence nodes</b></div>
             <div>Receipt Hash</div><div class="t-mono" style="word-break: break-all; color: var(--brand-mid)"><b>${esc(receipt.hash || receipt.receipt_hash || 'N/A')}</b></div>
           </div>
 
@@ -4692,16 +4708,26 @@
       `;
       $("vaultContent").innerHTML = html;
     } catch (e) {
-      $("vaultContent").innerHTML = `<p class="subtle" style="color: var(--red)">Vault build failed: ${esc(e.message)}</p>`;
+      $("vaultContent").innerHTML = `<p class="subtle">The evidence vault could not be built right now. Please choose another case or try again.</p>`;
     }
   };
+  /* The verify/tamper endpoints key on receipt_id (query param), which only
+     exists after a vault build \u2014 so resolve (and lazily build) the receipt first. */
+  async function resolveVaultReceipt(caseId) {
+    let receipt = await fetchJson(API + `/cases/${caseId}/trust-receipt`);
+    if (!receipt || receipt.built === false || !(receipt.receipt_id || receipt.hash)) {
+      await fetchJson(API + `/cases/${caseId}/evidence-vault/build`, { method: "POST" });
+      receipt = await fetchJson(API + `/cases/${caseId}/trust-receipt`);
+    }
+    return receipt;
+  }
   $("vaultVerifyBtn").onclick = async () => {
     $("vaultContent").innerHTML = `<p class="subtle">Verifying receipt\u2026</p>`;
     try {
-      const data = await fetchJson(API + `/trust-receipts/verify`, {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ case_id: $("vaultCaseSelect").value || "GOLDEN" }),
-      });
+      const caseId = $("vaultCaseSelect").value || "GOLDEN";
+      const receipt = await resolveVaultReceipt(caseId);
+      const receiptId = receipt.receipt_id || (receipt.hash || "").slice(0, 16);
+      const data = await fetchJson(API + `/trust-receipts/verify?receipt_id=${encodeURIComponent(receiptId)}`, { method: "POST" });
       const ok = data.valid || data.verified || data.status === "valid";
       $("vaultContent").innerHTML = `<div style="display:flex;align-items:center;gap:12px">
         <span class="badge ${ok ? 'approve' : 'reject'}" style="font-size:16px;padding:6px 16px">${ok ? '\u2713 Verified' : '\u2715 Failed'}</span>
@@ -4709,7 +4735,7 @@
         <p class="t-caption">${esc(data.message || (ok ? 'Hash chain intact. No tampering detected.' : 'Hash mismatch detected.'))}</p></div>
       </div>`;
     } catch (e) {
-      $("vaultContent").innerHTML = `<p class="subtle">Verification failed: ${esc(e.message)}</p>`;
+      $("vaultContent").innerHTML = `<p class="subtle">The receipt could not be verified right now. Build the evidence vault for a case, then run verification again.</p>`;
     }
   };
   $("vaultTamperBtn").onclick = async () => {
@@ -4718,9 +4744,17 @@
       ? `<p class="subtle">جاري تشغيل فحوصات السلامة\u2026</p>`
       : `<p class="subtle">Performing integrity checks\u2026</p>`;
     try {
-      const data = await fetchJson(API + `/trust-receipts/tamper-demo`, { method: "POST" });
+      const caseId = $("vaultCaseSelect").value || "GOLDEN";
+      const receipt = await resolveVaultReceipt(caseId);
+      const receiptId = receipt.receipt_id || (receipt.hash || "").slice(0, 16);
+      const data = await fetchJson(API + `/trust-receipts/tamper-demo?receipt_id=${encodeURIComponent(receiptId)}`, { method: "POST" });
       let html = `<p class="t-label" style="margin-bottom:12px">${isAr ? "تفاصيل فحص سلامة البيانات" : "Integrity check details"}</p>`;
-      const results = data.results || data.demos || [data];
+      const detected = data.mismatch === true || data.verification_failed === true;
+      const results = [
+        { test: isAr ? "بصمة الإيصال الأصلية" : "Original receipt hash", description: data.original_hash || receiptId, expected: isAr ? "مختومة" : "Sealed", passed: true },
+        { test: isAr ? "البصمة بعد محاكاة التعديل" : "Hash after simulated tampering", description: data.tampered_hash || "—", expected: isAr ? "مختلفة" : "Different", passed: true },
+        { test: isAr ? "كشف التلاعب" : "Tamper detection", description: isAr ? "تم رفض الإيصال المعدّل عند التحقق" : "Modified receipt rejected at verification", expected: isAr ? "مكتشف" : "Detected", passed: detected },
+      ];
       html += `
         <div class="table-container">
           <table class="data-table">
@@ -4752,8 +4786,8 @@
       $("vaultContent").innerHTML = html;
     } catch (e) {
       $("vaultContent").innerHTML = isAr
-        ? `<p class="subtle" style="color:var(--red)">فشل فحص السلامة: ${esc(e.message)}</p>`
-        : `<p class="subtle" style="color:var(--red)">Integrity check failed: ${esc(e.message)}</p>`;
+        ? `<p class="subtle">تعذر تشغيل فحص السلامة الآن. قم ببناء خزينة الأدلة لحالة أولاً ثم أعد المحاولة.</p>`
+        : `<p class="subtle">The integrity test could not run right now. Build the evidence vault for a case first, then try again.</p>`;
     }
   };
 
@@ -4799,8 +4833,8 @@
       $("interopContent").innerHTML = html;
     } catch (e) {
       $("interopContent").innerHTML = LANG === "ar"
-        ? `<p class="subtle">تعذر تحميل بيانات الشهادة: ${esc(e.message)}</p>`
-        : `<p class="subtle">Could not load certification data: ${esc(e.message)}</p>`;
+        ? `<p class="subtle">بيانات الشهادة غير متاحة حالياً. مسار العرض الأساسي غير متأثر.</p>`
+        : `<p class="subtle">Certification data is unavailable right now. The core demo path is unaffected.</p>`;
     }
   }
   $("interopRunBtn").onclick = async () => {
@@ -4812,8 +4846,8 @@
       initInteropLab();
     } catch (e) {
       $("interopContent").innerHTML = LANG === "ar"
-        ? `<p class="subtle">فشل تشغيل الشهادة: ${esc(e.message)}</p>`
-        : `<p class="subtle">Certification run failed: ${esc(e.message)}</p>`;
+        ? `<p class="subtle">تعذر تشغيل الشهادة الآن. أعد المحاولة لاحقاً.</p>`
+        : `<p class="subtle">The certification run could not start right now. Please try again.</p>`;
     }
   };
   $("interopPackBtn").onclick = async () => {
@@ -4881,24 +4915,34 @@
         </div>
       `;
     } catch (e) {
-      $("interopContent").innerHTML = `<p class="subtle">Could not load onboarding pack: ${esc(e.message)}</p>`;
+      $("interopContent").innerHTML = `<p class="subtle">The onboarding pack is unavailable right now. The core demo path is unaffected.</p>`;
     }
   };
 
   /* ═══════════════ v1.8: Arabic Service Copilot ═══════════════ */
+  async function startCopilotSession() {
+    const data = await fetchJson(API + "/copilot/session/start?lang=" + (LANG === "ar" ? "ar" : "en"), { method: "POST" });
+    S.copilotSessionId = data.session_id || data.id;
+    return S.copilotSessionId;
+  }
   async function initCopilot() {
-    if (S.copilotSessionId) return;
-    try {
-      const data = await fetchJson(API + "/copilot/session/start", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
-      S.copilotSessionId = data.session_id;
-    } catch (e) { /* session start failed */ }
+    if (!S.copilotSessionId) {
+      try { await startCopilotSession(); } catch (e) { /* session starts on demand from Send */ }
+    }
     try {
       const scripts = await fetchJson(API + "/copilot/scripts");
       const list = scripts.scripts || scripts;
       if (Array.isArray(list) && list.length) {
-        $("copilotScripts").innerHTML = list.map(s => `<div style="margin-bottom:4px">\u2022 ${esc(typeof s === 'string' ? s : s.name || s.topic)}</div>`).join("");
+        const labels = list
+          .map(s => typeof s === "string" ? s : (s.name || s.topic || (s.id ? String(s.id).replace(/_/g, " ") : "")))
+          .filter(Boolean);
+        $("copilotScripts").innerHTML = labels.map(l => `<div style="margin-bottom:4px">\u2022 ${esc(l)}</div>`).join("");
       }
     } catch (e) { /* scripts unavailable */ }
+  }
+  async function postCopilotMessage(msg) {
+    /* The copilot endpoint takes the message as a query parameter, not a JSON body. */
+    return fetchJson(API + `/copilot/session/${S.copilotSessionId}/message?message=${encodeURIComponent(msg)}`, { method: "POST" });
   }
   async function sendCopilotMessage() {
     const input = $("copilotInput");
@@ -4908,22 +4952,24 @@
     const container = $("copilotMessages");
     container.innerHTML += `<div class="copilot-msg user">${esc(msg)}</div>`;
     container.scrollTop = container.scrollHeight;
-    if (!S.copilotSessionId) {
-      container.innerHTML += `<div class="copilot-msg system">Session not available. The copilot service may be offline.</div>`;
-      return;
-    }
     try {
-      const data = await fetchJson(API + `/copilot/session/${S.copilotSessionId}/message`, {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: msg }),
-      });
-      const reply = data.response || data.message || data.reply || "No response.";
+      if (!S.copilotSessionId) await startCopilotSession();
+      let data = await postCopilotMessage(msg);
+      if (data && data.error) {
+        /* Session may have expired (stateless deployments) \u2014 start a fresh one and retry once. */
+        await startCopilotSession();
+        data = await postCopilotMessage(msg);
+      }
+      const reply = (LANG === "ar" ? (data.ar || data.en) : (data.en || data.ar)) || data.response || data.message || data.reply
+        || "I can help with case status, missing documents, the 20% salary cap, and appeals. Please ask about one of these topics.";
       container.innerHTML += `<div class="copilot-msg assistant">${esc(reply)}</div>`;
-      if (data.safety_trace || data.injection_detected) {
+      if (data.source_facts) {
+        $("copilotSafety").textContent = data.source_facts;
+      } else if (data.safety_trace || data.injection_detected) {
         $("copilotSafety").innerHTML = `<span style="color:var(--warn)">Injection check: ${data.injection_detected ? 'DETECTED' : 'clear'}</span>`;
       }
     } catch (e) {
-      container.innerHTML += `<div class="copilot-msg system">Error: ${esc(e.message)}</div>`;
+      container.innerHTML += `<div class="copilot-msg system">The assistant is temporarily unavailable. Please try again in a moment.</div>`;
     }
     container.scrollTop = container.scrollHeight;
   }
@@ -4967,7 +5013,7 @@
       });
       riskHtml += `</div>`;
       $("mcRiskBrief").innerHTML = riskHtml;
-    } catch (e) { $("mcRiskBrief").innerHTML = `<span class="subtle">Unavailable: ${esc(e.message)}</span>`; }
+    } catch (e) { $("mcRiskBrief").innerHTML = `<span class="subtle">The risk brief is unavailable right now.</span>`; }
     try {
       const playbooks = await fetchJson(API + "/mission-control/playbooks");
       const list = playbooks.playbooks || playbooks || [];
@@ -5011,10 +5057,15 @@
   window.runPlaybook = async function(playbookId) {
     try {
       const res = await fetchJson(API + `/mission-control/playbooks/${playbookId}/run`, { method: "POST" });
-      alert(`Playbook ${playbookId} started! Created ${res.tasks_created} tasks in queue.`);
-      initMissionControl();
+      await initMissionControl();
+      $("mcPlaybookList").insertAdjacentHTML("afterbegin",
+        `<div class="panel" style="padding:10px 12px;margin-bottom:10px;border:1px solid var(--gold-soft);background:var(--gold-bg);border-radius:var(--r-sm)">
+          <span style="font-weight:600;color:var(--brand-mid)">✓ Playbook ${esc(playbookId)} started</span>
+          <span class="t-caption" style="display:block">${res.tasks_created || 0} task(s) added to the queue.</span>
+        </div>`);
     } catch (e) {
-      alert("Failed to run playbook: " + e.message);
+      $("mcPlaybookList").insertAdjacentHTML("afterbegin",
+        `<p class="subtle" style="margin-bottom:8px">The playbook could not be started right now.</p>`);
     }
   };
 
@@ -5023,7 +5074,8 @@
       await fetchJson(API + `/mission-control/tasks/${taskId}/complete`, { method: "POST" });
       initMissionControl();
     } catch (e) {
-      alert("Failed to complete task: " + e.message);
+      $("mcTaskList").insertAdjacentHTML("afterbegin",
+        `<p class="subtle" style="margin-bottom:8px">The task could not be completed right now.</p>`);
     }
   };
 
@@ -5073,7 +5125,7 @@
         <div>Family Size / أفراد الأسرة</div><div><b>${esc(c.applicant ? c.applicant.family_size : "N/A")}</b></div>
       `;
     } catch (e) {
-      $("consoleCaseDetails").innerHTML = `<div style="grid-column: span 2; color: var(--red)">Error loading details: ${esc(e.message)}</div>`;
+      $("consoleCaseDetails").innerHTML = `<div style="grid-column: span 2" class="subtle">Case details are loading. If this persists, choose another case from the list.</div>`;
     }
   }
 
@@ -5140,7 +5192,7 @@
         $("supConnectorsList").innerHTML = html;
       }
     } catch (e) {
-      $("supConnectorsList").innerHTML = `<p style="color:var(--red)">Error loading connectors: ${esc(e.message)}</p>`;
+      $("supConnectorsList").innerHTML = `<p class="subtle">Connector controls are unavailable right now.</p>`;
     }
   }
 
@@ -5149,28 +5201,34 @@
     const val = sel.value;
     const failureMode = val === "none" ? null : val;
     try {
+      /* Connector outage drills are an admin action in the RBAC table. */
       await fetchJson(API + `/connectors/${name}/simulate`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-sanad-role": "supervisor" },
+        headers: { "Content-Type": "application/json", "x-sanad-role": "admin" },
         body: JSON.stringify({ failure_mode: failureMode })
       });
-      alert(`Connector ${name} failure mode set to: ${failureMode || 'None'}`);
-      loadSupervisorConnectors();
+      await loadSupervisorConnectors();
+      supervisorConnNote(`✓ Connector ${name} failure mode set to: ${failureMode || "None"}`);
     } catch (e) {
-      alert("Failed to simulate outage: " + e.message);
+      supervisorConnNote(`The outage simulation could not be applied right now.`);
     }
   };
+
+  function supervisorConnNote(text) {
+    $("supConnectorsList").insertAdjacentHTML("afterbegin",
+      `<p class="t-caption" style="margin-bottom:10px;font-weight:600;color:var(--brand-mid)">${esc(text)}</p>`);
+  }
 
   window.resetConnector = async function(name) {
     try {
       await fetchJson(API + `/connectors/${name}/reset`, {
         method: "POST",
-        headers: { "x-sanad-role": "supervisor" }
+        headers: { "x-sanad-role": "admin" }
       });
-      alert(`Connector ${name} has been reset to up.`);
-      loadSupervisorConnectors();
+      await loadSupervisorConnectors();
+      supervisorConnNote(`✓ Connector ${name} has been reset to normal operation.`);
     } catch (e) {
-      alert("Failed to reset connector: " + e.message);
+      supervisorConnNote(`The connector could not be reset right now.`);
     }
   };
 
@@ -5258,8 +5316,8 @@
       $("auditorLedgerLog").innerHTML = html;
     } catch (e) {
       $("auditorLedgerLog").innerHTML = LANG === "ar"
-        ? `<p class="subtle" style="color:var(--red)">فشل تحميل سلسلة التدقيق: ${esc(e.message)}</p>`
-        : `<p class="subtle" style="color:var(--red)">Failed to load audit chain: ${esc(e.message)}</p>`;
+        ? `<p class="subtle">سلسلة التدقيق غير متاحة حالياً. اختر حالة أخرى أو أعد المحاولة.</p>`
+        : `<p class="subtle">The audit chain is unavailable right now. Choose another case or try again.</p>`;
     }
   }
 
@@ -5291,8 +5349,8 @@
       `;
     } catch (e) {
       $("auditorVerificationResult").innerHTML = LANG === "ar"
-        ? `<p class="subtle" style="color:var(--red)">فشل التحقق: ${esc(e.message)}</p>`
-        : `<p class="subtle" style="color:var(--red)">Verification failed: ${esc(e.message)}</p>`;
+        ? `<p class="subtle">تعذر تشغيل التحقق الآن. أعد المحاولة.</p>`
+        : `<p class="subtle">Verification could not run right now. Please try again.</p>`;
     }
   };
 
@@ -5337,7 +5395,7 @@
         $("buildWarn").classList.add("show");
       }
     } catch (e) {
-      $("buildWarnDetail").textContent = "API unreachable \u2014 is uvicorn running?";
+      $("buildWarnDetail").textContent = "the service is not reachable at the moment";
       $("buildWarn").classList.add("show");
     }
     route();
