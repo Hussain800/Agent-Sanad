@@ -5057,6 +5057,102 @@
         }
       }
     },
+    "/materials/v1.8/judge-packet": {
+      "get": {
+        "summary": "<Lambda>",
+        "operationId": "_lambda__materials_v1_8_judge_packet_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/materials/v1.8/run-of-show": {
+      "get": {
+        "summary": "<Lambda>",
+        "operationId": "_lambda__materials_v1_8_run_of_show_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/materials/v1.8/interop-certification-pack": {
+      "get": {
+        "summary": "<Lambda>",
+        "operationId": "_lambda__materials_v1_8_interop_certification_pack_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/materials/v1.8/policy-digital-twin-guide": {
+      "get": {
+        "summary": "<Lambda>",
+        "operationId": "_lambda__materials_v1_8_policy_digital_twin_guide_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/materials/v1.8/evidence-vault-guide": {
+      "get": {
+        "summary": "<Lambda>",
+        "operationId": "_lambda__materials_v1_8_evidence_vault_guide_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/materials/v1.8/copilot-safety-case": {
+      "get": {
+        "summary": "<Lambda>",
+        "operationId": "_lambda__materials_v1_8_copilot_safety_case_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
     "/impact/housing-stability-ledger": {
       "get": {
         "summary": "Get Impact Ledger",
@@ -5184,6 +5280,179 @@
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/demo/stream/{case_id}": {
+      "post": {
+        "summary": "Stream Decision",
+        "operationId": "stream_decision_demo_stream__case_id__post",
+        "parameters": [
+          {
+            "name": "case_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Case Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/simulate/what-if/{case_id}": {
+      "post": {
+        "summary": "Simulate What If",
+        "description": "Interactive what-if: modify parameters and see how the decision changes.",
+        "operationId": "simulate_what_if_simulate_what_if__case_id__post",
+        "parameters": [
+          {
+            "name": "case_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Case Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "title": "Body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analysis/batch": {
+      "get": {
+        "summary": "Batch Analysis",
+        "description": "Run the policy engine against ALL demo cases and return a matrix.",
+        "operationId": "batch_analysis_analysis_batch_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analysis/decisions": {
+      "get": {
+        "summary": "Decision History",
+        "description": "Return a timeline of all decisions from the store.",
+        "operationId": "decision_history_analysis_decisions_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/policy": {
+      "get": {
+        "summary": "Admin Get Policy",
+        "description": "Return the current live policy configuration.",
+        "operationId": "admin_get_policy_admin_policy_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Admin Update Policy",
+        "description": "Update policy configuration fields. Changes apply instantly.",
+        "operationId": "admin_update_policy_admin_policy_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "title": "Body"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
               }
             }
           }

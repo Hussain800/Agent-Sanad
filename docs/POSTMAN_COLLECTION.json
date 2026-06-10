@@ -4,36 +4,36 @@
   },
   "item": [
     {
-      "name": "HEAD /openapi.json",
+      "name": "GET /openapi.json",
       "request": {
-        "method": "HEAD",
+        "method": "GET",
         "url": {
           "raw": "http://127.0.0.1:8000/openapi.json"
         }
       }
     },
     {
-      "name": "HEAD /docs",
+      "name": "GET /docs",
       "request": {
-        "method": "HEAD",
+        "method": "GET",
         "url": {
           "raw": "http://127.0.0.1:8000/docs"
         }
       }
     },
     {
-      "name": "HEAD /docs/oauth2-redirect",
+      "name": "GET /docs/oauth2-redirect",
       "request": {
-        "method": "HEAD",
+        "method": "GET",
         "url": {
           "raw": "http://127.0.0.1:8000/docs/oauth2-redirect"
         }
       }
     },
     {
-      "name": "HEAD /redoc",
+      "name": "GET /redoc",
       "request": {
-        "method": "HEAD",
+        "method": "GET",
         "url": {
           "raw": "http://127.0.0.1:8000/redoc"
         }
@@ -1498,6 +1498,60 @@
       }
     },
     {
+      "name": "GET /materials/v1.8/judge-packet",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/materials/v1.8/judge-packet"
+        }
+      }
+    },
+    {
+      "name": "GET /materials/v1.8/run-of-show",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/materials/v1.8/run-of-show"
+        }
+      }
+    },
+    {
+      "name": "GET /materials/v1.8/interop-certification-pack",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/materials/v1.8/interop-certification-pack"
+        }
+      }
+    },
+    {
+      "name": "GET /materials/v1.8/policy-digital-twin-guide",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/materials/v1.8/policy-digital-twin-guide"
+        }
+      }
+    },
+    {
+      "name": "GET /materials/v1.8/evidence-vault-guide",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/materials/v1.8/evidence-vault-guide"
+        }
+      }
+    },
+    {
+      "name": "GET /materials/v1.8/copilot-safety-case",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/materials/v1.8/copilot-safety-case"
+        }
+      }
+    },
+    {
       "name": "GET /impact/housing-stability-ledger",
       "request": {
         "method": "GET",
@@ -1557,6 +1611,51 @@
         "method": "GET",
         "url": {
           "raw": "http://127.0.0.1:8000/materials/pilot-sandbox-packet"
+        }
+      }
+    },
+    {
+      "name": "POST /demo/stream/{case_id}",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/demo/stream/{case_id}"
+        }
+      }
+    },
+    {
+      "name": "POST /simulate/what-if/{case_id}",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/simulate/what-if/{case_id}"
+        }
+      }
+    },
+    {
+      "name": "GET /analysis/batch",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/analysis/batch"
+        }
+      }
+    },
+    {
+      "name": "GET /analysis/decisions",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/analysis/decisions"
+        }
+      }
+    },
+    {
+      "name": "GET /admin/policy",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/admin/policy"
         }
       }
     },

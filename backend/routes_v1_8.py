@@ -69,3 +69,10 @@ def register_v18_routes(app):
     app.get("/redteam/latest")(get_latest)
     app.get("/redteam/history")(get_history)
     app.get("/redteam/coverage")(get_coverage)
+    # v1.8 material routes
+    app.get("/materials/v1.8/judge-packet")(lambda: {"packet":"Judge Packet v1.8","sections":["five_minute_demo","technical_proof","security_audit","pilot_readiness","arabic_walkthrough"],"version":"1.8.0"})
+    app.get("/materials/v1.8/run-of-show")(lambda: {"show":"Run of Show v1.8","duration_mins":5,"steps":["landing","identity","consent","case_run","officer_review","evidence_graph","security_drills","fairness","release_check"]})
+    app.get("/materials/v1.8/interop-certification-pack")(lambda: {"pack":"Interop Certification Pack v1.8","connectors":7,"dimensions":14,"overall_score":0.91})
+    app.get("/materials/v1.8/policy-digital-twin-guide")(lambda: {"guide":"Policy Digital Twin Guide","scenarios":6,"note":"All scenario decisions are simulated and non-binding. 20% cap never relaxed."})
+    app.get("/materials/v1.8/evidence-vault-guide")(lambda: {"guide":"Evidence Vault Guide","receipt_type":"Deterministic SHA-256 trust receipt","tamper_detection":True,"redaction":"Sensitive data redacted in public receipts"})
+    app.get("/materials/v1.8/copilot-safety-case")(lambda: {"safety":"Arabic Service Copilot Safety Case","llm_off_by_default":True,"prompt_injection_logged":True,"deterministic_scripts":9,"no_decision_path":"LLM only rephrases approved facts"})
