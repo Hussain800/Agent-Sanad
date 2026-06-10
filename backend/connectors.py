@@ -1,4 +1,4 @@
-"""Connector registry and mock connectors for v1.4."""
+"""Connector registry and mock connectors for v1.5."""
 from __future__ import annotations
 import time
 import uuid
@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from backend.store import STORE
+from backend.consent_guard import validate_consent
 
 _CONNECTORS: dict[str, dict[str, Any]] = {}
 
@@ -62,19 +63,13 @@ def _log_call(name: str, service: str, status: str, consent_id: str | None = Non
         pass
 
 
-def _check_consent(consent_id: str | None, purpose_code: str | None, connector_name: str):
-    """Raise ValueError if consent is missing/revoked."""
-    if not consent_id:
-        raise ValueError(f"Consent required for connector '{connector_name}'")
-    if STORE._db is None:
-        return
-    row = STORE._db.execute(
-        "SELECT purpose_code, revoked_at FROM consents WHERE id=?",
-        (consent_id,)).fetchone()
-    if row is None:
-        raise ValueError(f"Consent '{consent_id}' not found for connector '{connector_name}'")
-    if row[1]:
-        raise ValueError(f"Consent '{consent_id}' revoked")
+def _check_consent(consent_id: str | None, purpose_code: str | None, connector_name: str, beneficiary_ref: str = ""):
+    """Raise ValueError if consent is missing/revoked/invalid. Uses consent_guard v2."""
+    from backend.consent_guard import validate_consent
+    required_scope = f"{connector_name}.access"
+    result = validate_consent(consent_id, purpose_code or "identity.verify", required_scope, beneficiary_ref)
+    if not result["ok"]:
+        raise ValueError(result["reason"])
 
 # ── Register built-in connectors ──────────────────────────────────────────
 
@@ -97,6 +92,9 @@ _reg("financial-capacity", "1.0.0", "ECB-Mock",
 _reg("notifications", "1.0.0", "NIA-Mock",
      ["sms", "email", "push", "callback"],
      ["notification.send"], latency_budget_ms=50)
+_reg("case-management", "1.0.0", "SZHP-Case",
+     ["assign_officer", "schedule_callback", "record_note", "update_sla", "create_escalation", "close_case"],
+     ["case.manage"], latency_budget_ms=120)
 
 # ── API helpers ──────────────────────────────────────────────────────────
 
@@ -262,4 +260,75 @@ def send_notification(case_id: str, channel: str, template: str) -> dict:
         "notification_id": f"NOTIF-{uuid.uuid4().hex[:8].upper()}",
         "case_id": case_id, "channel": channel, "template": template,
         "status": "sent", "sent_at": datetime.now(timezone.utc).isoformat(), "mock": True,
+    }
+
+
+def case_management_assign_officer(case_id: str, officer_ref: str, priority: str = "normal", sla_hours: int = 72) -> dict:
+    _log_call("case-management", "assign_officer", "ok")
+    if STORE._db:
+        now = datetime.now(timezone.utc).isoformat()
+        due = (datetime.now(timezone.utc) + __import__('datetime').timedelta(hours=sla_hours)).isoformat()
+        STORE._db.execute(
+            "INSERT INTO case_assignments (case_id, officer_ref, assigned_at, due_date, priority, sla_hours) VALUES (?,?,?,?,?,?)",
+            (case_id, officer_ref, now, due, priority, sla_hours))
+        STORE._db.commit()
+    return {
+        "case_id": case_id, "officer_ref": officer_ref, "priority": priority,
+        "sla_hours": sla_hours, "status": "assigned", "mock": True,
+    }
+
+
+def case_management_schedule_callback(case_id: str, beneficiary_ref: str, scheduled_at: str, channel: str = "phone") -> dict:
+    _log_call("case-management", "schedule_callback", "ok")
+    return {
+        "callback_id": f"CB-{uuid.uuid4().hex[:8].upper()}",
+        "case_id": case_id, "beneficiary_ref": beneficiary_ref,
+        "scheduled_at": scheduled_at, "channel": channel,
+        "status": "scheduled", "mock": True,
+    }
+
+
+def case_management_record_note(case_id: str, officer_ref: str, note: str) -> dict:
+    _log_call("case-management", "record_note", "ok")
+    return {
+        "note_id": f"NOTE-{uuid.uuid4().hex[:8].upper()}",
+        "case_id": case_id, "officer_ref": officer_ref, "note": note,
+        "created_at": datetime.now(timezone.utc).isoformat(), "mock": True,
+    }
+
+
+def case_management_update_sla(case_id: str, stage: str, deadline: str) -> dict:
+    _log_call("case-management", "update_sla", "ok")
+    if STORE._db:
+        now = datetime.now(timezone.utc).isoformat()
+        STORE._db.execute(
+            "INSERT INTO case_sla (case_id, stage, deadline, created_at) VALUES (?,?,?,?)",
+            (case_id, stage, deadline, now))
+        STORE._db.commit()
+    return {
+        "case_id": case_id, "stage": stage, "deadline": deadline,
+        "status": "updated", "mock": True,
+    }
+
+
+def case_management_create_escalation(case_id: str, reason: str, supervisor_ref: str) -> dict:
+    _log_call("case-management", "create_escalation", "ok")
+    return {
+        "escalation_id": f"ESC-{uuid.uuid4().hex[:8].upper()}",
+        "case_id": case_id, "reason": reason, "supervisor_ref": supervisor_ref,
+        "status": "open", "created_at": datetime.now(timezone.utc).isoformat(), "mock": True,
+    }
+
+
+def case_management_close_case(case_id: str, resolution: str) -> dict:
+    _log_call("case-management", "close_case", "ok")
+    if STORE._db:
+        now = datetime.now(timezone.utc).isoformat()
+        STORE._db.execute(
+            "UPDATE case_assignments SET status='closed', resolved_at=? WHERE case_id=?",
+            (now, case_id))
+        STORE._db.commit()
+    return {
+        "case_id": case_id, "resolution": resolution,
+        "status": "closed", "closed_at": datetime.now(timezone.utc).isoformat(), "mock": True,
     }

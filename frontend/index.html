@@ -5,6 +5,13 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Agent Sanad — Housing Loan Arrears Rescheduling | Sheikh Zayed Housing Programme</title>
   <style>
+    /* v1.5 accessibility: skip-to-content, visible focus, keyboard nav */
+    .skip-link { position: absolute; top: -9999px; left: 8px; z-index: 999; background: var(--brand); color: #fff; padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 14px; text-decoration: none; }
+    .skip-link:focus { top: 8px; }
+    *:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+    button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; border-radius: 4px; }
+    [aria-disabled="true"] { opacity: .5; pointer-events: none; }
+    @media (prefers-contrast: high) { :root { --line: #666; --muted: #222; } .card { border-width: 2px; } }
     :root {
       --green-950: #07271c;
       --green-900: #0a3527;
@@ -433,6 +440,7 @@
   </style>
 </head>
 <body>
+  <a href="#screen-landing" class="skip-link" data-i18n="v15.a11y.skip">Skip to content / تخطي إلى المحتوى</a>
 
   <header class="topbar">
     <div class="crest">SZ</div>
@@ -1708,7 +1716,7 @@
   /* ═══════════════ boot + build handshake ═══════════════ */
   // Pinned at build time; must equal /healthz app_version. A mismatch means a
   // stale server process is serving new static files with old API routes.
-  const CLIENT_BUILD = "1.4.0";
+  const CLIENT_BUILD = "1.5.0";
 
   // i18n init
   document.getElementById("langToggle").onclick = toggleLang;

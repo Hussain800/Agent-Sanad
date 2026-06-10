@@ -1,0 +1,800 @@
+{
+  "info": {
+    "name": "Agent Sanad v1.5",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "HEAD /openapi.json",
+      "request": {
+        "method": "HEAD",
+        "url": {
+          "raw": "http://127.0.0.1:8000/openapi.json"
+        }
+      }
+    },
+    {
+      "name": "HEAD /docs",
+      "request": {
+        "method": "HEAD",
+        "url": {
+          "raw": "http://127.0.0.1:8000/docs"
+        }
+      }
+    },
+    {
+      "name": "HEAD /docs/oauth2-redirect",
+      "request": {
+        "method": "HEAD",
+        "url": {
+          "raw": "http://127.0.0.1:8000/docs/oauth2-redirect"
+        }
+      }
+    },
+    {
+      "name": "HEAD /redoc",
+      "request": {
+        "method": "HEAD",
+        "url": {
+          "raw": "http://127.0.0.1:8000/redoc"
+        }
+      }
+    },
+    {
+      "name": "GET /healthz",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/healthz"
+        }
+      }
+    },
+    {
+      "name": "GET /cases",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/cases"
+        }
+      }
+    },
+    {
+      "name": "GET /architecture",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/architecture"
+        }
+      }
+    },
+    {
+      "name": "GET /benchmark",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/benchmark"
+        }
+      }
+    },
+    {
+      "name": "GET /cases/{case_id}",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/cases/{case_id}"
+        }
+      }
+    },
+    {
+      "name": "GET /cases/{case_id}/audit",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/cases/{case_id}/audit"
+        }
+      }
+    },
+    {
+      "name": "POST /cases/{case_id}/decide",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/cases/{case_id}/decide"
+        }
+      }
+    },
+    {
+      "name": "POST /cases/{case_id}/officer-action",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/cases/{case_id}/officer-action"
+        }
+      }
+    },
+    {
+      "name": "GET /applications",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/applications"
+        }
+      }
+    },
+    {
+      "name": "GET /applications/{application_id}",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/applications/{application_id}"
+        }
+      }
+    },
+    {
+      "name": "GET /officer-actions",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/officer-actions"
+        }
+      }
+    },
+    {
+      "name": "POST /applications/mock",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/applications/mock"
+        }
+      }
+    },
+    {
+      "name": "POST /applications/mock/decide",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/applications/mock/decide"
+        }
+      }
+    },
+    {
+      "name": "POST /demo/run-graph/{case_id}",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/demo/run-graph/{case_id}"
+        }
+      }
+    },
+    {
+      "name": "GET /demo/compare/{case_id}",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/demo/compare/{case_id}"
+        }
+      }
+    },
+    {
+      "name": "POST /demo/run/{case_id}",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/demo/run/{case_id}"
+        }
+      }
+    },
+    {
+      "name": "GET /connectors",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/connectors"
+        }
+      }
+    },
+    {
+      "name": "GET /connectors/{name}/health",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/connectors/{name}/health"
+        }
+      }
+    },
+    {
+      "name": "POST /connectors/{name}/simulate",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/connectors/{name}/simulate"
+        }
+      }
+    },
+    {
+      "name": "POST /connectors/{name}/reset",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/connectors/{name}/reset"
+        }
+      }
+    },
+    {
+      "name": "POST /sessions/uaepass/mock/start",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/sessions/uaepass/mock/start"
+        }
+      }
+    },
+    {
+      "name": "POST /sessions/uaepass/mock/callback",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/sessions/uaepass/mock/callback"
+        }
+      }
+    },
+    {
+      "name": "GET /connectors/uaepass/mock/userinfo/{session_id}",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/connectors/uaepass/mock/userinfo/{session_id}"
+        }
+      }
+    },
+    {
+      "name": "POST /consents",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/consents"
+        }
+      }
+    },
+    {
+      "name": "GET /consents/{consent_id}",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/consents/{consent_id}"
+        }
+      }
+    },
+    {
+      "name": "POST /consents/{consent_id}/revoke",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/consents/{consent_id}/revoke"
+        }
+      }
+    },
+    {
+      "name": "GET /cases/{case_id}/consent-events",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/cases/{case_id}/consent-events"
+        }
+      }
+    },
+    {
+      "name": "POST /connectors/gsb/mock/exchange",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/connectors/gsb/mock/exchange"
+        }
+      }
+    },
+    {
+      "name": "POST /connectors/uae-verify/mock/verify-document",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/connectors/uae-verify/mock/verify-document"
+        }
+      }
+    },
+    {
+      "name": "POST /connectors/financial-capacity/mock/assess",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/connectors/financial-capacity/mock/assess"
+        }
+      }
+    },
+    {
+      "name": "POST /connectors/notifications/mock/send",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/connectors/notifications/mock/send"
+        }
+      }
+    },
+    {
+      "name": "GET /cases/{case_id}/audit-chain",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/cases/{case_id}/audit-chain"
+        }
+      }
+    },
+    {
+      "name": "POST /audit/verify",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/audit/verify"
+        }
+      }
+    },
+    {
+      "name": "GET /cases/{case_id}/actions",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/cases/{case_id}/actions"
+        }
+      }
+    },
+    {
+      "name": "POST /cases/{case_id}/actions/{action_id}/complete",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/cases/{case_id}/actions/{action_id}/complete"
+        }
+      }
+    },
+    {
+      "name": "POST /cases/{case_id}/actions/{action_id}/waive",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/cases/{case_id}/actions/{action_id}/waive"
+        }
+      }
+    },
+    {
+      "name": "POST /cases/{case_id}/simulate-plan",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/cases/{case_id}/simulate-plan"
+        }
+      }
+    },
+    {
+      "name": "POST /applications/mock/simulate-plan",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/applications/mock/simulate-plan"
+        }
+      }
+    },
+    {
+      "name": "POST /cases/{case_id}/decision-package",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/cases/{case_id}/decision-package"
+        }
+      }
+    },
+    {
+      "name": "POST /cases/{case_id}/signature/request",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/cases/{case_id}/signature/request"
+        }
+      }
+    },
+    {
+      "name": "POST /cases/{case_id}/signature/verify",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/cases/{case_id}/signature/verify"
+        }
+      }
+    },
+    {
+      "name": "GET /supervisor/metrics",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/supervisor/metrics"
+        }
+      }
+    },
+    {
+      "name": "GET /supervisor/overrides",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/supervisor/overrides"
+        }
+      }
+    },
+    {
+      "name": "GET /supervisor/connector-health",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/supervisor/connector-health"
+        }
+      }
+    },
+    {
+      "name": "GET /supervisor/policy-drift",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/supervisor/policy-drift"
+        }
+      }
+    },
+    {
+      "name": "POST /cases/{case_id}/appeals",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/cases/{case_id}/appeals"
+        }
+      }
+    },
+    {
+      "name": "GET /privacy/export/{beneficiary_ref}",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/privacy/export/{beneficiary_ref}"
+        }
+      }
+    },
+    {
+      "name": "GET /healthz/v1.4",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/healthz/v1.4"
+        }
+      }
+    },
+    {
+      "name": "POST /consents/{consent_id}/validate",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/consents/{consent_id}/validate"
+        }
+      }
+    },
+    {
+      "name": "GET /consents/{consent_id}/usage",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/consents/{consent_id}/usage"
+        }
+      }
+    },
+    {
+      "name": "GET /sessions/{session_id}",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/sessions/{session_id}"
+        }
+      }
+    },
+    {
+      "name": "POST /sessions/{session_id}/expire-mock",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/sessions/{session_id}/expire-mock"
+        }
+      }
+    },
+    {
+      "name": "POST /sessions/{session_id}/revoke-mock",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/sessions/{session_id}/revoke-mock"
+        }
+      }
+    },
+    {
+      "name": "POST /cases/{case_id}/actions/{action_id}/upload-mock",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/cases/{case_id}/actions/{action_id}/upload-mock"
+        }
+      }
+    },
+    {
+      "name": "POST /cases/{case_id}/actions/{action_id}/reject",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/cases/{case_id}/actions/{action_id}/reject"
+        }
+      }
+    },
+    {
+      "name": "POST /cases/{case_id}/actions/{action_id}/resubmit",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/cases/{case_id}/actions/{action_id}/resubmit"
+        }
+      }
+    },
+    {
+      "name": "GET /cases/{case_id}/actions/timeline",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/cases/{case_id}/actions/timeline"
+        }
+      }
+    },
+    {
+      "name": "GET /appeals",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/appeals"
+        }
+      }
+    },
+    {
+      "name": "GET /appeals/{appeal_id}",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/appeals/{appeal_id}"
+        }
+      }
+    },
+    {
+      "name": "POST /appeals/{appeal_id}/submit-evidence",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/appeals/{appeal_id}/submit-evidence"
+        }
+      }
+    },
+    {
+      "name": "POST /appeals/{appeal_id}/review",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/appeals/{appeal_id}/review"
+        }
+      }
+    },
+    {
+      "name": "POST /appeals/{appeal_id}/decision",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/appeals/{appeal_id}/decision"
+        }
+      }
+    },
+    {
+      "name": "POST /appeals/{appeal_id}/supervisor-approve",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/appeals/{appeal_id}/supervisor-approve"
+        }
+      }
+    },
+    {
+      "name": "POST /decision-packages/{package_id}/verify",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/decision-packages/{package_id}/verify"
+        }
+      }
+    },
+    {
+      "name": "GET /decision-packages/{package_id}/receipt",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/decision-packages/{package_id}/receipt"
+        }
+      }
+    },
+    {
+      "name": "POST /decision-packages/{package_id}/revoke-mock",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/decision-packages/{package_id}/revoke-mock"
+        }
+      }
+    },
+    {
+      "name": "GET /supervisor/backlog",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/supervisor/backlog"
+        }
+      }
+    },
+    {
+      "name": "GET /supervisor/sla-risk",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/supervisor/sla-risk"
+        }
+      }
+    },
+    {
+      "name": "GET /supervisor/fairness",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/supervisor/fairness"
+        }
+      }
+    },
+    {
+      "name": "GET /supervisor/connectors/incidents",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/supervisor/connectors/incidents"
+        }
+      }
+    },
+    {
+      "name": "GET /supervisor/officer-workload",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/supervisor/officer-workload"
+        }
+      }
+    },
+    {
+      "name": "GET /supervisor/override-review",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/supervisor/override-review"
+        }
+      }
+    },
+    {
+      "name": "GET /supervisor/consent-denial-rate",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/supervisor/consent-denial-rate"
+        }
+      }
+    },
+    {
+      "name": "GET /supervisor/document-trust-failure-rate",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/supervisor/document-trust-failure-rate"
+        }
+      }
+    },
+    {
+      "name": "POST /connectors/case-management/mock/assign-officer",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/connectors/case-management/mock/assign-officer"
+        }
+      }
+    },
+    {
+      "name": "POST /connectors/case-management/mock/schedule-callback",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/connectors/case-management/mock/schedule-callback"
+        }
+      }
+    },
+    {
+      "name": "POST /connectors/case-management/mock/record-note",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/connectors/case-management/mock/record-note"
+        }
+      }
+    },
+    {
+      "name": "POST /connectors/case-management/mock/update-sla",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/connectors/case-management/mock/update-sla"
+        }
+      }
+    },
+    {
+      "name": "POST /connectors/case-management/mock/create-escalation",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/connectors/case-management/mock/create-escalation"
+        }
+      }
+    },
+    {
+      "name": "POST /connectors/case-management/mock/close-case",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/connectors/case-management/mock/close-case"
+        }
+      }
+    },
+    {
+      "name": "GET /materials/api-guide",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/materials/api-guide"
+        }
+      }
+    },
+    {
+      "name": "GET /materials/integration-map",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/materials/integration-map"
+        }
+      }
+    },
+    {
+      "name": "GET /materials/security-one-pager",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/materials/security-one-pager"
+        }
+      }
+    },
+    {
+      "name": "GET /",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/"
+        }
+      }
+    }
+  ]
+}

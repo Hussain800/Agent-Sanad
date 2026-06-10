@@ -195,6 +195,72 @@ CREATE TABLE IF NOT EXISTS notifications (
     read_at         TEXT,
     created_at      TEXT NOT NULL
 );
+
+-- v1.5 tables
+CREATE TABLE IF NOT EXISTS case_assignments (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    case_id         TEXT NOT NULL,
+    officer_ref     TEXT NOT NULL,
+    assigned_at     TEXT NOT NULL,
+    due_date        TEXT,
+    priority        TEXT DEFAULT 'normal',
+    status          TEXT DEFAULT 'open',
+    sla_hours       INTEGER DEFAULT 72,
+    resolved_at     TEXT
+);
+
+CREATE TABLE IF NOT EXISTS case_sla (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    case_id         TEXT NOT NULL,
+    stage           TEXT NOT NULL,
+    deadline        TEXT NOT NULL,
+    breached        INTEGER DEFAULT 0,
+    created_at      TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS action_events (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    case_id         TEXT NOT NULL,
+    action_id       TEXT NOT NULL,
+    event_type      TEXT NOT NULL,
+    actor           TEXT NOT NULL,
+    detail          TEXT,
+    created_at      TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS appeal_events (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    appeal_id       INTEGER NOT NULL,
+    event_type      TEXT NOT NULL,
+    actor           TEXT NOT NULL,
+    detail          TEXT,
+    created_at      TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS notification_events (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    notification_id INTEGER NOT NULL,
+    event_type      TEXT NOT NULL,
+    detail          TEXT,
+    created_at      TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS fairness_slices (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    slice_name      TEXT NOT NULL,
+    metric          TEXT NOT NULL,
+    value           REAL NOT NULL,
+    sample_size     INTEGER NOT NULL,
+    created_at      TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS material_exports (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    material_type   TEXT NOT NULL,
+    file_path       TEXT NOT NULL,
+    generated_at    TEXT NOT NULL,
+    checksum        TEXT
+);
 """
 
 

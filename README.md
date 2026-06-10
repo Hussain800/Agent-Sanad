@@ -17,10 +17,11 @@
 
 **Sheikh Zayed Housing Programme** · UAE Ministry of Energy &amp; Infrastructure
 *Agentera Hackathon · MOEI × 42 Abu Dhabi*
+*v1.5.0 — Assurance Release*
 
 <br/>
 
-[![Tests](https://img.shields.io/badge/tests-125%20passing-1f7a4d?style=flat-square&logo=pytest&logoColor=white)](#-quality--testing)
+[![Tests](https://img.shields.io/badge/tests-220%2B%20passing-1f7a4d?style=flat-square&logo=pytest&logoColor=white)](#-quality--testing)
 [![Python](https://img.shields.io/badge/python-3.11+-0b3d2e?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-async-0b3d2e?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![Pydantic v2](https://img.shields.io/badge/Pydantic-v2-0b3d2e?style=flat-square&logo=pydantic&logoColor=white)](https://docs.pydantic.dev/)
@@ -510,11 +511,11 @@ python benchmark/run.py benchmark/data/RescheduleArrears.xlsx
 
 ## ✅ Quality &amp; Testing
 
-**125 tests across 9 files**, all passing. Run them:
+**231 tests across 21 files**, all passing. Run them:
 
 ```powershell
 $env:PYTHONPATH="."
-python -B -m pytest tests\ -q -p no:cacheprovider      # → 125 passed
+python -B -m pytest tests\ -q -p no:cacheprovider      # → 231 passed
 ```
 
 | Test file | Focus |
@@ -528,6 +529,18 @@ python -B -m pytest tests\ -q -p no:cacheprovider      # → 125 passed
 | `test_security.py` | XSS escaping · error envelope · PII absence |
 | `test_store.py` | SQLite persistence + graceful degradation |
 | `test_benchmark_replay.py` | Benchmark replay logic across 7 scenarios |
+| `test_connectors.py` | 7 mock connectors · case-management · consent guard · UAE PASS v3 |
+| `test_consent.py` | Consent create/get/revoke/events |
+| `test_consent_guard.py` | Consent guard v2: purpose/scope/expiry/revoke/ownership enforcement |
+| `test_sessions.py` | UAE PASS session v3: nonce, expiry, replay protection |
+| `test_abac.py` | ABAC ownership: cross-beneficiary access blocked |
+| `test_signature_integrity.py` | Signature binding: package hash, tamper detection |
+| `test_action_workflow.py` | Action workflow v4: upload, reject, resubmit, timeline |
+| `test_appeals.py` | Appeals workbench: create, evidence, review, decision, supervisor approve |
+| `test_supervisor_command.py` | Supervisor command center: backlog, SLA, fairness, incidents, workload |
+| `test_connector_contracts.py` | Connector contracts: 7 connectors, Pydantic models, materials |
+| `test_accessibility_i18n.py` | Arabic i18n coverage, accessibility: skip-link, focus, contrast |
+| `test_v1_4_integration.py` | v1.4 integration: RBAC, simulator, decision package, audit chain, supervisor |
 
 > **Protected files** — the deterministic core — are never modified without a
 > full suite re-run and manual review:
@@ -540,7 +553,12 @@ python -B -m pytest tests\ -q -p no:cacheprovider      # → 125 passed
 
 | Control | Implementation |
 |:---|:---|
-| **Untrusted documents** | Document text fires `RSK-01` but can never change policy logic — asserted by `PROMPT_INJECTION_ONLY` (plan stays byte-identical) |
+| **Consent Guard v2** | Purpose, scope, expiry, revocation, and beneficiary ownership enforced on all connector calls (v1.5) |
+| **UAE PASS Session v3** | Stored nonce, expiry, consumed callback, replay rejection, wrong nonce rejection (v1.5) |
+| **ABAC Ownership** | Object-level authorization for cases, consents, actions, packages, appeals, notifications (v1.5) |
+| **Signature Integrity v2** | Package hash binding, tamper detection, signature expiry, revocation (v1.5) |
+| **Denied-Access Audit** | All denied consent/access attempts recorded in SHA256 audit chain (v1.5) |
+| **Untrusted documents** | Document text fires `RSK-01` but can never change policy logic — asserted by `PROMPT_INJECTION_ONLY` |
 | **Read-only LLM** | Cannot decide, write state, or call the engine — by construction |
 | **PII discipline** | Synthetic identifiers only (`APP-*`, `AGR-*`, masked names); real workbook gitignored &amp; verified untracked |
 | **Trace redaction** | Emirates-ID / Arabic / document-text scrubbing before any emission; refuse-to-emit interlock |
@@ -556,13 +574,24 @@ python -B -m pytest tests\ -q -p no:cacheprovider      # → 125 passed
 ```text
 agent-sanad/
 ├── backend/
-│   ├── app.py                 # FastAPI app — 17 routes, error envelope, structured logs
+│   ├── app.py                 # FastAPI app — 92 routes, error envelope, structured logs
 │   ├── schemas.py             # Pydantic v2 contracts (extra="forbid" everywhere)
 │   ├── applications.py        # Custom application form → synthetic Case
 │   ├── actions.py             # Evidence Repair Loop (fired rules → next actions)
-│   ├── store.py               # SQLite persistence (stdlib, graceful degradation)
+│   ├── store.py               # SQLite persistence (20+ tables, graceful degradation)
 │   ├── audit.py               # Append-only audit log + 8-state machine
+│   ├── audit_chain.py         # SHA256 hash chain (immutable, verifiable)
 │   ├── confidence.py          # Confidence band + risk scoring
+│   ├── consent.py             # Purpose-bound consent ledger
+│   ├── consent_guard.py       # v1.5 consent guard v2 (purpose/scope/expiry/ownership)
+│   ├── connectors.py          # 7 mock connectors + failure modes + case-management
+│   ├── rbac.py                # Role-based access control (5 roles)
+│   ├── abac.py                # v1.5 ABAC ownership (object-level authorization)
+│   ├── security.py            # Correlation ID, rate-limit, security headers
+│   ├── uaepass_session.py     # v1.5 UAE PASS session v3 (nonce/expiry/replay)
+│   ├── decision_package.py    # Digital closeout: packages, signatures, e-Seal
+│   ├── simulator.py           # Fair Plan Simulator (2-3 compliant options)
+│   ├── routes_v1_5.py         # v1.5 routes: consent, sessions, actions, appeals, supervisor
 │   ├── extraction.py          # Salary-cert parsing with cached fallback
 │   ├── reasoning.py           # Deterministic cached reasoning (optional LLM hook)
 │   ├── adapters/              # 5 contract-true mock adapters + 13 fixtures
@@ -574,11 +603,11 @@ agent-sanad/
 │   ├── graph/                 # Optional LangGraph wrapper (import-guarded)
 │   └── observability/         # PII redaction + LangSmith-ready adapter
 ├── frontend/
-│   ├── index.html             # Single-file hash-routed SPA (zero deps)
-│   └── i18n.json              # AR/EN translation strings (RTL support)
+│   ├── index.html             # Single-file hash-routed SPA (zero deps, a11y-enhanced)
+│   └── i18n.json              # AR/EN translation strings (140+ keys, RTL support)
 ├── benchmark/                 # 🔒 Historical replay, normalize, score (94.6%)
-├── tests/                     # 9 files · 125 tests
-├── docs/                      # Architecture, readiness, tooling, demo, Q&A
+├── tests/                     # 21 files · 231 tests
+├── docs/                      # 26 docs: architecture, readiness, API guide, responsible AI, etc.
 ├── seeds/cases_v1.json        # Human-facing demo case index
 ├── run.ps1 · run.sh           # One-command launchers (stale-port guard)
 └── requirements.txt
