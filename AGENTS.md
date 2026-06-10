@@ -4,7 +4,7 @@
 
 FastAPI hackathon MVP: deterministic policy engine for Sheikh Zayed Housing Programme arrears rescheduling. 13 demo cases, fixture-backed offline mode.
 
-**125 tests passing** across 9 test files.
+**139 tests passing** across 9 test files.
 
 ## Core doctrine
 
@@ -21,7 +21,7 @@ SQLite persistence for custom apps and officer actions. Single-file frontend ser
 # Manual
 $env:PYTHONPATH="."; uvicorn backend.app:app --host 127.0.0.1 --port 8000
 
-# Full test suite (125 expected)
+# Full test suite (139 expected)
 $env:PYTHONPATH="."; python -B -m pytest tests\ -q -p no:cacheprovider
 
 # Single test
@@ -91,7 +91,7 @@ backend/
 frontend/
   index.html          — Single-file hash-routed SPA (~1576 lines, vanilla HTML/CSS/JS, zero deps)
   i18n.json           — Arabic/English translation strings (95 keys)
-tests/                — 9 test files (125 passing)
+tests/                — 9 test files (139 passing)
   test_policy.py      — 13 case assertions + endpoint contract tests
   test_demo_api.py    — API contract + CLIENT_BUILD handshake test
   test_governance.py  — No workbook tracked, no PII, risky cases routed to human
@@ -119,7 +119,7 @@ seeds/cases_v1.json   — Human-facing demo case index (13 cases)
 - The 20% salary cap is the hard policy rule. Monthly deduction must not exceed it. Never relax this.
 - **SQLite persistence** is in `backend/store.py`. DB lives at `data/agent_sanad.db` (gitignored). Gracefully degrades if DB can't be created. Three new endpoints: `GET /applications`, `GET /applications/{id}`, `GET /officer-actions`.
 - **Arabic localization** is in `frontend/i18n.json` (95 keys). Language toggle in the top bar loads translations client-side. RTL direction support. Key static text and beneficiary result strings are translated.
-- **New test files**: `test_benchmark_replay.py` (18 tests), `test_store.py` (12), `test_security.py` (11). Run full suite to verify 125 tests pass.
+- **New test files**: `test_benchmark_replay.py` (18 tests), `test_store.py` (12), `test_security.py` (11). Run full suite to verify 139 tests pass.
 - **Evidence Repair Loop**: `backend/actions.py` maps fired rules to structured `next_required_actions` in every API response and graph route. Rendered in beneficiary result cards and officer portal trace section 7. Case-aware: HARD-01+CAP-01 (capacity issue) suppresses hardship action. Backed by integration tests.
 - **Exception Studio**: Officer portal queue has filter buttons (Policy hard stop, Evidence problem, Affordability risk, Social hardship, Security risk) with server-provided `exception_group` metadata from `GET /cases`. No hard-coded frontend maps.
 
