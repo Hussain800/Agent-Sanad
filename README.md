@@ -20,7 +20,7 @@
 
 <br/>
 
-[![Tests](https://img.shields.io/badge/tests-125%20passing-1f7a4d?style=flat-square&logo=pytest&logoColor=white)](#-quality--testing)
+[![Tests](https://img.shields.io/badge/tests-139%20passing-1f7a4d?style=flat-square&logo=pytest&logoColor=white)](#-quality--testing)
 [![Python](https://img.shields.io/badge/python-3.11+-0b3d2e?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-async-0b3d2e?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![Pydantic v2](https://img.shields.io/badge/Pydantic-v2-0b3d2e?style=flat-square&logo=pydantic&logoColor=white)](https://docs.pydantic.dev/)
