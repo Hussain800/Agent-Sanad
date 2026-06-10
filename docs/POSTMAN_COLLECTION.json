@@ -1,39 +1,39 @@
 {
   "info": {
-    "name": "Agent Sanad v1.7"
+    "name": "Agent Sanad v1.8"
   },
   "item": [
     {
-      "name": "HEAD /openapi.json",
+      "name": "GET /openapi.json",
       "request": {
-        "method": "HEAD",
+        "method": "GET",
         "url": {
           "raw": "http://127.0.0.1:8000/openapi.json"
         }
       }
     },
     {
-      "name": "HEAD /docs",
+      "name": "GET /docs",
       "request": {
-        "method": "HEAD",
+        "method": "GET",
         "url": {
           "raw": "http://127.0.0.1:8000/docs"
         }
       }
     },
     {
-      "name": "HEAD /docs/oauth2-redirect",
+      "name": "GET /docs/oauth2-redirect",
       "request": {
-        "method": "HEAD",
+        "method": "GET",
         "url": {
           "raw": "http://127.0.0.1:8000/docs/oauth2-redirect"
         }
       }
     },
     {
-      "name": "HEAD /redoc",
+      "name": "GET /redoc",
       "request": {
-        "method": "HEAD",
+        "method": "GET",
         "url": {
           "raw": "http://127.0.0.1:8000/redoc"
         }
@@ -1057,6 +1057,501 @@
       }
     },
     {
+      "name": "GET /release/brain",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/release/brain"
+        }
+      }
+    },
+    {
+      "name": "GET /release/provenance",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/release/provenance"
+        }
+      }
+    },
+    {
+      "name": "GET /release/drift",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/release/drift"
+        }
+      }
+    },
+    {
+      "name": "POST /release/drift/check",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/release/drift/check"
+        }
+      }
+    },
+    {
+      "name": "GET /release/warning-budget",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/release/warning-budget"
+        }
+      }
+    },
+    {
+      "name": "GET /rescue/radar",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/rescue/radar"
+        }
+      }
+    },
+    {
+      "name": "GET /rescue/radar/{case_id}",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/rescue/radar/{case_id}"
+        }
+      }
+    },
+    {
+      "name": "POST /rescue/radar/simulate",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/rescue/radar/simulate"
+        }
+      }
+    },
+    {
+      "name": "POST /rescue/outreach/{case_id}",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/rescue/outreach/{case_id}"
+        }
+      }
+    },
+    {
+      "name": "GET /rescue/interventions",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/rescue/interventions"
+        }
+      }
+    },
+    {
+      "name": "GET /digital-twin/scenarios",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/digital-twin/scenarios"
+        }
+      }
+    },
+    {
+      "name": "POST /digital-twin/run",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/digital-twin/run"
+        }
+      }
+    },
+    {
+      "name": "GET /digital-twin/runs/{run_id}",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/digital-twin/runs/{run_id}"
+        }
+      }
+    },
+    {
+      "name": "GET /digital-twin/runs/{run_id}/impact",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/digital-twin/runs/{run_id}/impact"
+        }
+      }
+    },
+    {
+      "name": "GET /digital-twin/runs/{run_id}/fairness",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/digital-twin/runs/{run_id}/fairness"
+        }
+      }
+    },
+    {
+      "name": "GET /digital-twin/runs/{run_id}/workload",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/digital-twin/runs/{run_id}/workload"
+        }
+      }
+    },
+    {
+      "name": "GET /digital-twin/runs/{run_id}/explain",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/digital-twin/runs/{run_id}/explain"
+        }
+      }
+    },
+    {
+      "name": "GET /digital-twin/runs/{run_id}/compare/{baseline_run_id}",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/digital-twin/runs/{run_id}/compare/{baseline_run_id}"
+        }
+      }
+    },
+    {
+      "name": "POST /cases/{case_id}/evidence-vault/build",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/cases/{case_id}/evidence-vault/build"
+        }
+      }
+    },
+    {
+      "name": "GET /cases/{case_id}/evidence-vault",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/cases/{case_id}/evidence-vault"
+        }
+      }
+    },
+    {
+      "name": "GET /cases/{case_id}/trust-receipt",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/cases/{case_id}/trust-receipt"
+        }
+      }
+    },
+    {
+      "name": "POST /trust-receipts/verify",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/trust-receipts/verify"
+        }
+      }
+    },
+    {
+      "name": "POST /trust-receipts/tamper-demo",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/trust-receipts/tamper-demo"
+        }
+      }
+    },
+    {
+      "name": "GET /trust-receipts/{receipt_id}/public",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/trust-receipts/{receipt_id}/public"
+        }
+      }
+    },
+    {
+      "name": "GET /interop/certification",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/interop/certification"
+        }
+      }
+    },
+    {
+      "name": "GET /interop/certification/{connector}",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/interop/certification/{connector}"
+        }
+      }
+    },
+    {
+      "name": "POST /interop/certification/run",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/interop/certification/run"
+        }
+      }
+    },
+    {
+      "name": "GET /interop/onboarding-pack",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/interop/onboarding-pack"
+        }
+      }
+    },
+    {
+      "name": "GET /interop/api-marketplace-readiness",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/interop/api-marketplace-readiness"
+        }
+      }
+    },
+    {
+      "name": "GET /interop/gsb-onboarding-checklist",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/interop/gsb-onboarding-checklist"
+        }
+      }
+    },
+    {
+      "name": "GET /interop/uaepass-readiness",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/interop/uaepass-readiness"
+        }
+      }
+    },
+    {
+      "name": "GET /interop/uae-verify-readiness",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/interop/uae-verify-readiness"
+        }
+      }
+    },
+    {
+      "name": "POST /copilot/session/start",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/copilot/session/start"
+        }
+      }
+    },
+    {
+      "name": "POST /copilot/session/{session_id}/message",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/copilot/session/{session_id}/message"
+        }
+      }
+    },
+    {
+      "name": "GET /copilot/session/{session_id}",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/copilot/session/{session_id}"
+        }
+      }
+    },
+    {
+      "name": "GET /copilot/scripts",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/copilot/scripts"
+        }
+      }
+    },
+    {
+      "name": "GET /copilot/safety-case",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/copilot/safety-case"
+        }
+      }
+    },
+    {
+      "name": "POST /copilot/redteam/run",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/copilot/redteam/run"
+        }
+      }
+    },
+    {
+      "name": "GET /mission-control",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/mission-control"
+        }
+      }
+    },
+    {
+      "name": "GET /mission-control/playbooks",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/mission-control/playbooks"
+        }
+      }
+    },
+    {
+      "name": "POST /mission-control/playbooks/{playbook_id}/run",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/mission-control/playbooks/{playbook_id}/run"
+        }
+      }
+    },
+    {
+      "name": "GET /mission-control/tasks",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/mission-control/tasks"
+        }
+      }
+    },
+    {
+      "name": "POST /mission-control/tasks/{task_id}/complete",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/mission-control/tasks/{task_id}/complete"
+        }
+      }
+    },
+    {
+      "name": "GET /mission-control/risk-brief",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/mission-control/risk-brief"
+        }
+      }
+    },
+    {
+      "name": "GET /mission-control/live-demo-script",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/mission-control/live-demo-script"
+        }
+      }
+    },
+    {
+      "name": "POST /redteam/run",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/redteam/run"
+        }
+      }
+    },
+    {
+      "name": "GET /redteam/latest",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/redteam/latest"
+        }
+      }
+    },
+    {
+      "name": "GET /redteam/history",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/redteam/history"
+        }
+      }
+    },
+    {
+      "name": "GET /redteam/coverage",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/redteam/coverage"
+        }
+      }
+    },
+    {
+      "name": "GET /materials/v1.8/judge-packet",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/materials/v1.8/judge-packet"
+        }
+      }
+    },
+    {
+      "name": "GET /materials/v1.8/run-of-show",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/materials/v1.8/run-of-show"
+        }
+      }
+    },
+    {
+      "name": "GET /materials/v1.8/interop-certification-pack",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/materials/v1.8/interop-certification-pack"
+        }
+      }
+    },
+    {
+      "name": "GET /materials/v1.8/policy-digital-twin-guide",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/materials/v1.8/policy-digital-twin-guide"
+        }
+      }
+    },
+    {
+      "name": "GET /materials/v1.8/evidence-vault-guide",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/materials/v1.8/evidence-vault-guide"
+        }
+      }
+    },
+    {
+      "name": "GET /materials/v1.8/copilot-safety-case",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/materials/v1.8/copilot-safety-case"
+        }
+      }
+    },
+    {
       "name": "GET /impact/housing-stability-ledger",
       "request": {
         "method": "GET",
@@ -1116,6 +1611,51 @@
         "method": "GET",
         "url": {
           "raw": "http://127.0.0.1:8000/materials/pilot-sandbox-packet"
+        }
+      }
+    },
+    {
+      "name": "POST /demo/stream/{case_id}",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/demo/stream/{case_id}"
+        }
+      }
+    },
+    {
+      "name": "POST /simulate/what-if/{case_id}",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/simulate/what-if/{case_id}"
+        }
+      }
+    },
+    {
+      "name": "GET /analysis/batch",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/analysis/batch"
+        }
+      }
+    },
+    {
+      "name": "GET /analysis/decisions",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/analysis/decisions"
+        }
+      }
+    },
+    {
+      "name": "GET /admin/policy",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/admin/policy"
         }
       }
     },

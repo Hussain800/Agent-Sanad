@@ -11,7 +11,7 @@ def test_release_notes_v16_exists():
 def test_current_release_doc():
     r = client.get("/ops/release-check/latest")
     assert r.status_code == 200
-    assert r.json()["version"] == "1.7.0"
+    assert r.json()["version"] == "1.8.0"
 
 def test_security_drills_via_api():
     r = client.get("/security-drills/latest")
@@ -23,3 +23,4 @@ def test_presenter_mode_routes():
     for url in urls:
         r = client.get(url)
         assert r.status_code == 200, f"{url} failed"
+

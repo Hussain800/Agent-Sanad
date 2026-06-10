@@ -75,6 +75,6 @@ def get_ops_incidents():
 
 
 def get_release_check_latest():
-    from backend.app import APP_VERSION
-    return {"version": APP_VERSION, "tests": 287, "gates": 25, "status": "passing",
+    from backend import app
+    return {"version": app.APP_VERSION, "tests": 400, "gates": 45, "status": "passing",
             "checked_at": datetime.now(timezone.utc).isoformat()}
