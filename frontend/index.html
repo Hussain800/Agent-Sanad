@@ -836,7 +836,7 @@
   });
 
   /* ═══════════════ router ═══════════════ */
-  const SCREENS = ["landing","uaepass","apply","processing","result","officer"];
+  const SCREENS = ["landing","uaepass","consent","apply","processing","result","officer"];
   function show(name) {
     SCREENS.forEach(s => $("screen-" + s).classList.toggle("active", s === name));
     window.scrollTo(0, 0);
