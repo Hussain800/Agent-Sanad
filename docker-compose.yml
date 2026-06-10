@@ -1,0 +1,25 @@
+version: "3.9"
+
+services:
+  agent-sanad:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONPATH=/app
+      - LOCAL_MOCK_MODE=true
+      - SANAD_LIVE_EXTRACTION=0
+      - LANGSMITH_TRACING=false
+      - SANAD_DB_PATH=/app/data/agent_sanad.db
+    volumes:
+      - sanad_data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request, json; r = urllib.request.urlopen('http://localhost:8000/healthz'); assert json.loads(r.read())['ok']"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+volumes:
+  sanad_data:

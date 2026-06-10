@@ -25,7 +25,7 @@ class TestXssPrevention:
         """The esc() function must exist in the HTML and escape HTML special chars."""
         html = client.get("/").text
         # Look for the esc function definition
-        assert "const esc = v =>" in html
+        assert "const esc=" in html or "const esc = v =>" in html
         assert "&amp;" in html  # escaping reference
 
     def test_frontend_renders_prompt_injection_safely(self):

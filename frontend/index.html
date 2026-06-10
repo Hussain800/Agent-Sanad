@@ -4,6 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Agent Sanad — Housing Loan Arrears Rescheduling | Sheikh Zayed Housing Programme</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
   <style>
     /* v1.5 accessibility: skip-to-content, visible focus, keyboard nav */
     .skip-link { position: absolute; top: -9999px; left: 8px; z-index: 999; background: var(--brand); color: #fff; padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 14px; text-decoration: none; }
@@ -13,34 +16,35 @@
     [aria-disabled="true"] { opacity: .5; pointer-events: none; }
     @media (prefers-contrast: high) { :root { --line: #666; --muted: #222; } .card { border-width: 2px; } }
     :root {
-      --green-950: #07271c;
-      --green-900: #0a3527;
-      --green-800: #0e4434;
-      --brand: #0b3d2e;
-      --brand-2: #14573f;
-      --gold: #b8902f;
-      --gold-soft: #d9bd7f;
-      --ink: #182420;
-      --muted: #5f6e66;
-      --line: #e3e3d8;
-      --bg: #f5f4ef;
+      --green-950: #5C3D0E;
+      --green-900: #7A5520;
+      --green-800: #8B5E1A;
+      --brand: #B8860B;
+      --brand-2: #C9A84C;
+      --gold: #D9C07A;
+      --gold-soft: #E8D6A8;
+      --ink: #1a120b;
+      --muted: #7a6b5a;
+      --line: #e6ddd0;
+      --bg: #fcfaf7;
       --card: #ffffff;
-      --green-ok: #177245;
-      --green-ok-bg: #e8f4ed;
+      --green-ok: #1B7A4B;
+      --green-ok-bg: #E8F5EE;
       --amber: #946300;
-      --amber-bg: #fdf4dd;
-      --red: #b42318;
-      --red-bg: #fdecea;
-      --blue: #235a8f;
-      --blue-bg: #eaf2f9;
-      --shadow-lg: 0 24px 60px rgba(10, 53, 39, .10);
-      --shadow-sm: 0 8px 24px rgba(10, 53, 39, .07);
+      --amber-bg: #FDF4DD;
+      --red: #B42318;
+      --red-bg: #FDE8E6;
+      --blue: #1A5C8A;
+      --blue-bg: #E6F0F8;
+      --shadow-lg: 0 24px 60px rgba(92,61,14,.12);
+      --shadow-sm: 0 8px 24px rgba(92,61,14,.07);
       --radius: 14px;
     }
     * { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; }
     body {
-      font: 15px/1.55 "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
+      font: 400 15px/1.6 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+      letter-spacing: 0.01em;
       background: var(--bg);
       color: var(--ink);
       -webkit-font-smoothing: antialiased;
@@ -49,7 +53,7 @@
 
     /* ── Top bar ─────────────────────────────────────────────── */
     .topbar {
-      background: linear-gradient(135deg, var(--green-950), var(--brand) 55%, var(--green-800));
+      background: linear-gradient(135deg, #5C3D0E, #8B5E1A 55%, #B8860B);
       color: #fff;
       border-bottom: 3px solid var(--gold);
       padding: 0 28px;
@@ -116,7 +120,7 @@
     }
     .btn.primary { background: var(--brand); color: #fff; }
     .btn.primary:hover { background: var(--brand-2); box-shadow: 0 0 0 3px rgba(184,144,47,.30); }
-    .btn.ghost { background: #fff; color: var(--brand); border-color: var(--line); }
+    .btn.ghost { background: #fff; color: var(--brand); border-color: var(--brand); }
     .btn.ghost:hover { border-color: var(--gold); }
     .btn.subtle { background: transparent; color: var(--muted); }
     .btn:disabled { opacity: .5; cursor: not-allowed; box-shadow: none; }
@@ -377,7 +381,7 @@
     table.rule-trace td.effect-Approve { color: var(--green-ok); font-weight: 700; }
     table.rule-trace td.effect-Note    { color: var(--muted); }
     .drawer {
-      background: var(--green-950); color: #d8e9df; border-radius: 10px;
+      background: #5C3D0E; color: #E8D6A8; border-radius: 10px;
       padding: 14px 16px; max-height: 230px; overflow: auto; white-space: pre-wrap;
       font: 12px/1.6 ui-monospace, Consolas, monospace;
     }
@@ -391,7 +395,7 @@
 
     .usp {
       margin-top: 8px; padding: 16px 18px; border-radius: var(--radius);
-      background: var(--green-950); color: #d8e9df;
+      background: #5C3D0E; color: #E8D6A8;
       display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
     }
     .usp strong { color: #fff; }
@@ -462,42 +466,30 @@
   </div>
 
   <!-- ════════ A · LANDING ════════ -->
-  <section class="screen" id="screen-landing">
-    <div class="wrap">
-      <div class="hero-grid">
-        <div class="card hero hero-main">
-          <div>
-            <p class="eyebrow" data-i18n="beneficiary.title">Beneficiary journey</p>
-            <h1 data-i18n="landing.headline">Agent Sanad — Housing Loan Arrears Rescheduling</h1>
-            <p class="lede" data-i18n="landing.lede">
-              Apply to review and reschedule your housing-loan arrears. Agent Sanad
-              studies your case the way a Programme officer would — your loan and
-              arrears data are retrieved automatically, your salary certificate is
-              verified, and the Programme's rules are applied consistently — in
-              seconds instead of five working days.
-            </p>
-          </div>
-          <div class="actions">
-            <button class="btn primary" id="btnStartPass">
-              <span class="uaepass-mark"><i></i>UAE PASS</span> <span data-i18n="landing.cta_continue">Continue with UAE PASS</span>
-            </button>
-            <a class="btn ghost" href="#/officer" data-i18n="landing.cta_officer">Officer portal</a>
-          </div>
-          <p class="subtle" style="font-size:12px;margin:4px 0 0">
-            Demo build — UAE PASS and Programme integrations are simulated. No real
-            personal data is used.
-          </p>
-        </div>
-        <div class="card hero-side">
-          <p class="eyebrow" style="margin-bottom:2px">How it works</p>
-          <div class="factrow"><div class="dot">1</div><div><b data-i18n="landing.fact1_title">Instant assessment</b><span data-i18n="landing.fact1_desc">Processed in under one second</span></div></div>
-          <div class="factrow"><div class="dot">2</div><div><b data-i18n="landing.fact2_title">Governed system</b><span data-i18n="landing.fact2_desc">All decisions auditable and policy-compliant</span></div></div>
-          <div class="factrow"><div class="dot">3</div><div><b data-i18n="landing.fact3_title">Rule-compliant</b><span data-i18n="landing.fact3_desc">Deduction capped at 20% of income</span></div></div>
-          <div class="factrow"><div class="dot">4</div><div><b>Receive a recommendation</b><span>Within the 20% income rule and your approved repayment period. Exceptional cases go to a specialist.</span></div></div>
+  <!-- A - LANDING -->
+<section class="screen" id="screen-landing">
+  <div style="min-height:calc(100vh - 64px);display:flex;flex-direction:column">
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:60px 24px;text-align:center;background:linear-gradient(135deg,#fcfaf7,#f5f0e8 50%,#fcfaf7);position:relative;overflow:hidden">
+      <div style="position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 30% 40%,rgba(184,134,11,.08) 0%,transparent 50%),radial-gradient(circle at 70% 60%,rgba(92,61,14,.05) 0%,transparent 50%);pointer-events:none"></div>
+      <div style="position:relative;max-width:520px">
+        <div style="display:inline-flex;align-items:center;gap:6px;background:#101820;color:#fff;border-radius:6px;font-size:11px;font-weight:700;padding:4px 10px;margin-bottom:14px"><i style="width:12px;height:12px;border-radius:3px;background:#C9A84C;display:inline-block"></i>UAE PASS</div>
+        <p style="font-size:15px;color:#7a6b5a;margin-bottom:4px">Welcome back, <strong style="color:#5C3D0E" id="greetingName">Rayan</strong> <span style="color:#B8860B">&#10003;</span></p>
+        <h1 style="font-size:34px;font-weight:800;color:#2D1A0E;margin-bottom:8px;line-height:1.15">Agent Sanad<br>Housing Arrears Rescheduling</h1>
+        <p style="color:#4a3d2e;font-size:15px;line-height:1.7;margin-bottom:24px;max-width:44ch;margin-left:auto;margin-right:auto">Apply to reschedule your housing loan arrears. Your case is assessed in seconds with full transparency and policy compliance.</p>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+          <button class="btn primary" id="btnStartPass" style="background:#8B5E1A;color:#fff;border-color:#8B5E1A;padding:12px 28px">Continue with UAE PASS</button>
+          <a class="btn ghost" href="#/officer" style="padding:12px 28px">Officer portal</a>
         </div>
       </div>
     </div>
-  </section>
+    <div style="display:flex;gap:32px;justify-content:center;padding:24px 20px 32px;max-width:640px;margin:0 auto">
+      <div style="text-align:center;flex:1"><div style="width:34px;height:34px;border-radius:50%;background:#8B5E1A;color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px;margin:0 auto 8px">1</div><b style="display:block;font-size:14px;color:#1a120b;margin-bottom:2px">Verify identity</b><span style="font-size:12px;color:#7a6b5a">UAE PASS confirms your profile</span></div>
+      <div style="text-align:center;flex:1"><div style="width:34px;height:34px;border-radius:50%;background:#8B5E1A;color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px;margin:0 auto 8px">2</div><b style="display:block;font-size:14px;color:#1a120b;margin-bottom:2px">Review and submit</b><span style="font-size:12px;color:#7a6b5a">Your data is retrieved automatically</span></div>
+      <div style="text-align:center;flex:1"><div style="width:34px;height:34px;border-radius:50%;background:#8B5E1A;color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px;margin:0 auto 8px">3</div><b style="display:block;font-size:14px;color:#1a120b;margin-bottom:2px">Receive decision</b><span style="font-size:12px;color:#7a6b5a">Instant, auditable recommendation</span></div>
+    </div>
+  </div>
+</section>
+
 
   <!-- ════════ B · UAE PASS MOCK ════════ -->
   <section class="screen" id="screen-uaepass">
