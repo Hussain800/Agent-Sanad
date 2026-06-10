@@ -12,3 +12,8 @@ RescheduleArrears*.xlsx
 RescheduleArrears*.xls
 benchmark/data/*.xlsx
 benchmark/data/*.xls
+
+# Per-installation SQLite database
+data/*.db
+data/*.db-wal
+data/*.db-shm

@@ -15,6 +15,7 @@ from backend.applications import build_case_from_application
 from backend.policy.engine import decide
 from backend.policy.rules import load_policy
 from backend.schemas import MockApplication, OfficerAction
+from backend.store import STORE
 
 # T1 — optional LangGraph orchestration (Tooling Addendum). Import-guarded so a
 # missing/broken langgraph dependency can never break the demo: the routes
@@ -303,6 +304,9 @@ def post_officer_action(case_id: str, body: dict):
             mock_mode=MOCK_MODE, state_from=terminal,
             state_to={"approve": "Approved", "adjust": "Adjusted",
                       "escalate": "Refer"}.get(action.action, terminal))
+    # Persist officer action.
+    STORE.save_officer_action(case_id, action.action,
+                                     action.override_reason_code, action.notes)
     return {
         "case_id": case_id,
         "report": report.model_dump(mode="json"),
@@ -313,10 +317,34 @@ def post_officer_action(case_id: str, body: dict):
     }
 
 
-# ── v1.1 app flow — custom mock application (stateless) ─────────────────────
+# ── P1 persistence — list/retrieve stored applications & actions ───────────
+
+
+@app.get("/applications")
+def list_applications():
+    """Return all persisted custom applications, newest first."""
+    return {"applications": STORE.list_applications()}
+
+
+@app.get("/applications/{application_id}")
+def get_application(application_id: str):
+    """Return a persisted application with its recommendation and audit trail."""
+    app_data = STORE.get_application(application_id.upper())
+    if app_data is None:
+        raise HTTPException(404, f"unknown application '{application_id}'")
+    return app_data
+
+
+@app.get("/officer-actions")
+def list_officer_actions():
+    """Return all persisted officer actions, newest first."""
+    return {"actions": STORE.list_officer_actions()}
+
+
+# ── v1.1 app flow — custom mock application ─────────────────────────────────
 # The beneficiary form posts here. Input is Pydantic-validated, mapped onto a
 # synthetic Case (backend/applications.py), and decided by the EXISTING
-# deterministic engine. No persistence, no PII, no engine changes.
+# deterministic engine. No PII, no engine changes.
 
 def _parse_mock_application(body: dict) -> MockApplication:
     try:
@@ -331,6 +359,8 @@ def post_mock_application(body: dict):
     (no policy run) — used by the app's review step."""
     app_in = _parse_mock_application(body)
     case, log, application_id = build_case_from_application(app_in)
+    STORE.save_application(application_id, app_in.model_dump(mode="json"))
+    STORE.save_audit_events(application_id, log.events())
     return {
         "application_id": application_id,
         "case": case.model_dump(mode="json"),
@@ -364,6 +394,9 @@ def post_mock_application_decide(body: dict, request: Request):
         "path": report.proposed_plan.path, "fired_rules": report.fired_rules,
         "latency_ms": latency_ms, "mock_mode": MOCK_MODE,
     })
+    STORE.save_application(application_id, app_in.model_dump(mode="json"))
+    STORE.save_recommendation(application_id, report.model_dump(mode="json"))
+    STORE.save_audit_events(application_id, log.events())
     return JSONResponse({
         "application_id": application_id,
         "case": case.model_dump(mode="json"),
