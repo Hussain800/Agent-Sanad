@@ -70,4 +70,5 @@ def test_version_consistency():
     fe_path = os.path.join(os.path.dirname(__file__), "..", "frontend", "index.html")
     with open(fe_path, encoding="utf-8") as f:
         html = f.read()
-    assert 'CLIENT_BUILD = "1.7.0"' in html
+    assert 'CLIENT_BUILD = "1.8.0"' in html
+

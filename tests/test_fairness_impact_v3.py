@@ -14,7 +14,7 @@ def test_fairness_report_v2():
     r = client.get("/fairness/report/v2")
     assert r.status_code == 200
     d = r.json()
-    assert d["version"] == "1.7.0"
+    assert d["version"] == "1.8.0"
     assert "path_distribution" in d
     assert len(d["path_distribution"]) >= 3
 
@@ -30,3 +30,4 @@ def test_fairness_does_not_mutate_policy():
     r3 = client.post("/demo/run/GOLDEN")
     rep2 = r3.json()["report"]["recommendation"]
     assert rep1 == rep2
+

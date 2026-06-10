@@ -23,9 +23,10 @@ def test_release_check_gates_count():
 def test_decision_package_version():
     path = os.path.join(os.path.dirname(__file__), "..", "backend", "decision_package.py")
     with open(path, encoding="utf-8") as f: text = f.read()
-    assert '"app_version": "1.7.0"' in text
+    assert '"app_version": "1.8.0"' in text
 
 def test_frontend_has_workspace_references():
     path = os.path.join(os.path.dirname(__file__), "..", "frontend", "index.html")
     with open(path, encoding="utf-8") as f: text = f.read()
     assert "beneficiary" in text.lower() or "officer" in text.lower()
+
