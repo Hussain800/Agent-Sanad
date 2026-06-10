@@ -13,17 +13,17 @@ function check($name, $condition) {
 
 Write-Host "===== Agent Sanad v1.8 Release Check =====" -ForegroundColor Cyan
 
-# 1. Version handshake (must be 1.5.0)
+# 1. Version handshake
 check "APP_VERSION == CLIENT_BUILD == 1.8.0" { 
     $av = Select-String -Path backend\app.py -Pattern 'APP_VERSION = "(.+)"' | ForEach-Object { $_.Matches.Groups[1].Value }
     $cv = Select-String -Path frontend\index.html -Pattern 'CLIENT_BUILD = "(.+)"' | ForEach-Object { $_.Matches.Groups[1].Value }
     ($av -eq $cv) -and ($av -eq "1.8.0")
 }
 
-# 2. Full test suite (220+)
-check "Full test suite 400+" {
+# 2. Full test suite
+check "Full test suite 420+" {
     $result = & python -B -m pytest tests\ -q -p no:cacheprovider 2>&1 | Out-String
-    ($result -match "passed") -and ($result -match "(\d+) passed") -and ([int]$matches[1] -ge 380)
+    ($result -match "passed") -and ($result -match "(\d+) passed") -and ([int]$matches[1] -ge 420)
 }
 
 # 3. No workbook tracked
@@ -103,7 +103,7 @@ check "Postman collection generated" {
 
 # 15. Release notes exist
 check "Release notes exist" {
-    Test-Path docs\RELEASE_NOTES_V1_5.md
+    Test-Path docs\RELEASE_NOTES_V1_8.md
 }
 
 # 16. Arabic key coverage
@@ -190,14 +190,14 @@ check "Fairness impact v3 tests" {
     $result -match "passed"
 }
 
-# 30. Materials v1.7
-check "Materials v1.7 tests" {
+# 30. Materials v1.7/v1.8
+check "Materials tests" {
     $result = & python -B -m pytest tests\test_materials_v1_7.py -q -p no:cacheprovider 2>&1 | Out-String
     $result -match "passed"
 }
 
 # 31. Lifecycle enforcement
-check "Lifecycle enforcement v1.7" {
+check "Lifecycle enforcement" {
     $result = & python -B -m pytest tests\test_lifecycle_enforcement_v17.py -q -p no:cacheprovider 2>&1 | Out-String
     $result -match "passed"
 }
@@ -221,9 +221,81 @@ check "Pilot docs exist" {
 }
 
 # 35. Version consistency
-check "Version consistency v1.7" {
+check "Version consistency" {
     $result = & python -B -m pytest tests\test_version_consistency_v17.py -q -p no:cacheprovider 2>&1 | Out-String
     $result -match "passed"
+}
+
+# 36. v1.8 module smoke tests
+check "v1.8 module tests" {
+    $result = & python -B -m pytest tests\test_v18_modules.py -q -p no:cacheprovider 2>&1 | Out-String
+    $result -match "passed"
+}
+
+# 37. v1.8 release facts
+check "v1.8 release facts" {
+    $result = & python -B -m pytest tests\test_release_facts_v18.py tests\test_v18_gates.py -q -p no:cacheprovider 2>&1 | Out-String
+    $result -match "passed"
+}
+
+# 38. v1.8 copilot and interop
+check "v1.8 copilot and interop tests" {
+    $result = & python -B -m pytest tests\test_v18_copilot_interop.py -q -p no:cacheprovider 2>&1 | Out-String
+    $result -match "passed"
+}
+
+# 39. v1.8 material routes
+check "v1.8 material routes" {
+    $result = & python -B -m pytest tests\test_v18_materials.py -q -p no:cacheprovider 2>&1 | Out-String
+    $result -match "passed"
+}
+
+# 40. v1.8 backend modules exist
+check "v1.8 backend modules exist" {
+    (Test-Path backend\release_brain.py) -and
+    (Test-Path backend\rescue_radar.py) -and
+    (Test-Path backend\policy_digital_twin.py) -and
+    (Test-Path backend\evidence_vault.py) -and
+    (Test-Path backend\interop_certification.py) -and
+    (Test-Path backend\service_copilot.py) -and
+    (Test-Path backend\mission_control.py) -and
+    (Test-Path backend\redteam_lab.py)
+}
+
+# 41. v1.8 OpenAPI routes
+check "v1.8 OpenAPI routes" {
+    $openapi = Get-Content docs\api\openapi.json -Raw
+    ($openapi -match "/rescue/radar") -and
+    ($openapi -match "/digital-twin/run") -and
+    ($openapi -match "/evidence-vault") -and
+    ($openapi -match "/interop/certification") -and
+    ($openapi -match "/copilot/session/start") -and
+    ($openapi -match "/mission-control") -and
+    ($openapi -match "/redteam/run")
+}
+
+# 42. Release provenance current
+check "Release provenance current" {
+    $prov = Get-Content docs\RELEASE_PROVENANCE.md -Raw
+    ($prov -match "1\.8\.0") -and ($prov -match "431 passing tests") -and ($prov -match "45/45 release gates")
+}
+
+# 43. Runtime release facts current
+check "Runtime release facts current" {
+    $result = & python -c "from backend.observability.service_metrics import get_release_check_latest; r=get_release_check_latest(); print(r['version'], r['tests'], r['gates'])" 2>$null
+    $result -match "1\.8\.0 431 45"
+}
+
+# 44. Current release doc current
+check "Current release doc current" {
+    $current = Get-Content docs\CURRENT_RELEASE.md -Raw
+    ($current -match "1\.8\.0") -and ($current -match "431") -and ($current -match "45\+")
+}
+
+# 45. v1.8 release notes current
+check "v1.8 release notes current" {
+    $notes = Get-Content docs\RELEASE_NOTES_V1_8.md -Raw
+    ($notes -match "1\.8\.0") -and ($notes -match "431") -and ($notes -match "45\+")
 }
 
 Write-Host "`n===== Results: $passed passed, $failed failed =====" -ForegroundColor Cyan

@@ -142,7 +142,7 @@ seeds/cases_v1.json   — Human-facing demo case index (13 cases)
 - **v1.5 Workflows**: Action workflow v4 (upload-mock/reject/resubmit/waive), appeals workbench (create/list/evidence/review/decision/supervisor-approve), case assignment/SLA.
 - **v1.5 Supervisor**: Backlog, SLA risk, fairness, connector incidents, officer workload, override review added.
 - **v1.6**: Contract-first APIs, route modules, case lifecycle, evidence graph, audit export, ABAC v2, UAE PASS/signature v4, connector reliability lab, fairness analytics v2, reasoning evals.
-- **v1.8 Release**: `scripts/release-check.ps1` runs 35 automated checks. Version is 1.8.0. 431 tests.
+- **v1.8 Release**: `scripts/release-check.ps1` runs 45 automated checks. Version is 1.8.0. 431 tests.
 
 ## 13 demo cases
 

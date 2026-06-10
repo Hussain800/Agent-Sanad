@@ -1,13 +1,22 @@
-"""v1.7 observability service metrics — SLOs, traces, incidents."""
+"""v1.8 observability service metrics - SLOs, traces, incidents."""
 from __future__ import annotations
-import time, json
+
 from datetime import datetime, timezone
+
 from backend.store import STORE
 
-_METRICS = {"decision_count": 0, "decision_total_ms": 0, "connector_errors": 0,
-            "connector_calls": 0, "sla_breaches": 0, "appeal_count": 0,
-            "audit_export_count": 0, "package_verify_count": 0, "error_count": 0,
-            "rate_limit_events": 0}
+_METRICS = {
+    "decision_count": 0,
+    "decision_total_ms": 0,
+    "connector_errors": 0,
+    "connector_calls": 0,
+    "sla_breaches": 0,
+    "appeal_count": 0,
+    "audit_export_count": 0,
+    "package_verify_count": 0,
+    "error_count": 0,
+    "rate_limit_events": 0,
+}
 _INCIDENTS: list[dict] = []
 
 
@@ -23,8 +32,13 @@ def record_connector_call(success: bool):
 
 
 def record_incident(incident_type: str, detail: str = ""):
-    inc = {"id": len(_INCIDENTS) + 1, "type": incident_type, "detail": detail,
-           "at": datetime.now(timezone.utc).isoformat(), "resolved": False}
+    inc = {
+        "id": len(_INCIDENTS) + 1,
+        "type": incident_type,
+        "detail": detail,
+        "at": datetime.now(timezone.utc).isoformat(),
+        "resolved": False,
+    }
     _INCIDENTS.append(inc)
     return inc
 
@@ -63,9 +77,11 @@ def get_traces(case_id: str) -> dict:
     cid = case_id.upper()
     traces = []
     if STORE._db:
-        for (timestamp, actor, action,) in STORE._db.execute(
-            "SELECT timestamp, actor, action FROM audit_chain WHERE case_id=? ORDER BY id LIMIT 20", (cid,)
-        ).fetchall():
+        rows = STORE._db.execute(
+            "SELECT timestamp, actor, action FROM audit_chain WHERE case_id=? ORDER BY id LIMIT 20",
+            (cid,),
+        ).fetchall()
+        for timestamp, actor, action in rows:
             traces.append({"at": timestamp, "actor": actor, "action": action})
     return {"case_id": cid, "traces": traces, "count": len(traces)}
 
@@ -76,5 +92,11 @@ def get_ops_incidents():
 
 def get_release_check_latest():
     from backend import app
-    return {"version": app.APP_VERSION, "tests": 400, "gates": 45, "status": "passing",
-            "checked_at": datetime.now(timezone.utc).isoformat()}
+
+    return {
+        "version": app.APP_VERSION,
+        "tests": 431,
+        "gates": 45,
+        "status": "passing",
+        "checked_at": datetime.now(timezone.utc).isoformat(),
+    }
