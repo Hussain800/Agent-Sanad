@@ -289,6 +289,9 @@
     }
     .queue-item:hover { background: #f2f3ec; }
     .queue-item.on { background: var(--brand); color: #fff; }
+    .exc-filter { transition: all .12s ease; }
+    .exc-filter.on { background: var(--brand) !important; color: #fff !important; border-color: var(--brand) !important; }
+    .exc-filter:hover { border-color: var(--gold) !important; }
     .queue-item .sub { display: block; font-size: 11px; color: var(--muted); }
     .queue-item.on .sub { color: #cfe2d8; }
 
@@ -1251,6 +1254,27 @@
     "OFF-01":    { effect: "Note",    text: "Officer override recorded with a reason code." },
   };
   const ruleInfo = rid => RULE_CATALOG[rid] || { effect: "Note", text: rid };
+
+  /* ── Exception Studio ────────────────────────────────────── */
+  const EXCEPTION_GROUPS = {
+    "Policy hard stop":    ["ACTIVE-01", "TEN-01", "ELIG-01"],
+    "Evidence problem":    ["DOC-01", "DOC-02", "INC-01"],
+    "Affordability risk":  ["OBL-01", "CAP-01"],
+    "Social hardship":     ["HARD-01", "HARD-02", "FAM-01"],
+    "Security risk":       ["RSK-01"],
+  };
+  const EXCEPTION_ORDER = ["Policy hard stop","Evidence problem","Affordability risk","Social hardship","Security risk"];
+  const EXCEPTION_COLORS = { "Policy hard stop":"danger","Evidence problem":"info","Affordability risk":"warn","Social hardship":"ok","Security risk":"warn" };
+  function exceptionGroup(firedRules) {
+    for (const g of EXCEPTION_ORDER) {
+      if (EXCEPTION_GROUPS[g].some(r => firedRules.includes(r))) return g;
+    }
+    return "";
+  }
+  function exceptionCategory(caseId, firedRules) {
+    return { group: exceptionGroup(firedRules), color: EXCEPTION_COLORS[exceptionGroup(firedRules)] || "" };
+  }
+
   const ADAPTER_MAP = [
     ["UAE PASS",            "identity, nationality, marital status, family size"],
     ["Loan system",         "agreement, balance, original term, current installment"],
@@ -1333,10 +1357,36 @@
       S.pastApps = (data.applications || []).filter(a => a.id !== (S.result && S.result.application_id));
     } catch (e) { S.pastApps = []; }
   }
+  let S_exceptionFilter = "";
+  function setExceptionFilter(filter) {
+    S_exceptionFilter = filter;
+    renderQueue();
+    document.querySelectorAll(".exc-filter").forEach(b => b.classList.toggle("on", b.dataset.filter === filter));
+  }
   function renderQueue() {
     const groups = {};
-    S.caseDetails.forEach(d => { (groups[d.group] = groups[d.group] || []).push(d); });
+    const filtered = !S_exceptionFilter ? S.caseDetails
+      : S.caseDetails.filter(d => {
+          // Check if this case's known fired rules match the filter
+          const knownFired = {
+            "GOLDEN":[],"NOHEAD":["HARD-01","CAP-01"],"MISSING":["DOC-01"],
+            "ACTIVE":["ACTIVE-01"],"CONTRA":["INC-01","RSK-01"],
+            "HIGH_OBLIGATIONS":["OBL-01"],"PERIOD_BREACH":["TEN-01"],
+            "HARDSHIP":["HARD-02"],"ZERO_OR_MISSING_INCOME":["DOC-02"],
+            "LOW_INCOME_PER_MEMBER":["FAM-01"],"UNVERIFIED_HARDSHIP":["HARD-01"],
+            "PROMPT_INJECTION_ONLY":["RSK-01"],"HIGH_CAPACITY_UPDATE":[],
+          };
+          return exceptionGroup(knownFired[d.id] || []).includes(S_exceptionFilter);
+        });
+    filtered.forEach(d => { (groups[d.group] = groups[d.group] || []).push(d); });
     let html = "";
+    // Exception filter bar
+    html += `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">`;
+    html += `<button class="exc-filter on" data-filter="" style="border-radius:999px;padding:5px 11px;font-size:11.5px;font-weight:700;cursor:pointer;border:1px solid var(--line);background:#fff;font-family:inherit">All</button>`;
+    EXCEPTION_ORDER.forEach(g => {
+      html += `<button class="exc-filter" data-filter="${esc(g)}" style="border-radius:999px;padding:5px 11px;font-size:11.5px;font-weight:700;cursor:pointer;border:1px solid var(--line);background:#fff;font-family:inherit">${esc(g)}</button>`;
+    });
+    html += `</div>`;
     if (S.result && S.resultSource === "custom") {
       html += `<div class="queue-group">Submitted now</div>
         <button class="queue-item" data-id="__last__">${__("queue.last")}
@@ -1361,6 +1411,9 @@
         else if (id && id.startsWith("__past__")) { selectPastApp(id.replace("__past__", "")); }
         else selectCase(id);
       };
+    });
+    [...document.querySelectorAll(".exc-filter")].forEach(btn => {
+      btn.onclick = () => { setExceptionFilter(btn.dataset.filter); };
     });
   }
   function markQueue(id) {

@@ -16,6 +16,7 @@ from backend.policy.engine import decide
 from backend.policy.rules import load_policy
 from backend.schemas import MockApplication, OfficerAction
 from backend.store import STORE
+from backend.actions import next_actions
 
 # T1 — optional LangGraph orchestration (Tooling Addendum). Import-guarded so a
 # missing/broken langgraph dependency can never break the demo: the routes
@@ -310,6 +311,7 @@ def post_officer_action(case_id: str, body: dict):
     return {
         "case_id": case_id,
         "report": report.model_dump(mode="json"),
+        "next_required_actions": next_actions(report.fired_rules),
         "officer_action": action.model_dump(mode="json"),
         "audit": log.events(),
         "note": ("Deterministic recommendation preserved. Officer action recorded "
@@ -401,6 +403,7 @@ def post_mock_application_decide(body: dict, request: Request):
         "application_id": application_id,
         "case": case.model_dump(mode="json"),
         "report": report.model_dump(mode="json"),
+        "next_required_actions": next_actions(report.fired_rules),
         "audit": log.events(),
         "impact": {
             "latency_ms": latency_ms,
@@ -476,6 +479,7 @@ def _plain_envelope(case_id: str, request_id: str, *,
     envelope = {
         "case": case.model_dump(mode="json"),
         "report": report.model_dump(mode="json"),
+        "next_required_actions": next_actions(report.fired_rules),
         "audit": log.events(),
         "impact": {
             "latency_ms": latency_ms, "mock_mode": MOCK_MODE,
@@ -543,6 +547,7 @@ def run(case_id: str, request: Request):
     return JSONResponse({
         "case": case.model_dump(mode="json"),
         "report": report.model_dump(mode="json"),
+        "next_required_actions": next_actions(report.fired_rules),
         "audit": log.events(),
         "impact": {
             "latency_ms": latency_ms,
