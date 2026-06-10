@@ -16,7 +16,7 @@ def create_decision_package(case_id: str, recommendation: str, proposed_plan: di
         "case_id": case_id, "recommendation": recommendation,
         "proposed_plan": proposed_plan, "reasoning": reasoning,
         "issued_at": datetime.now(timezone.utc).isoformat(),
-        "app_version": "1.6.0",
+        "app_version": "1.7.0",
     }
     package_json = json.dumps(summary, sort_keys=True)
     package_hash = hashlib.sha256(package_json.encode()).hexdigest()

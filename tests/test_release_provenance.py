@@ -9,7 +9,7 @@ def test_release_provenance_exists():
     assert os.path.exists(path)
 def test_healthz_version():
     r = client.get("/healthz")
-    assert r.status_code == 200 and r.json()["app_version"] == "1.6.0"
+    assert r.status_code == 200 and r.json()["app_version"] == "1.7.0"
 def test_connector_count():
     r = client.get("/connectors", headers={"x-sanad-role":"admin"})
     assert len(r.json()["connectors"]) >= 7

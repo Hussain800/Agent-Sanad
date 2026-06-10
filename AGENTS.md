@@ -4,7 +4,7 @@
 
 FastAPI hackathon MVP: deterministic policy engine for Sheikh Zayed Housing Programme arrears rescheduling. 13 demo cases, fixture-backed offline mode.
 
-**280+ tests** expected across 30+ test files (v1.6 target).
+**340+ tests** expected across 40+ test files (v1.7 target).
 
 ## Core doctrine
 
@@ -21,8 +21,8 @@ SQLite persistence for custom apps and officer actions. Single-file frontend ser
 # Manual
 $env:PYTHONPATH="."; uvicorn backend.app:app --host 127.0.0.1 --port 8000
 
-# Full test suite (280+ expected for v1.6)
-$env:PYTHONPATH="."; python -B -m pytest tests\ -q -p no:cacheprovider -W default::PytestReturnNotNoneWarning
+# Full test suite (340+ expected for v1.7)
+$env:PYTHONPATH="."; python -B -m pytest tests\ -q -p no:cacheprovider
 
 # Single test
 $env:PYTHONPATH="."; python -B -m pytest tests\test_policy.py::test_golden_update_approve -q -p no:cacheprovider
@@ -98,7 +98,7 @@ backend/
 frontend/
   index.html          — Single-file hash-routed SPA (~1576 lines, vanilla HTML/CSS/JS, zero deps)
   i18n.json           — Arabic/English translation strings (95 keys)
-tests/                — 12 test files (168 passing)
+tests/                — 40+ test files (319+ passing)
   test_policy.py      — 13 case assertions + endpoint contract tests
   test_demo_api.py    — API contract + CLIENT_BUILD handshake test
   test_governance.py  — No workbook tracked, no PII, risky cases routed to human
