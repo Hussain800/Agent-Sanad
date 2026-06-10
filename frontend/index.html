@@ -438,8 +438,9 @@
       <div class="ar">برنامج الشيخ زايد للإسكان · Ministry of Energy &amp; Infrastructure</div>
     </div>
     <span class="spacer"></span>
-    <a class="toplink" href="#/officer" id="navOfficer">Officer portal</a>
+    <a class="toplink" href="#/officer" id="navOfficer" data-i18n="nav.officer_portal">Officer portal</a>
     <span class="pill" id="modePill">offline mock mode</span>
+    <button class="pill" id="langToggle" style="cursor:pointer;border:1px solid rgba(255,255,255,.35);background:transparent;color:#e9f4ee;font-family:inherit" title="Switch language / تبديل اللغة">EN</button>
   </header>
 
   <div class="buildwarn" id="buildWarn">
@@ -455,9 +456,9 @@
       <div class="hero-grid">
         <div class="card hero hero-main">
           <div>
-            <p class="eyebrow">Digital service</p>
-            <h1>Agent Sanad — Housing Loan Arrears Rescheduling</h1>
-            <p class="lede">
+            <p class="eyebrow" data-i18n="beneficiary.title">Beneficiary journey</p>
+            <h1 data-i18n="landing.headline">Agent Sanad — Housing Loan Arrears Rescheduling</h1>
+            <p class="lede" data-i18n="landing.lede">
               Apply to review and reschedule your housing-loan arrears. Agent Sanad
               studies your case the way a Programme officer would — your loan and
               arrears data are retrieved automatically, your salary certificate is
@@ -467,9 +468,9 @@
           </div>
           <div class="actions">
             <button class="btn primary" id="btnStartPass">
-              <span class="uaepass-mark"><i></i>UAE PASS</span> Continue with UAE PASS
+              <span class="uaepass-mark"><i></i>UAE PASS</span> <span data-i18n="landing.cta_continue">Continue with UAE PASS</span>
             </button>
-            <a class="btn ghost" href="#/officer">Officer portal</a>
+            <a class="btn ghost" href="#/officer" data-i18n="landing.cta_officer">Officer portal</a>
           </div>
           <p class="subtle" style="font-size:12px;margin:4px 0 0">
             Demo build — UAE PASS and Programme integrations are simulated. No real
@@ -478,9 +479,9 @@
         </div>
         <div class="card hero-side">
           <p class="eyebrow" style="margin-bottom:2px">How it works</p>
-          <div class="factrow"><div class="dot">1</div><div><b>Verify your identity</b><span>Sign in with UAE PASS — your profile is populated automatically.</span></div></div>
-          <div class="factrow"><div class="dot">2</div><div><b>We retrieve your Programme data</b><span>Loan balance, arrears, and repayment period come from Programme systems — no manual entry.</span></div></div>
-          <div class="factrow"><div class="dot">3</div><div><b>Upload your salary certificate</b><span>Your income is verified against Programme records.</span></div></div>
+          <div class="factrow"><div class="dot">1</div><div><b data-i18n="landing.fact1_title">Instant assessment</b><span data-i18n="landing.fact1_desc">Processed in under one second</span></div></div>
+          <div class="factrow"><div class="dot">2</div><div><b data-i18n="landing.fact2_title">Governed system</b><span data-i18n="landing.fact2_desc">All decisions auditable and policy-compliant</span></div></div>
+          <div class="factrow"><div class="dot">3</div><div><b data-i18n="landing.fact3_title">Rule-compliant</b><span data-i18n="landing.fact3_desc">Deduction capped at 20% of income</span></div></div>
           <div class="factrow"><div class="dot">4</div><div><b>Receive a recommendation</b><span>Within the 20% income rule and your approved repayment period. Exceptional cases go to a specialist.</span></div></div>
         </div>
       </div>
@@ -718,7 +719,7 @@
     </div>
   </section>
 
-  <footer class="sitefoot">
+  <footer class="sitefoot" data-i18n="footer.text">
     Agent Sanad · Sheikh Zayed Housing Programme demo · offline-safe ·
     <a href="/architecture" target="_blank" rel="noopener">architecture</a> ·
     Extraction source and audit trail available in the officer portal.
@@ -726,6 +727,24 @@
 
   <script>
   "use strict";
+  /* ═══════════════ i18n (Arabic/English) ═══════════════ */
+  let I18N = {}, LANG = "en";
+  function loadI18n() {
+    fetch("i18n.json").then(r => r.json()).then(d => { I18N = d; applyLang(); }).catch(() => {});
+  }
+  function __(key) { return (I18N[LANG] && I18N[LANG][key]) || key; }
+  function applyLang() {
+    const dir = LANG === "ar" ? "rtl" : "ltr";
+    document.documentElement.setAttribute("dir", dir);
+    document.documentElement.setAttribute("lang", LANG === "ar" ? "ar-AE" : "en");
+    document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = __(el.dataset.i18n); });
+    document.getElementById("langToggle").textContent = LANG === "ar" ? "EN" : "عربي";
+  }
+  function toggleLang() {
+    LANG = LANG === "en" ? "ar" : "en";
+    applyLang();
+    route();
+  }
   /* ═══════════════ helpers ═══════════════ */
   const API = "";
   const $ = id => document.getElementById(id);
@@ -1168,22 +1187,22 @@
     const fired = new Set(rep.fired_rules || []);
     if (rep.recommendation === "Approve") {
       if (fired.has("HARD-02"))
-        return ["Approved", "Your verified circumstance has been recognised; arrears will be moved to the end of your loan without changing your monthly installment.", "ok", "✓"];
-      return ["Approved", "Your rescheduling plan has been prepared and is ready for officer approval.", "ok", "✓"];
+        return [__("result.approve"), __("result.approve_hardship"), "ok", "✓"];
+      return [__("result.approve"), __("result.approve_ready"), "ok", "✓"];
     }
     if (rep.recommendation === "Request documents")
-      return ["Additional Information Required", "Please upload your salary certificate so your income can be verified before a plan is prepared.", "info", "!"];
+      return [__("result.request_docs"), __("result.request_docs_detail"), "info", "!"];
     if (rep.recommendation === "Reject")
-      return ["Rejected", "An active rescheduling request already exists for your file. Please contact the Programme about your existing request.", "bad", "✕"];
+      return [__("result.rejected"), __("result.rejected_detail"), "bad", "✕"];
     if (fired.has("HARD-01"))
-      return ["Specialist Review Required", "Your situation requires a specialist review before any change to your monthly installment.", "warn", "👤"];
+      return [__("result.specialist"), __("result.specialist_hardship"), "warn", "👤"];
     if (fired.has("TEN-01"))
-      return ["Specialist Review Required", "Your case requires a specialist review to confirm the timing of the new plan.", "warn", "👤"];
+      return [__("result.specialist"), __("result.specialist_tenure"), "warn", "👤"];
     if (fired.has("OBL-01"))
-      return ["Specialist Review Required", "Your wider financial obligations will be reviewed by a specialist before a plan is confirmed.", "warn", "👤"];
+      return [__("result.specialist"), __("result.specialist_obligations"), "warn", "👤"];
     if (fired.has("INC-01") || fired.has("RSK-01"))
-      return ["Specialist Review Required", "A specialist will verify your income details before a plan is confirmed.", "warn", "👤"];
-    return ["Specialist Review Required", "A specialist employee will review your case before a final decision.", "warn", "👤"];
+      return [__("result.specialist"), __("result.specialist_income"), "warn", "👤"];
+    return [__("result.specialist"), __("result.specialist_general"), "warn", "👤"];
   }
   const NEXT_STEPS = {
     ok: ["A Programme officer gives the final approval.",
@@ -1289,6 +1308,7 @@
         }
       } catch (e) { /* pill stays default */ }
       await ensureCases();
+      await loadPastApps();
       renderQueue();
       if (S.result) {
         if (S.resultSource === "custom") {
@@ -1306,14 +1326,28 @@
       renderQueue();
     }
   }
+  async function loadPastApps() {
+    try {
+      const r = await fetch(API + "/applications");
+      const data = await r.json();
+      S.pastApps = (data.applications || []).filter(a => a.id !== (S.result && S.result.application_id));
+    } catch (e) { S.pastApps = []; }
+  }
   function renderQueue() {
     const groups = {};
     S.caseDetails.forEach(d => { (groups[d.group] = groups[d.group] || []).push(d); });
     let html = "";
     if (S.result && S.resultSource === "custom") {
       html += `<div class="queue-group">Submitted now</div>
-        <button class="queue-item" data-id="__last__">Last submitted application
+        <button class="queue-item" data-id="__last__">${__("queue.last")}
         <span class="sub">${esc(S.result.application_id || "custom")}</span></button>`;
+    }
+    if (S.pastApps && S.pastApps.length) {
+      html += `<div class="queue-group">${__("queue.past")}</div>` +
+        S.pastApps.slice(0, 5).map(a =>
+          `<button class="queue-item" data-id="__past__${esc(a.id)}">${esc(a.id)}
+            <span class="sub">${esc(a.created_at || "")}</span></button>`
+        ).join("");
     }
     Object.entries(groups).forEach(([g, items]) => {
       html += `<div class="queue-group">${esc(g)}</div>` + items.map(d =>
@@ -1323,7 +1357,8 @@
     [...document.querySelectorAll(".queue-item")].forEach(btn => {
       btn.onclick = () => {
         const id = btn.dataset.id;
-        if (id === "__last__") { renderOfficer(S.result, "Last submitted application"); markQueue(id); }
+        if (id === "__last__") { renderOfficer(S.result, __("queue.last")); markQueue(id); }
+        else if (id && id.startsWith("__past__")) { selectPastApp(id.replace("__past__", "")); }
         else selectCase(id);
       };
     });
@@ -1331,6 +1366,27 @@
   function markQueue(id) {
     [...document.querySelectorAll(".queue-item")].forEach(b =>
       b.classList.toggle("on", b.dataset.id === id));
+  }
+  async function selectPastApp(appId) {
+    try {
+      $("officerError").classList.remove("show");
+      const r = await fetch(API + "/applications/" + appId);
+      if (!r.ok) throw new Error("not found");
+      const d = await r.json();
+      // Build a renderable envelope from the stored application data.
+      const envelope = {
+        case: d.payload || {},
+        report: d.report,
+        audit: d.audit || [],
+        impact: { mock_mode: true, benchmark: null, latency_ms: 0 },
+      };
+      S.officerCaseId = appId;
+      renderOfficer(envelope, appId);
+      markQueue("__past__" + appId);
+    } catch (e) {
+      $("officerErrorText").textContent = "Failed to load past application " + appId + ": " + e.message;
+      $("officerError").classList.add("show");
+    }
   }
   async function selectCase(id) {
     try {
@@ -1518,6 +1574,11 @@
   // Pinned at build time; must equal /healthz app_version. A mismatch means a
   // stale server process is serving new static files with old API routes.
   const CLIENT_BUILD = "1.1.0";
+
+  // i18n init
+  document.getElementById("langToggle").onclick = toggleLang;
+  loadI18n();
+
   (async function boot() {
     try {
       const health = await fetchJson(API + "/healthz");
