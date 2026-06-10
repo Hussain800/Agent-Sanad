@@ -1,4 +1,4 @@
-"""v1.5 appeals workbench tests."""
+"""v1.6 appeals workbench tests."""
 from __future__ import annotations
 from fastapi.testclient import TestClient
 from backend.app import app
@@ -6,12 +6,17 @@ from backend.app import app
 client = TestClient(app)
 
 
-def test_appeal_create():
+def _create_appeal():
     r = client.post("/cases/GOLDEN/appeals", json={"reason": "Decision seems incorrect", "new_evidence": {"doc": "proof.pdf"}})
     assert r.status_code == 200
     d = r.json()
     assert d["status"] in ("draft", "open")
-    return d.get("appeal_id", 1)
+    return d["appeal_id"]
+
+
+def test_appeal_create():
+    aid = _create_appeal()
+    assert aid is not None
 
 
 def test_appeals_list():
@@ -22,28 +27,28 @@ def test_appeals_list():
 
 
 def test_appeal_submit_evidence():
-    aid = test_appeal_create()
+    aid = _create_appeal()
     r = client.post(f"/appeals/{aid}/submit-evidence", json={"evidence": {"new": "data"}})
     assert r.status_code == 200
     assert r.json()["status"] == "submitted"
 
 
 def test_appeal_review():
-    aid = test_appeal_create()
+    aid = _create_appeal()
     r = client.post(f"/appeals/{aid}/review", json={"notes": "reviewing"})
     assert r.status_code == 200
     assert r.json()["status"] == "officer_review"
 
 
 def test_appeal_decision():
-    aid = test_appeal_create()
+    aid = _create_appeal()
     r = client.post(f"/appeals/{aid}/decision", json={"decision": "upheld", "rationale": "No new evidence"})
     assert r.status_code == 200
     assert r.json()["decision"] == "upheld"
 
 
 def test_appeal_supervisor_approve():
-    aid = test_appeal_create()
+    aid = _create_appeal()
     r = client.post(f"/appeals/{aid}/supervisor-approve", json={"notes": "approved"}, headers={"x-sanad-role": "supervisor"})
     assert r.status_code == 200
     assert r.json()["status"] == "closed"

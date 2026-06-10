@@ -67,8 +67,7 @@ def test_frontend_high_contrast():
 
 
 def test_version_consistency():
-    app_v = "1.5.0"
     fe_path = os.path.join(os.path.dirname(__file__), "..", "frontend", "index.html")
     with open(fe_path, encoding="utf-8") as f:
         html = f.read()
-    assert 'CLIENT_BUILD = "1.5.0"' in html
+    assert 'CLIENT_BUILD = "1.7.0"' in html

@@ -44,7 +44,7 @@ def test_consent_validate_denied_audit():
 def test_materials_api_guide():
     r = client.get("/materials/api-guide")
     assert r.status_code == 200
-    assert r.json()["version"] == "1.5.0"
+    assert r.json()["version"] == "1.7.0"
 
 
 def test_materials_integration_map():

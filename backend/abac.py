@@ -26,9 +26,9 @@ def check_ownership(object_type: str, object_id: str, beneficiary_ref: str) -> d
         elif object_type == "package":
             return _check_package_ownership(object_id, beneficiary_ref)
         else:
-            return {"ok": True, "reason": f"no ownership rules for '{object_type}'"}
+            return {"ok": False, "reason": f"Unknown sensitive object type: {object_type}"}
     except Exception:
-        return {"ok": True, "reason": "ownership_check_failed_gracefully"}
+        return {"ok": False, "reason": "ownership_check_failed"}
 
 
 def _check_case_ownership(case_id: str, beneficiary_ref: str) -> dict:

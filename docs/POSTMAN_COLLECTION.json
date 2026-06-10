@@ -1,7 +1,6 @@
 {
   "info": {
-    "name": "Agent Sanad v1.5",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    "name": "Agent Sanad v1.7"
   },
   "item": [
     {
@@ -784,6 +783,339 @@
         "method": "GET",
         "url": {
           "raw": "http://127.0.0.1:8000/materials/security-one-pager"
+        }
+      }
+    },
+    {
+      "name": "GET /cases/{case_id}/lifecycle",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/cases/{case_id}/lifecycle"
+        }
+      }
+    },
+    {
+      "name": "POST /cases/{case_id}/lifecycle/transition",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/cases/{case_id}/lifecycle/transition"
+        }
+      }
+    },
+    {
+      "name": "GET /cases/{case_id}/timeline",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/cases/{case_id}/timeline"
+        }
+      }
+    },
+    {
+      "name": "GET /cases/{case_id}/evidence-graph",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/cases/{case_id}/evidence-graph"
+        }
+      }
+    },
+    {
+      "name": "GET /cases/{case_id}/evidence-graph/export",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/cases/{case_id}/evidence-graph/export"
+        }
+      }
+    },
+    {
+      "name": "GET /decision-packages/{package_id}/evidence-graph",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/decision-packages/{package_id}/evidence-graph"
+        }
+      }
+    },
+    {
+      "name": "GET /audit/export/{case_id}",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/audit/export/{case_id}"
+        }
+      }
+    },
+    {
+      "name": "GET /audit/export/{case_id}/zip-manifest",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/audit/export/{case_id}/zip-manifest"
+        }
+      }
+    },
+    {
+      "name": "POST /audit/export/{case_id}/verify",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/audit/export/{case_id}/verify"
+        }
+      }
+    },
+    {
+      "name": "GET /access-decisions/{case_id}",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/access-decisions/{case_id}"
+        }
+      }
+    },
+    {
+      "name": "POST /connectors/{name}/failure-profile",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/connectors/{name}/failure-profile"
+        }
+      }
+    },
+    {
+      "name": "GET /connectors/{name}/incidents",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/connectors/{name}/incidents"
+        }
+      }
+    },
+    {
+      "name": "POST /connectors/{name}/retry",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/connectors/{name}/retry"
+        }
+      }
+    },
+    {
+      "name": "POST /connectors/{name}/circuit-breaker/reset",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/connectors/{name}/circuit-breaker/reset"
+        }
+      }
+    },
+    {
+      "name": "POST /fairness/synthetic-cohort/generate",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/fairness/synthetic-cohort/generate"
+        }
+      }
+    },
+    {
+      "name": "GET /fairness/slices",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/fairness/slices"
+        }
+      }
+    },
+    {
+      "name": "GET /fairness/appeals",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/fairness/appeals"
+        }
+      }
+    },
+    {
+      "name": "GET /fairness/overrides",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/fairness/overrides"
+        }
+      }
+    },
+    {
+      "name": "GET /fairness/report",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/fairness/report"
+        }
+      }
+    },
+    {
+      "name": "GET /cases/{case_id}/evidence-graph/v2",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/cases/{case_id}/evidence-graph/v2"
+        }
+      }
+    },
+    {
+      "name": "GET /cases/{case_id}/evidence-graph/v2/mermaid",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/cases/{case_id}/evidence-graph/v2/mermaid"
+        }
+      }
+    },
+    {
+      "name": "GET /cases/{case_id}/evidence-summary",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/cases/{case_id}/evidence-summary"
+        }
+      }
+    },
+    {
+      "name": "GET /ops/health",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/ops/health"
+        }
+      }
+    },
+    {
+      "name": "GET /ops/slo",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/ops/slo"
+        }
+      }
+    },
+    {
+      "name": "GET /ops/traces/{case_id}",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/ops/traces/{case_id}"
+        }
+      }
+    },
+    {
+      "name": "GET /ops/incidents",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/ops/incidents"
+        }
+      }
+    },
+    {
+      "name": "POST /ops/incidents/{incident_id}/resolve",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/ops/incidents/{incident_id}/resolve"
+        }
+      }
+    },
+    {
+      "name": "GET /ops/release-check/latest",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/ops/release-check/latest"
+        }
+      }
+    },
+    {
+      "name": "POST /security-drills/run",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/security-drills/run"
+        }
+      }
+    },
+    {
+      "name": "GET /security-drills/latest",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/security-drills/latest"
+        }
+      }
+    },
+    {
+      "name": "GET /impact/housing-stability-ledger",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/impact/housing-stability-ledger"
+        }
+      }
+    },
+    {
+      "name": "GET /fairness/report/v2",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/fairness/report/v2"
+        }
+      }
+    },
+    {
+      "name": "GET /fairness/cohort/{cohort_id}",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/fairness/cohort/{cohort_id}"
+        }
+      }
+    },
+    {
+      "name": "GET /materials/arabic-glossary",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/materials/arabic-glossary"
+        }
+      }
+    },
+    {
+      "name": "GET /materials/accessibility-report",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/materials/accessibility-report"
+        }
+      }
+    },
+    {
+      "name": "GET /materials/rtl-checklist",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/materials/rtl-checklist"
+        }
+      }
+    },
+    {
+      "name": "GET /materials/pilot-sandbox-packet",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/materials/pilot-sandbox-packet"
         }
       }
     },
