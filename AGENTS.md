@@ -4,7 +4,7 @@
 
 FastAPI hackathon MVP: deterministic policy engine for Sheikh Zayed Housing Programme arrears rescheduling. 13 demo cases, fixture-backed offline mode.
 
-**168 tests passing** across 12 test files.
+**231 tests passing** across 21 test files. Target: 220+ for v1.5.
 
 ## Core doctrine
 
@@ -21,7 +21,7 @@ SQLite persistence for custom apps and officer actions. Single-file frontend ser
 # Manual
 $env:PYTHONPATH="."; uvicorn backend.app:app --host 127.0.0.1 --port 8000
 
-# Full test suite (168 expected)
+# Full test suite (220+ expected for v1.5)
 $env:PYTHONPATH="."; python -B -m pytest tests\ -q -p no:cacheprovider
 
 # Single test
@@ -137,7 +137,11 @@ seeds/cases_v1.json   — Human-facing demo case index (13 cases)
 - **v1.4 Audit Chain**: SHA256 hash chain with `GET /cases/{id}/audit-chain` and `POST /audit/verify`. Tampered events fail verification.
 - **v1.4 Simulator**: Fair Plan Simulator via `POST /cases/{id}/simulate-plan`. Returns 2-3 compliant options. Official recommendation remains deterministic.
 - **v1.4 Decision Packages**: Digital closeout with packages, signatures, e-Seal, hash verification.
-- **v1.4 Release**: `scripts/release-check.ps1` runs 8 automated checks. Version is 1.4.0.
+- **v1.5 Trust Controls**: Consent guard v2 (purpose/scope/expiry/revocation/ownership), UAE PASS session v3 (nonce/expiry/replay), ABAC ownership, signature integrity (hash binding/tamper detection).
+- **v1.5 Connectors**: 7th connector (case-management) added. All connectors use Pydantic models. Contract tests in test_connectors.py.
+- **v1.5 Workflows**: Action workflow v4 (upload-mock/reject/resubmit/waive), appeals workbench (create/list/evidence/review/decision/supervisor-approve), case assignment/SLA.
+- **v1.5 Supervisor**: Backlog, SLA risk, fairness, connector incidents, officer workload, override review added.
+- **v1.5 Release**: `scripts/release-check.ps1` runs 17 automated checks. Version is 1.5.0. Target test count 220+.
 
 ## 13 demo cases
 
