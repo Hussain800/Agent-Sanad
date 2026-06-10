@@ -914,7 +914,7 @@
       S.sampleId = id; S.caseData = c; S.mode = "sample";
       // Map the case payload onto the form so editing starts from real values.
       const f = S.form;
-      f.monthly_income_aed       = c.income.salary_certificate_income_aed ?? "";
+      f.monthly_income_aed       = (c.income && c.income.salary_certificate_income_aed) ?? "";
       f.current_installment_aed  = c.loan ? c.loan.current_installment_aed : 0;
       f.arrears_amount_aed       = c.arrears ? c.arrears.arrears_amount_aed : 0;
       f.remaining_balance_aed    = c.loan ? c.loan.remaining_balance_aed : 0;
@@ -922,14 +922,14 @@
       f.original_approved_term_months = c.loan ? c.loan.original_approved_term_months : 240;
       f.unpaid_installments      = c.arrears ? c.arrears.unpaid_installments : 0;
       f.family_size              = c.applicant ? c.applicant.family_size : 1;
-      f.obligations_ratio        = c.income.obligations_ratio ?? "";
-      f.income_trend             = c.income.income_trend || "unknown";
+f.obligations_ratio        = (c.income && c.income.obligations_ratio) ?? "";
+f.income_trend             = (c.income && c.income.income_trend) || "unknown";
       f.active_request_exists    = !!(c.arrears && c.arrears.active_request_exists);
-      f.salary_certificate_present = (c.documents.received_document_types || []).includes("salary_certificate");
-      f.suspicious_document_text = (c.documents.injection_flags || []).length > 0;
-      f.hardship_type = c.hardship.unemployed_flag ? "unemployment"
-                      : c.hardship.temporary_circumstance_flag ? "temporary_circumstance" : "none";
-      f.hardship_verified = (f.hardship_type !== "none") && !c.hardship.unverified;
+f.salary_certificate_present = ((c.documents && c.documents.received_document_types) || []).includes("salary_certificate");
+f.suspicious_document_text = ((c.documents && c.documents.injection_flags) || []).length > 0;
+f.hardship_type = (c.hardship && c.hardship.unemployed_flag) ? "unemployment"
+: (c.hardship && c.hardship.temporary_circumstance_flag) ? "temporary_circumstance" : "none";
+f.hardship_verified = (f.hardship_type !== "none") && !(c.hardship && c.hardship.unverified);
       updateModeUI(); renderStep();
     } catch (e) {
       const hint = String(e.message).startsWith("404")
@@ -1576,7 +1576,7 @@
     document.querySelector("#traceRules tbody").innerHTML = ruleRows.length
       ? `<tr><th>Rule</th><th>What it means</th><th>Effect</th></tr>${ruleRows.join("")}`
       : `<tr><td colspan="3" style="color:var(--muted);font-style:italic">No rules fired.</td></tr>`;
-    const salary = c.income.verified_monthly_income_aed || 0;
+    const salary = (c.income && c.income.verified_monthly_income_aed) || 0;
     const emi = (c.loan && c.loan.current_installment_aed) || 0;
     const cap = salary * 0.20, headroom = cap - emi;
     const calcRows = noPlan
@@ -1605,8 +1605,8 @@
       const cls = b === "Pass" ? "highlight-pass" : b === "Fail" ? "highlight-fail" : "";
       return `<div>${esc(k)}</div><div class="${cls}">${esc(v)}</div>`; }).join("");
     const injection = (c.documents && c.documents.injection_flags || []).length > 0;
-    const variance = c.income ? c.income.variance_pct : 0;
-    const contra = c.income ? c.income.contradiction_flag : false;
+const variance = (c.income && c.income.variance_pct) || 0;
+const contra = c.income && c.income.contradiction_flag;
     const extractionEvent = (d.audit || []).find(e => e.step === "extract.salary_certificate");
     const secRows = [
       ["Document injection flag", injection ? "DETECTED (RSK-01)" : "Not detected", injection ? "Fail" : "Pass"],
@@ -1638,13 +1638,13 @@
 
     // facts + flags
     $("facts").innerHTML =
-      `<div>Verified income</div><div>${AED(c.income.verified_monthly_income_aed)}</div>` +
-      `<div>Income on certificate</div><div>${AED(c.income.salary_certificate_income_aed)}</div>` +
+`<div>Verified income</div><div>${AED((c.income && c.income.verified_monthly_income_aed))}</div>` +
+`<div>Income on certificate</div><div>${AED((c.income && c.income.salary_certificate_income_aed))}</div>` +
       `<div>Extraction source</div><div style="font-size:11.5px">${esc(extractionEvent ? extractionEvent.detail : "N/A")}</div>` +
       `<div>Current installment</div><div>${AED(emi)}</div>` +
       `<div>Arrears</div><div>${AED(c.arrears && c.arrears.arrears_amount_aed)}</div>` +
       `<div>Family size</div><div>${esc(c.applicant ? c.applicant.family_size : "N/A")}</div>` +
-      `<div>Income trend</div><div>${esc(c.income.income_trend)}</div>`;
+      `<div>Income trend</div><div>${esc((c.income && c.income.income_trend) || "N/A")}</div>`;
     $("flags").innerHTML = "Fired rules: " +
       ((rep.fired_rules || []).map(x => `<span class="rule">${esc(x)}</span>`).join("") || "<span class='subtle'>none</span>");
 
