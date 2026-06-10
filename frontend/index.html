@@ -589,6 +589,7 @@
           <b>What happens next</b>
           <ul id="resultNext"></ul>
         </div>
+        <div id="resultActions" style="margin-top:14px;display:none"></div>
         <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
           <button class="btn ghost" id="btnNewApp">Start a new application</button>
           <a class="btn primary" href="#/officer" id="btnOpenOfficer">Open officer review</a>
@@ -1229,6 +1230,20 @@
     $("resultRef").textContent =
       `Reference ${ref} · processed in ${Math.max(1, S.result.impact.latency_ms)} ms · policy ${rep.policy_version}`;
     $("resultNext").innerHTML = (NEXT_STEPS[tone] || []).map(s => `<li>${esc(s)}</li>`).join("");
+    // Render Evidence Repair Loop actions
+    const actions = S.result.next_required_actions || [];
+    const actEl = $("resultActions");
+    if (actions.length) {
+      actEl.style.display = "block";
+      actEl.innerHTML = `<b style="font-size:13px">${__("actions.required")}</b>` +
+        actions.map(a => `<div style="margin-top:8px;padding:11px 14px;border-radius:10px;background:#f8f9f4;border:1px solid var(--line);text-align:left">
+          <div style="font-weight:700;font-size:13.5px">${esc(a.label)}</div>
+          <div style="font-size:12.5px;color:var(--muted);margin-top:3px">${esc(a.description)}</div>
+          ${a.repair_hint ? `<div style="font-size:12px;color:var(--brand);margin-top:5px">${esc(a.repair_hint)}</div>` : ""}
+        </div>`).join("");
+    } else {
+      actEl.style.display = "none";
+    }
   }
   $("btnNewApp").onclick = () => {
     S.step = 0; S.result = null; S.form = { ...FORM_DEFAULTS }; S.mode = "sample";
