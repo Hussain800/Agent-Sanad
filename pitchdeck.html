@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agent Sanad — MOEI Pitch Deck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet">
+<style>
+@page{size:1920px 1080px;margin:0}
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--g1:#5C3D0E;--g2:#7A5520;--g3:#8B5E1A;--g4:#B8860B;--g5:#C9A84C;--g6:#D9C07A;--g7:#E8D6A8;--g8:#F2E8CC;--g9:#FFFDF7;--ink:#1a120b;--ink2:#4a3d2e;--muted:#7a6b5a;--line:#e6ddd0}
+html,body{height:100%;background:#1a120b}
+body{font-family:Inter,'Segoe UI',Arial,sans-serif;overflow:hidden;color:var(--ink)}
+.slide{display:none;width:100vw;height:100vh;position:absolute;top:0;left:0;overflow:hidden}
+.slide.active{display:flex;flex-direction:column;animation:fadeIn .4s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes scaleIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+@keyframes glow{0%{opacity:.6}50%{opacity:1}100%{opacity:.6}}
+.nav{position:fixed;bottom:32px;left:50%;transform:translateX(-50%);z-index:100;display:flex;gap:10px;align-items:center;background:rgba(255,255,255,.9);backdrop-filter:blur(10px);padding:10px 20px;border-radius:999px;box-shadow:0 4px 20px rgba(0,0,0,.15)}
+.nav button{width:10px;height:10px;border-radius:50%;border:2px solid var(--g4);background:transparent;cursor:pointer;padding:0;transition:all .2s}
+.nav button.active{background:var(--g4);transform:scale(1.3)}
+.nav .arr{background:var(--g3);color:#fff;border:none;border-radius:50%;width:32px;height:32px;cursor:pointer;font-size:16px;font-weight:700;display:grid;place-items:center;transition:all .15s}
+.nav .arr:hover{background:var(--g2)}
+.nav .page-num{font-size:12px;color:var(--muted);font-weight:600;min-width:60px;text-align:center}
+
+.s1{background:linear-gradient(135deg,#5C3D0E,#8B5E1A 50%,#B8860B);justify-content:center;align-items:center;text-align:center;color:#fff}
+.s1 .badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);padding:8px 18px;border-radius:999px;font-size:13px;font-weight:600;margin-bottom:24px;animation:slideUp .6s .1s both}
+.s1 h1{font-size:56px;font-weight:900;margin-bottom:10px;letter-spacing:-.02em;animation:slideUp .6s .2s both}
+.s1 .sub{font-size:22px;font-weight:400;opacity:.85;margin-bottom:30px;animation:slideUp .6s .3s both}
+.s1 .org{font-size:15px;opacity:.7;animation:slideUp .6s .4s both}
+.s1 .date{position:absolute;bottom:40px;left:0;right:0;font-size:13px;opacity:.5;animation:slideUp .6s .5s both}
+.s1 .glow{position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.06) 0%,transparent 70%);pointer-events:none;animation:glow 3s ease-in-out infinite}
+
+.s2,.s3,.s4,.s5,.s6,.s7,.s8,.s9{background:#fff;padding:60px 80px}
+.s2 .content,.s3 .content,.s4 .content,.s5 .content,.s6 .content,.s7 .content,.s8 .content,.s9 .content{max-width:1200px;margin:0 auto;width:100%;flex:1;display:flex;flex-direction:column;justify-content:center}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--g4);margin-bottom:6px}
+h2{font-size:38px;font-weight:800;color:var(--g1);margin-bottom:6px;letter-spacing:-.015em}
+.subtitle{font-size:17px;color:var(--muted);margin-bottom:32px;line-height:1.6}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:32px}
+.card{background:var(--g9);border:1px solid var(--line);border-radius:16px;padding:28px;transition:all .2s}
+.card:hover{box-shadow:0 8px 30px rgba(92,61,14,.1);transform:translateY(-2px)}
+.card h3{font-size:18px;font-weight:700;color:var(--g2);margin-bottom:8px}
+.card p,.card li{font-size:14px;line-height:1.7;color:var(--ink2)}
+.card ul{list-style:none;padding:0}
+.card li{padding:4px 0;padding-left:20px;position:relative}
+.card li::before{content:'\25B8';position:absolute;left:0;color:var(--g4);font-weight:700}
+.rule-box{background:linear-gradient(135deg,var(--g1),var(--g3));color:#fff;border-radius:12px;padding:20px 24px;display:flex;gap:16px;align-items:center}
+.rule-box .num{font-size:28px;font-weight:900;opacity:.4;flex-shrink:0}
+.rule-box .text{font-size:14px;line-height:1.6;opacity:.9}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.stat{text-align:center;padding:28px 16px;background:var(--g9);border:1px solid var(--line);border-radius:16px}
+.stat .num{font-size:42px;font-weight:900;color:var(--g3);display:block}
+.stat .lbl{font-size:13px;color:var(--muted);margin-top:6px;line-height:1.5}
+.arch{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.arch-item{background:var(--g9);border:1px solid var(--line);border-radius:12px;padding:18px;text-align:center}
+.arch-item .icon{font-size:28px;margin-bottom:6px}
+.arch-item h4{font-size:14px;font-weight:700;color:var(--g2);margin-bottom:4px}
+.arch-item p{font-size:12px;color:var(--muted);line-height:1.5}
+.demo-grid{display:grid;grid-template-columns:2fr 1fr;gap:24px}
+.demo-list{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.demo-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid var(--line);border-radius:10px;font-size:13px;background:var(--g9)}
+.demo-item .status{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.demo-item .status.green{background:#1B7A4B}.demo-item .status.amber{background:#B8860B}.demo-item .status.red{background:#B42318}.demo-item .status.gray{background:#9ca3af}
+.demo-item .rule-tag{font-size:10px;background:var(--g8);padding:2px 8px;border-radius:999px;color:var(--g2);font-weight:600}
+table.bench{width:100%;border-collapse:collapse;font-size:14px}
+table.bench th{text-align:left;padding:12px 16px;background:var(--g1);color:#fff;font-weight:600}
+table.bench td{padding:12px 16px;border-bottom:1px solid var(--line)}
+table.bench tr:last-child td{border-bottom:none}
+table.bench tr:hover td{background:var(--g9)}
+.tag{display:inline-flex;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600}
+.tag.gold{background:var(--g5);color:#fff}.tag.green{background:#E8F5EE;color:#1B7A4B}.tag.amber{background:#FDF4DD;color:#946300}
+.footer-slide{background:linear-gradient(135deg,#5C3D0E,#8B5E1A 50%,#B8860B);justify-content:center;align-items:center;text-align:center;color:#fff}
+.footer-slide h2{font-size:48px;font-weight:800;margin-bottom:16px;color:#fff}
+.footer-slide p{font-size:20px;opacity:.85;max-width:600px;line-height:1.6}
+.footer-slide .cta{margin-top:40px;display:inline-flex;align-items:center;gap:10px;background:rgba(255,255,255,.15);padding:14px 36px;border-radius:999px;font-size:18px;font-weight:700}
+@media(max-width:900px){.grid2,.stat-grid,.demo-grid,.demo-list{grid-template-columns:1fr}.slide{padding:40px 30px}.nav{bottom:16px;padding:8px 14px}}
+</style>
+</head>
+<body>
+
+<div class="nav" id="nav">
+  <button class="arr" id="prevBtn">&larr;</button>
+  <div id="dots"></div>
+  <span class="page-num" id="pageNum">1 / 9</span>
+  <button class="arr" id="nextBtn">&rarr;</button>
+</div>
+
+<!-- SLIDE 1: TITLE -->
+<div class="slide s1 active" id="slide-1">
+  <div class="glow" style="top:10%;left:20%"></div>
+  <div class="glow" style="bottom:20%;right:15%;width:400px;height:400px"></div>
+  <div class="badge"><span style="font-size:16px">&#9733;</span> Agentera Hackathon 2026 &mdash; MOEI &times; 42 Abu Dhabi</div>
+  <h1>Agent Sanad</h1>
+  <div class="sub">AI Agent for Housing Loan Arrears Rescheduling</div>
+  <div class="org">Sheikh Zayed Housing Programme &middot; Ministry of Energy &amp; Infrastructure</div>
+  <div class="date">Presented June 2026 &middot; Abu Dhabi</div>
+</div>
+
+<!-- SLIDE 2: PROBLEM -->
+<div class="slide s2" id="slide-2">
+  <div class="content">
+    <div class="eyebrow">The Challenge</div>
+    <h2>Five working days per case</h2>
+    <p class="subtitle">Today, rescheduling a housing loan arrears application is a manual, paper-intensive process that takes an officer five working days per case.</p>
+    <div class="grid2">
+      <div class="card">
+        <h3>For the beneficiary</h3>
+        <ul>
+          <li>Uncertain wait times for a decision</li>
+          <li>No visibility into the process</li>
+          <li>Multiple visits to service centres</li>
+          <li>Inconsistent outcomes across officers</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>For the Programme</h3>
+        <ul>
+          <li>High per-case processing cost</li>
+          <li>Officer time spent on repetitive analysis</li>
+          <li>Inconsistent rule application</li>
+          <li>Growing arrears caseload with fixed staff</li>
+        </ul>
+      </div>
+    </div>
+    <div style="margin-top:24px;text-align:center;font-size:28px;font-weight:800;color:var(--g4)">The mandate: compress 5 days to near-instant &rarr;</div>
+  </div>
+</div>
+
+<!-- SLIDE 3: SOLUTION -->
+<div class="slide s3" id="slide-3">
+  <div class="content">
+    <div class="eyebrow">Our Solution</div>
+    <h2>Agent Sanad &mdash; governed, instant, auditable</h2>
+    <p class="subtitle">A specialised AI casework agent that does the officer&rsquo;s entire job &mdash; retrieve, validate, analyse, decide, explain &mdash; in under one second. The LLM reads and explains; deterministic code decides the money; a human officer owns exceptions.</p>
+    <div class="grid2" style="margin-bottom:24px">
+      <div class="rule-box">
+        <div class="num">1</div>
+        <div class="text"><strong>LLM reads &amp; explains</strong> &mdash; extracts fields from documents, writes plain-language reasoning. Never computes an installment or chooses a path.</div>
+      </div>
+      <div class="rule-box" style="background:linear-gradient(135deg,var(--g3),var(--g4))">
+        <div class="num">2</div>
+        <div class="text"><strong>Deterministic code decides</strong> &mdash; the 20% cap, headroom calculation, path selection, period compliance. All unit-tested, all benchmarked.</div>
+      </div>
+    </div>
+    <div class="arch">
+      <div class="arch-item"><div class="icon">&#128274;</div><h4>UAE PASS</h4><p>Identity verification &mdash; beneficiary profile retrieved</p></div>
+      <div class="arch-item"><div class="icon">&#128202;</div><h4>Programme Data</h4><p>Loan &amp; arrears fetched automatically from ministry systems</p></div>
+      <div class="arch-item"><div class="icon">&#128221;</div><h4>Document Analysis</h4><p>Salary certificate parsing with injection detection</p></div>
+      <div class="arch-item"><div class="icon">&#9878;&#65039;</div><h4>Policy Engine</h4><p>Deterministic 20% cap + period rules + risk scoring</p></div>
+      <div class="arch-item"><div class="icon">&#128196;</div><h4>Section-8 Report</h4><p>12-field official recommendation with full traceability</p></div>
+      <div class="arch-item"><div class="icon">&#128100;</div><h4>Human Escalation</h4><p>Exceptions routed to officer with evidence-linked audit</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 4: GOVERNANCE -->
+<div class="slide s4" id="slide-4">
+  <div class="content">
+    <div class="eyebrow">Policy Compliance</div>
+    <h2>Three official rules, enforced in code</h2>
+    <p class="subtitle">The policy engine implements MOEI&rsquo;s governance rules as deterministic gates &mdash; no LLM can override them, no officer can bypass them.</p>
+    <div class="grid2">
+      <div>
+        <div class="rule-box" style="margin-bottom:14px">
+          <div class="num">R1</div>
+          <div class="text"><strong>20% Deduction Cap</strong> &mdash; Monthly deduction must not exceed 20% of verified income. Hard-checked. Surfaces as Pass/Fail chip on every report.</div>
+        </div>
+        <div class="rule-box" style="background:linear-gradient(135deg,var(--g3),var(--g4));margin-bottom:14px">
+          <div class="num">R2</div>
+          <div class="text"><strong>Period Compliance</strong> &mdash; New schedule must not exceed original approved loan term. Per-path check fires TEN-01 if breached.</div>
+        </div>
+        <div class="rule-box">
+          <div class="num">R3</div>
+          <div class="text"><strong>Active Request Gate</strong> &mdash; Existing active application auto-rejects at gate one, before any computation. ACTIVE-01 fires.</div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Risk Assessment Matrix</h3>
+        <ul>
+          <li><strong>INC-01</strong> &mdash; Income contradiction between certificate and verification</li>
+          <li><strong>OBL-01</strong> &mdash; Financial obligations exceed 60% of income</li>
+          <li><strong>FAM-01</strong> &mdash; Low income per family member (confidence lowered)</li>
+          <li><strong>HARD-01/02</strong> &mdash; Hardship detection with verified/unverified branches</li>
+          <li><strong>RSK-01</strong> &mdash; Document injection attempts logged, policy unchanged</li>
+          <li><strong>CAP-01/02</strong> &mdash; Headroom analysis under the 20% cap</li>
+        </ul>
+        <div style="margin-top:12px;font-size:12px;color:var(--muted)">14 rule IDs total &middot; Each with deterministic effect</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 5: BENCHMARK -->
+<div class="slide s5" id="slide-5">
+  <div class="content">
+    <div class="eyebrow">Proof Against Reality</div>
+    <h2>94.6% path-match on real decisions</h2>
+    <p class="subtitle">We replayed the deterministic engine against 1,960 real MOEI decisions (2023&ndash;2025). Calibrated on 2023&ndash;2024. Validated on held-out 2025.</p>
+    <div class="stat-grid" style="margin-bottom:28px">
+      <div class="stat"><span class="num">94.6%</span><span class="lbl">Path-match accuracy<br>held-out 2025 (n=522)</span></div>
+      <div class="stat"><span class="num">100%</span><span class="lbl">UPDATE plans within<br>the 20% cap</span></div>
+      <div class="stat"><span class="num">AED 557</span><span class="lbl">Median premium<br>deviation vs officer</span></div>
+      <div class="stat"><span class="num">&lt;1s</span><span class="lbl">Decision draft latency<br>vs 5 working days</span></div>
+    </div>
+    <div class="card">
+      <h3>What this means</h3>
+      <p style="font-size:14px;line-height:1.7;color:var(--ink2)">Agent Sanad matches the officer&rsquo;s rescheduling <strong>path</strong> 94.6% of the time. Every plan it sets is within the 20% cap. Where the engine differs, officers apply discretion the data doesn&rsquo;t fully encode &mdash; and that discretion is <strong>deliberately routed to a human</strong>. This is the governance feature, not a bug.</p>
+      <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+        <span class="tag green">Deterministic rerun: 100%</span>
+        <span class="tag amber">Premium dev: AED 557 median</span>
+        <span class="tag gold">Path-match, not exact reproduction</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 6: DEMO CASES -->
+<div class="slide s6" id="slide-6">
+  <div class="content">
+    <div class="eyebrow">Demo Coverage</div>
+    <h2>13 cases, every branch covered</h2>
+    <p class="subtitle">Each fixture hand-traced through <code>decide()</code> before its test was written &mdash; covering every policy gate, path, risk signal, and edge case.</p>
+    <div class="demo-grid">
+      <div>
+        <div class="demo-list">
+          <div class="demo-item"><span class="status green"></span><b>GOLDEN</b><span class="rule-tag">CAP-02, AFF-01</span></div>
+          <div class="demo-item"><span class="status amber"></span><b>NOHEAD</b><span class="rule-tag">HARD-01, CAP-01</span></div>
+          <div class="demo-item"><span class="status gray"></span><b>MISSING</b><span class="rule-tag">DOC-01</span></div>
+          <div class="demo-item"><span class="status red"></span><b>ACTIVE</b><span class="rule-tag">ACTIVE-01</span></div>
+          <div class="demo-item"><span class="status amber"></span><b>CONTRA</b><span class="rule-tag">INC-01, RSK-01</span></div>
+          <div class="demo-item"><span class="status amber"></span><b>HIGH_OBLIGATIONS</b><span class="rule-tag">OBL-01</span></div>
+          <div class="demo-item"><span class="status amber"></span><b>PERIOD_BREACH</b><span class="rule-tag">TEN-01</span></div>
+          <div class="demo-item"><span class="status green"></span><b>HARDSHIP</b><span class="rule-tag">HARD-02</span></div>
+          <div class="demo-item"><span class="status gray"></span><b>ZERO_INCOME</b><span class="rule-tag">DOC-02</span></div>
+          <div class="demo-item"><span class="status green"></span><b>LOW_INCOME</b><span class="rule-tag">FAM-01</span></div>
+          <div class="demo-item"><span class="status amber"></span><b>UNVERIFIED_HARDSHIP</b><span class="rule-tag">HARD-01</span></div>
+          <div class="demo-item"><span class="status green"></span><b>INJECTION_ONLY</b><span class="rule-tag">RSK-01</span></div>
+          <div class="demo-item"><span class="status green"></span><b>HIGH_CAPACITY</b><span class="rule-tag">CAP-02, AFF-01</span></div>
+        </div>
+      </div>
+      <div class="card" style="display:flex;flex-direction:column;justify-content:center">
+        <h3>Outcome distribution</h3>
+        <div style="margin-top:12px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span>Approve</span><strong style="color:var(--g3)">5 cases</strong></div>
+          <div style="height:8px;background:var(--line);border-radius:999px;overflow:hidden"><div style="width:38.5%;height:100%;background:#1B7A4B;border-radius:999px"></div></div>
+        </div>
+        <div style="margin-top:10px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span>Refer to officer</span><strong style="color:var(--g3)">5 cases</strong></div>
+          <div style="height:8px;background:var(--line);border-radius:999px;overflow:hidden"><div style="width:38.5%;height:100%;background:var(--g4);border-radius:999px"></div></div>
+        </div>
+        <div style="margin-top:10px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span>Request docs</span><strong style="color:var(--g3)">2 cases</strong></div>
+          <div style="height:8px;background:var(--line);border-radius:999px;overflow:hidden"><div style="width:15.4%;height:100%;background:#9ca3af;border-radius:999px"></div></div>
+        </div>
+        <div style="margin-top:10px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span>Reject</span><strong style="color:var(--g3)">1 case</strong></div>
+          <div style="height:8px;background:var(--line);border-radius:999px;overflow:hidden"><div style="width:7.7%;height:100%;background:#B42318;border-radius:999px"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 7: ARCHITECTURE DEPTH -->
+<div class="slide s7" id="slide-7">
+  <div class="content">
+    <div class="eyebrow">Engineering Depth</div>
+    <h2>Built to the IBM Research 7-skills playbook</h2>
+    <p class="subtitle">Agent Sanad is engineered across all seven disciplines that separate a production agent from a demo experiment.</p>
+    <div class="grid2">
+      <div class="card"><h3>1. System Design</h3><p>Explicit 8-state machine. Hard LLM/deterministic/human boundary. Not a free-form chatbot.</p></div>
+      <div class="card"><h3>2. Tool &amp; Contract Design</h3><p>Pydantic v2 with <code>extra=&quot;forbid&quot;</code> on every payload. Five typed adapter contracts.</p></div>
+      <div class="card"><h3>3. Retrieval Engineering</h3><p>Five fixture-backed adapters. Cached extraction fallback. No RAG ambiguity.</p></div>
+      <div class="card"><h3>4. Reliability Engineering</h3><p>Offline-first. Cached fallbacks. Stale-port guard. Auto graph-fallback. 165 tests.</p></div>
+      <div class="card"><h3>5. Security &amp; Safety</h3><p>Untrusted documents (RSK-01). Read-only LLM. XSS-escaped UI. PII redaction interlock.</p></div>
+      <div class="card"><h3>6. Evaluation &amp; Observability</h3><p>94.6% historical benchmark. Append-only audit. LangSmith-ready tracing (off by default).</p></div>
+      <div class="card" style="grid-column:1/-1"><h3>7. Product Thinking</h3><p>Dual surfaces: beneficiary (status only) and officer (full evidence). Evidence Repair Loop converts dead-end states into guided next steps. Exception Studio for case queue filtering.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 8: ADVANCED FEATURES -->
+<div class="slide s8" id="slide-8">
+  <div class="content">
+    <div class="eyebrow">Beyond the MVP</div>
+    <h2>Production-ready capabilities</h2>
+    <p class="subtitle">Optional but implemented: industry-standard tooling that proves the architecture scales to production.</p>
+    <div class="grid2" style="margin-bottom:20px">
+      <div class="card">
+        <h3>Live Policy Configuration</h3>
+        <p>MOEI can adjust thresholds (20% cap, headroom, obligations ratio) via <code>PUT /admin/policy</code>. No restart. No developer. Changes apply to the next decision.</p>
+      </div>
+      <div class="card">
+        <h3>What-If Simulator</h3>
+        <p>&ldquo;What if this beneficiary earned AED 5,000 instead of AED 16,000?&rdquo; Post any override to <code>/simulate/what-if/{case}</code> and see the exact decision delta instantly.</p>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h3>Real-Time Streaming</h3>
+        <p>SSE endpoint <code>/demo/stream/{case}</code> streams each step of the decision pipeline live &mdash; showing the agent &ldquo;thinking&rdquo; in real-time for demos and audit.</p>
+      </div>
+      <div class="card">
+        <h3>Batch Analysis &amp; Docker</h3>
+        <p>Run all 13 demo cases in one API call for comparison matrix. One-command deploy: <code>docker-compose up</code> with healthcheck, persistence, and restart policy.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 9: CLOSE -->
+<div class="slide footer-slide" id="slide-9">
+  <div class="glow" style="position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.06) 0%,transparent 70%);pointer-events:none;top:5%;right:10%"></div>
+  <h2 style="color:#fff">Agent Sanad</h2>
+  <p style="color:rgba(255,255,255,.9)">Not a chatbot. A governed, auditable casework system<br>that MOEI could pilot tomorrow.</p>
+  <div class="cta"><span style="font-size:24px">&#9733;</span> Thank you</div>
+  <div style="margin-top:60px;display:flex;justify-content:center;gap:60px;color:rgba(255,255,255,.7);font-size:14px">
+    <div><strong style="color:#fff">github.com/Hussain800/Agent-Sanad</strong></div>
+    <div>Sheikh Zayed Housing Programme &middot; MOEI</div>
+  </div>
+</div>
+
+<script>
+var current = 0;
+var slides = document.querySelectorAll('.slide');
+var total = slides.length;
+
+function showSlide(n) {
+  slides.forEach(function(s) { s.classList.remove('active'); });
+  slides[n].classList.add('active');
+  current = n;
+  updateNav();
+}
+function updateNav() {
+  document.querySelectorAll('.nav button:not(.arr)').forEach(function(d,i) {
+    d.classList.toggle('active', i === current);
+  });
+  document.getElementById('pageNum').textContent = (current + 1) + ' / ' + total;
+}
+function nextSlide() { if (current < total - 1) showSlide(current + 1); }
+function prevSlide() { if (current > 0) showSlide(current - 1); }
+
+document.getElementById('nextBtn').onclick = nextSlide;
+document.getElementById('prevBtn').onclick = prevSlide;
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); prevSlide(); }
+});
+
+// Build dots
+var dotsHtml = '';
+for (var i = 0; i < total; i++) {
+  dotsHtml += '<button class="' + (i === 0 ? 'active' : '') + '" data-slide="' + i + '"></button>';
+}
+document.getElementById('dots').innerHTML = dotsHtml;
+document.querySelectorAll('.nav button[data-slide]').forEach(function(b) {
+  b.onclick = function() { showSlide(parseInt(this.dataset.slide)); };
+});
+
+updateNav();
+</script>
+</body>
+</html>
