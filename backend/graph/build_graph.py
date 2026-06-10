@@ -15,6 +15,7 @@ from __future__ import annotations
 import time
 from typing import Any
 
+from backend.actions import next_actions
 from backend.graph.nodes import NODES, assert_case_known
 from backend.graph.state import SanadGraphState
 
@@ -104,9 +105,11 @@ def run_graph_case(case_id: str, *, mock_mode: bool = True,
     log.transition(case_id, terminal, "Closed", mock_mode=mock_mode,
                    detail="case finalized in the audit record")
 
+    fired_rules = list(report.fired_rules)
     return {
         "case": final.get("_case_dump") or final["_case"].model_dump(mode="json"),
         "report": final["report"],
+        "next_required_actions": next_actions(fired_rules),
         "audit": log.events(),
         "impact": {
             "latency_ms": latency_ms,

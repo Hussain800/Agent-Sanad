@@ -75,6 +75,19 @@ def test_compare_endpoint_proves_equivalence() -> None:
     assert body["plain"]["recommendation"] == body["graph"]["recommendation"]
 
 
+@pytest.mark.skipif(not GRAPH_AVAILABLE, reason="LangGraph not installed")
+@pytest.mark.parametrize("case_id", ALL_CASES)
+def test_graph_route_returns_same_actions_as_plain(case_id: str) -> None:
+    """v1.3 P1 fix: graph route must include next_required_actions matching
+    the plain route. Guards the Evidence Repair Loop parity."""
+    plain = client.post(f"/demo/run/{case_id}").json()
+    graph = client.post(f"/demo/run-graph/{case_id}").json()
+    assert plain.get("next_required_actions") == graph.get("next_required_actions"), (
+        f"{case_id}: plain actions {plain.get('next_required_actions')} != "
+        f"graph actions {graph.get('next_required_actions')}"
+    )
+
+
 def test_graph_route_falls_back_to_plain_on_failure(monkeypatch) -> None:
     """If graph execution raises, the route must return the plain envelope
     with fallback_used=true — never a 500 to the demo."""
