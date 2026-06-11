@@ -1149,6 +1149,19 @@
       color: var(--gold);
       font-weight: 800;
     }
+    /* Collapsible trace sections — only the essentials open by default. */
+    .trace-section summary {
+      margin: 0 0 10px;
+      font-size: 11.5px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--gold);
+      font-weight: 800;
+      cursor: pointer;
+      user-select: none;
+    }
+    .trace-section summary:hover { color: var(--brand-mid); }
+    .trace-section:not([open]) summary { margin-bottom: 0; }
     .sources, .calc-trace {
       display: grid;
       grid-template-columns: minmax(120px,.45fr) 1fr;
@@ -3130,14 +3143,14 @@
                     </div>
                   </div>
                   <div class="trace">
-                    <section class="trace-section"><h4>1 · State timeline</h4><div class="timeline" id="traceTimeline">—</div></section>
-                    <section class="trace-section"><h4>2 · Adapter source map</h4><div class="sources" id="traceSources">—</div></section>
-                    <section class="trace-section"><h4>3 · Rule trace</h4><table class="rule-trace" id="traceRules"><tbody></tbody></table></section>
-                    <section class="trace-section"><h4>4 · Calculation trace (Rule 1: 20% deduction cap)</h4><div class="calc-trace" id="traceCalc">—</div></section>
-                    <section class="trace-section"><h4>5 · Period rule trace (Rule 2)</h4><div class="calc-trace" id="tracePeriod">—</div></section>
-                    <section class="trace-section"><h4>6 · Security trace</h4><div class="calc-trace" id="traceSecurity">—</div></section>
-                    <section class="trace-section" id="traceActionsSection" style="display:none"><h4>7 · Required actions</h4><div class="calc-trace" id="traceActions">—</div></section>
-                    <section class="trace-section"><h4>Raw audit feed</h4><div class="drawer" id="drawer">Select a case.</div></section>
+                    <details class="trace-section" open><summary>Case timeline</summary><div class="timeline" id="traceTimeline">—</div></details>
+                    <details class="trace-section" open><summary>Rules applied</summary><table class="rule-trace" id="traceRules"><tbody></tbody></table></details>
+                    <details class="trace-section" id="traceActionsSection" style="display:none" open><summary>Required actions</summary><div class="calc-trace" id="traceActions">—</div></details>
+                    <details class="trace-section"><summary>Where the data came from</summary><div class="sources" id="traceSources">—</div></details>
+                    <details class="trace-section"><summary>20% cap calculation</summary><div class="calc-trace" id="traceCalc">—</div></details>
+                    <details class="trace-section"><summary>Repayment-period check</summary><div class="calc-trace" id="tracePeriod">—</div></details>
+                    <details class="trace-section"><summary>Security checks</summary><div class="calc-trace" id="traceSecurity">—</div></details>
+                    <details class="trace-section"><summary>Raw audit feed</summary><div class="drawer" id="drawer">Select a case.</div></details>
                   </div>
                 </div>
                 <div class="officer-stack">
@@ -3165,7 +3178,8 @@
                     <p class="t-label" data-i18n="supervisor.title">Supervisor dashboard</p>
                     <div class="kv" id="supervisorMetrics"></div>
                   </div>
-                  <div class="usp">
+                  <!-- Engineering-playbook card hidden from the demo surface: jargon for judges, noise for officers. -->
+                  <div class="usp" style="display:none">
                     <div>
                       <strong>Built to the IBM Research agent-engineering playbook</strong>
                       <div style="margin-top:4px;font-size:12px">LLM reads. Deterministic code decides. Human owns exceptions. · <a href="/architecture" target="_blank" rel="noopener">/architecture</a></div>
