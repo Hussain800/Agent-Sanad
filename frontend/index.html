@@ -1241,7 +1241,10 @@
       align-items: baseline;
       font-size: 13.5px;
     }
-    .impact > div {
+    .impact > div:nth-child(odd) {
+      min-width: 96px;
+    }
+    .impact > div:nth-child(even) {
       min-width: 0;
       overflow-wrap: anywhere;
     }
@@ -1280,9 +1283,13 @@
       gap: 10px 20px;
       font-size: 13.5px;
     }
-    /* Long unbroken values (hashes, extraction notes) must wrap instead of
-       blowing the auto column past the panel edge and clipping every row. */
-    .kv > div {
+    /* Long unbroken VALUES (hashes, extraction notes) must wrap instead of
+       blowing the auto column past the panel edge — but LABELS keep a readable
+       floor and wrap at spaces only, never letter-by-letter. */
+    .kv > div:nth-child(odd) {
+      min-width: 96px;
+    }
+    .kv > div:nth-child(even) {
       min-width: 0;
       overflow-wrap: anywhere;
     }
@@ -1519,6 +1526,54 @@
       display: inline-block;
       font-style: normal;
       box-shadow: 0 0 6px rgba(197, 160, 89, 0.8);
+    }
+    /* UAE PASS-styled sign-in (simulated) */
+    .uaepass-logo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .uaepass-wordmark {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: .14em;
+      color: #0a0a0a;
+    }
+    .uaepass-wordmark span { color: #00A651; }
+    .uaepass-field {
+      text-align: left;
+      max-width: 360px;
+      margin: 0 auto 18px;
+    }
+    .uaepass-field label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .uaepass-field input {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid var(--line);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: var(--mono);
+      color: var(--ink);
+      background: #fafafa;
+    }
+    .btn.uaepass-btn {
+      background: #00A651;
+      border-color: #00A651;
+      color: #fff;
+      font-weight: 700;
+      width: 100%;
+      max-width: 360px;
+    }
+    .btn.uaepass-btn:hover {
+      background: #008c44;
+      border-color: #008c44;
+      color: #fff;
     }
     .pass-status {
       margin: 24px 0 8px;
@@ -2860,9 +2915,22 @@
       <section class="screen" id="screen-uaepass">
         <div class="ws-body narrow" style="margin:0 auto">
           <div class="panel panel-pad pass-card">
-            <span class="uaepass-mark"><i></i>UAE PASS</span>
-            <div class="pass-status" id="passStatus">Verify your identity</div>
-            <div class="pass-sub" id="passSub">You will be redirected to UAE PASS to confirm your identity. Verification is simulated for evaluation purposes — no credentials are required.</div>
+            <div class="uaepass-logo">
+              <svg width="46" height="46" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M24 6c-9.94 0-18 8.06-18 18" stroke="#0a0a0a" stroke-width="3" stroke-linecap="round"/>
+                <path d="M24 13a11 11 0 0 0-11 11c0 6 2.5 11.2 6.5 14.6" stroke="#0a0a0a" stroke-width="3" stroke-linecap="round"/>
+                <path d="M24 20a4 4 0 0 1 4 4c0 5.6 1.6 10.2 4.6 13.2" stroke="#00A651" stroke-width="3" stroke-linecap="round"/>
+                <path d="M42 24c0-9.94-8.06-18-18-18" stroke="#00A651" stroke-width="3" stroke-linecap="round"/>
+                <path d="M35 24a11 11 0 0 0-5.2-9.35" stroke="#0a0a0a" stroke-width="3" stroke-linecap="round"/>
+              </svg>
+              <div class="uaepass-wordmark">UAE&nbsp;<span>PASS</span></div>
+            </div>
+            <div class="pass-status" id="passStatus">Login to UAE PASS</div>
+            <div class="pass-sub" id="passSub">Sign in securely with your UAE PASS digital identity. This sign-in is simulated for evaluation — no real credentials are used.</div>
+            <div class="uaepass-field" id="uaepassField">
+              <label for="uaepassIdInput">Emirates ID, email, or phone</label>
+              <input id="uaepassIdInput" type="text" value="784-1990-1234567-1" readonly aria-label="Emirates ID (simulated)">
+            </div>
             <div class="spinner" id="passSpinner"></div>
             <div class="identity-box" id="passIdentity">
               <div class="row"><span>Identity</span><b id="passName">A*** (verified profile)</b></div>
@@ -2870,7 +2938,7 @@
               <div class="row"><span>UAE PASS level</span><b>SOP2 — verified</b></div>
               <div class="row"><span>Linked Programme file</span><b id="passFile">Housing loan beneficiary</b></div>
             </div>
-            <button class="btn primary" id="btnVerify" data-i18n="uaepass.btn_verify">Verify identity</button>
+            <button class="btn uaepass-btn" id="btnVerify" data-i18n="uaepass.btn_verify">Login with UAE PASS</button>
             <button class="btn primary" id="btnPassContinue" style="display:none" data-i18n="uaepass.btn_continue">Continue to application</button>
             <div style="margin-top:8px"><button class="btn subtle" id="btnPassBack" data-i18n="uaepass.btn_back">Back</button></div>
           </div>
@@ -3520,8 +3588,9 @@
   let I18N = {}, LANG = "en";
   function loadI18n() {
     /* Version the URL: browsers heuristically cache i18n.json, and a stale
-       translations file against a newer page renders raw keys. */
-    fetch("i18n.json?v=" + encodeURIComponent(CLIENT_BUILD)).then(r => r.json()).then(d => { I18N = d; applyLang(); }).catch(() => {});
+       translations file against a newer page renders raw keys. Bump the
+       revision suffix whenever i18n.json changes within the same release. */
+    fetch("i18n.json?v=" + encodeURIComponent(CLIENT_BUILD) + "-2").then(r => r.json()).then(d => { I18N = d; applyLang(); }).catch(() => {});
   }
   function __(key) { return (I18N[LANG] && I18N[LANG][key]) || key; }
   function applyLang() {
@@ -3685,6 +3754,7 @@
     $("passSub").textContent = "Simulated verification \u2014 no real credentials are exchanged.";
     setTimeout(() => {
       $("passSpinner").style.display = "none";
+      $("uaepassField").style.display = "none";
       $("passIdentity").style.display = "block";
       $("passStatus").textContent = "Identity verified";
       $("passSub").textContent = "Welcome back. Your Programme profile has been linked.";
@@ -4058,7 +4128,7 @@
     $("resultTitle").textContent = title;
     $("resultTitle").className = "badge " + (rep.recommendation === "Approve" ? "approve" : rep.recommendation === "Reject" ? "reject" : rep.recommendation === "Request docs" ? "request" : "refer");
     $("resultReason").textContent = reason;
-    const ref = S.result.application_id || rep.case_id;
+    const ref = String(S.result.application_id || rep.case_id || "").replace(/_/g, "-");
     $("resultRef").textContent = `Ref: ${ref}`;
     $("resultNext").innerHTML = (NEXT_STEPS[tone] || []).map(s => `<li>${esc(s)}</li>`).join("");
     const actions = S.result.next_required_actions || [];
@@ -4267,7 +4337,7 @@
     }
     Object.entries(groups).forEach(([g, items]) => {
       html += `<div class="queue-group">${esc(g)}</div>` + items.map(d =>
-        `<button class="queue-item" data-id="${esc(d.id)}">${esc(d.label)}<span class="sub">${esc(d.id)}</span></button>`).join("");
+        `<button class="queue-item" data-id="${esc(d.id)}">${esc(d.label)}<span class="sub">Ref ${esc(String(d.id).replace(/_/g, "-"))}</span></button>`).join("");
     });
     if (!filtered.length) {
       html += S.caseDetails.length
@@ -4414,6 +4484,7 @@
       const mode = String(extractionEvent.detail).split(":")[0].trim().toLowerCase();
       if (mode === "live") return "Salary certificate parsed live ✓";
       if (mode === "cached") return "Salary certificate parsed (cached fixture)";
+      if (mode === "fixture") return "Loaded from Programme records";
       const s = String(extractionEvent.detail);
       return s.length > 60 ? s.slice(0, 57) + "…" : s;
     })();
