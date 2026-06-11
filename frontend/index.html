@@ -2745,8 +2745,8 @@
         <div class="ws-header">
           <div class="console-header">
             <div>
-              <p class="t-label">Sheikh Zayed Housing Programme</p>
-              <h1>Service Console</h1>
+              <p class="t-label" data-i18n="brand.title">Sheikh Zayed Housing Programme</p>
+              <h1 data-i18n="console.title">Service Console</h1>
               <p class="t-caption">This service checks a housing-loan arrears rescheduling request using Programme-held data, verified income, and MOEI rules.</p>
             </div>
             <div class="flex-center gap-8">
@@ -2762,7 +2762,7 @@
               <div class="panel-head mb-16">
                 <div>
                   <p class="t-label">Apply</p>
-                  <h2>Select a case to process</h2>
+                  <h2 data-i18n="console.select_case">Select a case to process</h2>
                 </div>
               </div>
 
@@ -2780,8 +2780,8 @@
               </div>
 
               <div class="console-actions">
-                <button class="btn primary btn-lg" id="consoleBtnStart">Process via UAE PASS</button>
-                <button class="btn secondary btn-lg" id="consoleBtnCustom">Custom application</button>
+                <button class="btn primary btn-lg" id="consoleBtnStart" data-i18n="console.btn_start">Process via UAE PASS</button>
+                <button class="btn secondary btn-lg" id="consoleBtnCustom" data-i18n="console.btn_custom">Custom application</button>
               </div>
               <p class="t-caption" style="margin-top:14px">The 20% salary cap and repayment-period rules are enforced by deterministic policy code. Clear cases produce a draft automatically; exceptions go to an officer. The LLM reads and explains — it never decides.</p>
             </div>
@@ -2834,9 +2834,9 @@
               <div class="row"><span>UAE PASS level</span><b>SOP2 — verified</b></div>
               <div class="row"><span>Linked Programme file</span><b id="passFile">Housing loan beneficiary</b></div>
             </div>
-            <button class="btn primary" id="btnVerify">Verify identity</button>
-            <button class="btn primary" id="btnPassContinue" style="display:none">Continue to application</button>
-            <div style="margin-top:8px"><button class="btn subtle" id="btnPassBack">Back</button></div>
+            <button class="btn primary" id="btnVerify" data-i18n="uaepass.btn_verify">Verify identity</button>
+            <button class="btn primary" id="btnPassContinue" style="display:none" data-i18n="uaepass.btn_continue">Continue to application</button>
+            <div style="margin-top:8px"><button class="btn subtle" id="btnPassBack" data-i18n="uaepass.btn_back">Back</button></div>
           </div>
         </div>
       </section>
@@ -3048,8 +3048,8 @@
         <div class="ws-header">
           <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">
             <div>
-              <p class="t-label">Officer workbench</p>
-              <h1 style="font-size:20px;margin-bottom:2px">Case review</h1>
+              <p class="t-label" data-i18n="officer.workbench">Officer workbench</p>
+              <h1 style="font-size:20px;margin-bottom:2px" data-i18n="officer.case_review">Case review</h1>
               <p class="subtle" style="font-size:13px">Default-autonomous, exception-routed: clear cases auto-draft; you review the exceptions.</p>
             </div>
             <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
@@ -3069,7 +3069,7 @@
           <div class="officer-layout">
             <aside class="queue">
               <div class="panel panel-pad">
-                <p class="t-label" style="margin-bottom:4px">Case queue</p>
+                <p class="t-label" style="margin-bottom:4px" data-i18n="officer.case_queue">Case queue</p>
                 <div id="queueList"></div>
               </div>
             </aside>
@@ -3482,7 +3482,9 @@
   /* ═══════════════ i18n (Arabic/English) ═══════════════ */
   let I18N = {}, LANG = "en";
   function loadI18n() {
-    fetch("i18n.json").then(r => r.json()).then(d => { I18N = d; applyLang(); }).catch(() => {});
+    /* Version the URL: browsers heuristically cache i18n.json, and a stale
+       translations file against a newer page renders raw keys. */
+    fetch("i18n.json?v=" + encodeURIComponent(CLIENT_BUILD)).then(r => r.json()).then(d => { I18N = d; applyLang(); }).catch(() => {});
   }
   function __(key) { return (I18N[LANG] && I18N[LANG][key]) || key; }
   function applyLang() {
