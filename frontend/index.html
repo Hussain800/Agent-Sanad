@@ -4224,6 +4224,11 @@
       html += `<div class="queue-group">${esc(g)}</div>` + items.map(d =>
         `<button class="queue-item" data-id="${esc(d.id)}">${esc(d.label)}<span class="sub">${esc(d.id)}</span></button>`).join("");
     });
+    if (!filtered.length) {
+      html += S.caseDetails.length
+        ? `<p class="subtle" style="padding:10px 6px;font-size:12.5px">No cases in this category. Choose another filter or select "All".</p>`
+        : `<p class="subtle" style="padding:10px 6px;font-size:12.5px">The case queue could not be loaded. Please refresh the page.</p>`;
+    }
     $("queueList").innerHTML = html;
     [...document.querySelectorAll(".queue-item")].forEach(btn => {
       btn.onclick = () => {
