@@ -11,7 +11,7 @@
 | Version | **1.8.0** | `backend/app.py` `APP_VERSION`; `frontend/index.html` `CLIENT_BUILD`; `docs/RELEASE_FACTS.json` |
 | Tests | **431 passing** (`pytest -q` → `431 passed`) | run the suite; do not trust doc counts |
 | Test files | **52** | `ls tests/*.py \| wc -l` |
-| Mounted routes | **189** API routes | `len([r for r in app.routes if hasattr(r,'methods')])` |
+| Mounted routes | **190** API routes | `len([r for r in app.routes if hasattr(r,'methods')])` |
 | Doctrine | "LLM reads and explains. Deterministic code decides. Human owns the exception." | `docs/RELEASE_FACTS.json` |
 
 **Release-doc rule:** `docs/RELEASE_FACTS.json` + a freshly-run `pytest` are the
