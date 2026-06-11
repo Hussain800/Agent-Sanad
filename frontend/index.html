@@ -290,7 +290,7 @@
     .t-metric { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; }
     .workspace-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1.2fr) 0.8fr;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
       gap: 20px;
       align-items: start;
     }
@@ -811,6 +811,7 @@
       border-bottom: 1px solid var(--line);
       vertical-align: top;
       font-size: 13.5px;
+      overflow-wrap: anywhere;
     }
     .data-table tr:hover td {
       background: var(--ok-bg);
@@ -915,6 +916,8 @@
       padding: 10px 14px;
       border-bottom: 1px solid var(--line);
       border-right: 1px solid var(--line);
+      min-width: 0;
+      overflow-wrap: anywhere;
     }
     .kv-grid div:nth-child(4n+1) {
       background: var(--line-lt);
@@ -1000,6 +1003,13 @@
       grid-template-columns: 280px minmax(0, 1fr);
       gap: 24px;
       align-items: start;
+    }
+    /* Between 1021-1100px the three officer columns squeeze below their
+       ~240px min-content and clip; stack them before that happens. */
+    @media (max-width: 1100px) {
+      .officer-layout { grid-template-columns: 1fr; }
+      .officer-two { grid-template-columns: 1fr; }
+      .queue { position: static; max-height: none; }
     }
     .queue {
       position: sticky;
@@ -1119,7 +1129,7 @@
     }
     .sources, .calc-trace {
       display: grid;
-      grid-template-columns: minmax(180px,.45fr) 1fr;
+      grid-template-columns: minmax(120px,.45fr) 1fr;
       border: 1px solid var(--line);
       border-radius: var(--r-md);
       overflow: hidden;
@@ -1130,6 +1140,8 @@
       padding: 10px 12px;
       border-bottom: 1px solid var(--line);
       border-right: 1px solid var(--line);
+      min-width: 0;
+      overflow-wrap: anywhere;
     }
     .sources div:nth-child(odd) { background: var(--line-lt); font-weight: 600; color: var(--ink-2); }
     .calc-trace div:nth-child(odd) { background: var(--line-lt); font-weight: 600; color: var(--ink-2); }
@@ -1179,6 +1191,7 @@
       max-height: 240px;
       overflow-y: auto;
       white-space: pre-wrap;
+      overflow-wrap: anywhere;
       font: 12px/1.65 var(--mono);
       box-shadow: inset 0 2px 8px rgba(0,0,0,0.6), var(--shadow-sm);
       border-top: 3.5px solid var(--gold);
@@ -1192,6 +1205,10 @@
       gap: 10px 20px;
       align-items: baseline;
       font-size: 13.5px;
+    }
+    .impact > div {
+      min-width: 0;
+      overflow-wrap: anywhere;
     }
     .impact .big {
       font-size: 20px;
@@ -1227,6 +1244,12 @@
       grid-template-columns: 1fr auto;
       gap: 10px 20px;
       font-size: 13.5px;
+    }
+    /* Long unbroken values (hashes, extraction notes) must wrap instead of
+       blowing the auto column past the panel edge and clipping every row. */
+    .kv > div {
+      min-width: 0;
+      overflow-wrap: anywhere;
     }
     .kv div:nth-child(odd) {
       color: var(--muted);
@@ -1986,7 +2009,7 @@
     }
     
     [dir=rtl] .sources, [dir=rtl] .calc-trace {
-      grid-template-columns: 1fr minmax(180px, .45fr);
+      grid-template-columns: 1fr minmax(120px, .45fr);
     }
     [dir=rtl] .sources div, [dir=rtl] .calc-trace div {
       border-right: 0;
@@ -3830,7 +3853,7 @@
       $("d_susp").addEventListener("input", e => { S.form.suspicious_document_text = e.target.checked; markCustom(); renderStep(); });
       if (S.mode === "sample" && S.sampleId === "GOLDEN") {
         $("extractNote").textContent =
-          "Extraction source: for the GOLDEN sample, the synthetic salary certificate is parsed live when SANAD_LIVE_EXTRACTION=1 (cached fixture otherwise) \u2014 the audit trail records which path ran.";
+          "For this sample, the salary certificate is parsed automatically and the audit trail records exactly which extraction path ran.";
       }
       wireNav(() => { S.step = 3; renderStep(); });
     }
@@ -4334,11 +4357,21 @@
     const variance = (c.income && c.income.variance_pct) || 0;
     const contra = c.income && c.income.contradiction_flag;
     const extractionEvent = (d.audit || []).find(e => e.step === "extract.salary_certificate");
+    /* The raw audit detail carries internal flags (env vars, counters) — show a
+       human label here; the full string stays in the raw audit feed below. */
+    const extractionLabel = (() => {
+      if (!extractionEvent || !extractionEvent.detail) return "N/A";
+      const mode = String(extractionEvent.detail).split(":")[0].trim().toLowerCase();
+      if (mode === "live") return "Salary certificate parsed live ✓";
+      if (mode === "cached") return "Salary certificate parsed (cached fixture)";
+      const s = String(extractionEvent.detail);
+      return s.length > 60 ? s.slice(0, 57) + "…" : s;
+    })();
     const secRows = [
       ["Document injection flag", injection ? "DETECTED (RSK-01)" : "Not detected", injection ? "Fail" : "Pass"],
       ["Income variance (cert vs verified)", `${Number(variance).toFixed(1)}%`, contra ? "Fail" : "Pass"],
       ["Contradiction flag (>30%)", contra ? "Yes \u2014 INC-01 fired" : "No", contra ? "Fail" : "Pass"],
-      ["Extraction source", extractionEvent ? extractionEvent.detail : "n/a"],
+      ["Extraction source", extractionLabel],
       ["LLM authority", "Read-only: cannot decide, cannot write state, cannot call engine."],
       ["Document text", "Treated as untrusted content. Never overrides policy logic."],
     ];
@@ -4364,7 +4397,7 @@
     $("facts").innerHTML =
       `<div>Verified income</div><div>${AED((c.income && c.income.verified_monthly_income_aed))}</div>` +
       `<div>Income on certificate</div><div>${AED((c.income && c.income.salary_certificate_income_aed))}</div>` +
-      `<div>Extraction source</div><div style="font-size:11.5px">${esc(extractionEvent ? extractionEvent.detail : "N/A")}</div>` +
+      `<div>Extraction source</div><div style="font-size:11.5px" title="${esc(extractionEvent ? extractionEvent.detail : "")}">${esc(extractionLabel)}</div>` +
       `<div>Current installment</div><div>${AED(emi)}</div>` +
       `<div>Arrears</div><div>${AED(c.arrears && c.arrears.arrears_amount_aed)}</div>` +
       `<div>Family size</div><div>${esc(c.applicant ? c.applicant.family_size : "N/A")}</div>` +
