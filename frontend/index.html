@@ -518,6 +518,28 @@
     .sidenav-link.active .ni {
       background: var(--brand-mid);
     }
+    .sidenav-adv-toggle {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 4px 20px 10px;
+      margin-bottom: 14px;
+      border-bottom: 1px solid var(--line-lt);
+      text-align: left;
+    }
+    .sidenav-adv-toggle:hover { color: var(--gold); }
+    .sidenav-adv-toggle .adv-arrow { display: inline-block; transition: transform .15s ease; }
+    .sidenav-adv-toggle[aria-expanded="true"] .adv-arrow { transform: rotate(90deg); }
 
     /* Main Area & Workspace Layouts */
     .main-area {
@@ -2720,20 +2742,23 @@
         <div class="sidenav-label">Service</div>
         <a class="sidenav-link active" href="#/" data-screen="landing"><span class="ni"></span> <span>Apply</span></a>
         <a class="sidenav-link" href="#/officer" data-screen="officer"><span class="ni"></span> <span>Review</span></a>
-        <a class="sidenav-link" href="#/evidence-vault" data-screen="evidence-vault"><span class="ni"></span> <span>Evidence</span></a>
-        <a class="sidenav-link" href="#/rescue-radar" data-screen="rescue-radar"><span class="ni"></span> <span>Rescue Radar</span></a>
       </div>
-      <div class="sidenav-group">
-        <div class="sidenav-label">Trust</div>
-        <a class="sidenav-link" href="#/auditor" data-screen="auditor"><span class="ni"></span> <span>Audit</span></a>
-        <a class="sidenav-link" href="#/supervisor" data-screen="supervisor"><span class="ni"></span> <span>Supervisor</span></a>
-        <a class="sidenav-link" href="#/digital-twin" data-screen="digital-twin"><span class="ni"></span> <span>Policy Twin</span></a>
-      </div>
-      <div class="sidenav-group">
-        <div class="sidenav-label">Operations</div>
-        <a class="sidenav-link" href="#/interop-lab" data-screen="interop-lab"><span class="ni"></span> <span>Interop Lab</span></a>
-        <a class="sidenav-link" href="#/copilot" data-screen="copilot"><span class="ni"></span> <span>Copilot</span></a>
-        <a class="sidenav-link" href="#/mission-control" data-screen="mission-control"><span class="ni"></span> <span>Mission Control</span></a>
+      <button class="sidenav-adv-toggle" id="advNavToggle" type="button" aria-expanded="false" aria-controls="advNavGroups">Advanced tools <span class="adv-arrow" aria-hidden="true">▸</span></button>
+      <div id="advNavGroups" hidden>
+        <div class="sidenav-group">
+          <div class="sidenav-label">Trust</div>
+          <a class="sidenav-link" href="#/evidence-vault" data-screen="evidence-vault"><span class="ni"></span> <span>Evidence</span></a>
+          <a class="sidenav-link" href="#/auditor" data-screen="auditor"><span class="ni"></span> <span>Audit</span></a>
+          <a class="sidenav-link" href="#/supervisor" data-screen="supervisor"><span class="ni"></span> <span>Supervisor</span></a>
+          <a class="sidenav-link" href="#/digital-twin" data-screen="digital-twin"><span class="ni"></span> <span>Policy Twin</span></a>
+        </div>
+        <div class="sidenav-group">
+          <div class="sidenav-label">Operations</div>
+          <a class="sidenav-link" href="#/rescue-radar" data-screen="rescue-radar"><span class="ni"></span> <span>Rescue Radar</span></a>
+          <a class="sidenav-link" href="#/interop-lab" data-screen="interop-lab"><span class="ni"></span> <span>Interop Lab</span></a>
+          <a class="sidenav-link" href="#/copilot" data-screen="copilot"><span class="ni"></span> <span>Copilot</span></a>
+          <a class="sidenav-link" href="#/mission-control" data-screen="mission-control"><span class="ni"></span> <span>Mission Control</span></a>
+        </div>
       </div>
     </nav>
 
@@ -3585,6 +3610,12 @@
       else if (screen === name) { a.classList.add("active"); }
       else { a.classList.remove("active"); }
     });
+    // Deep links into an advanced screen must reveal the collapsed nav group.
+    const advActive = document.querySelector("#advNavGroups .sidenav-link.active");
+    if (advActive && $("advNavGroups").hidden) {
+      $("advNavGroups").hidden = false;
+      $("advNavToggle").setAttribute("aria-expanded", "true");
+    }
     // Update role pill
     const roleMap = {
       landing: "beneficiary",
@@ -5423,6 +5454,11 @@
   }
 
   document.getElementById("langToggle").onclick = toggleLang;
+  $("advNavToggle").onclick = () => {
+    const groups = $("advNavGroups");
+    groups.hidden = !groups.hidden;
+    $("advNavToggle").setAttribute("aria-expanded", String(!groups.hidden));
+  };
   loadI18n();
 
   (async function boot() {
