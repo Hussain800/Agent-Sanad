@@ -2717,14 +2717,15 @@
       </div>
     </div>
     <span class="topbar-spacer"></span>
-    <div class="topbar-gsr no-print" title="Global Star Rating - 7 Star Service Center">
+    <!-- GSR rating, version and role pills are hidden from the demo surface to keep the header calm. -->
+    <div class="topbar-gsr no-print" title="Global Star Rating - 7 Star Service Center" style="display:none">
       <span>GSR</span>
       <span class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;&#9733;&#9733;</span>
     </div>
     <div class="topbar-pills no-print">
       <span class="topbar-pill" id="modePill">Mock data demo</span>
-      <span class="topbar-pill version">v<span id="versionPill">1.8.0</span></span>
-      <span class="topbar-pill" id="rolePill" data-i18n="rbac.beneficiary">beneficiary</span>
+      <span class="topbar-pill version" style="display:none">v<span id="versionPill">1.8.0</span></span>
+      <span class="topbar-pill" id="rolePill" data-i18n="rbac.beneficiary" style="display:none">beneficiary</span>
     </div>
     <button class="topbar-btn no-print" id="langToggle" title="Switch language / تبديل اللغة">EN</button>
   </header>
@@ -2776,7 +2777,6 @@
             </div>
             <div class="flex-center gap-8">
               <span class="badge approve">Mock Pilot</span>
-              <span class="chip info">v1.8.0</span>
             </div>
           </div>
         </div>
@@ -2813,32 +2813,30 @@
 
             <div class="console-side">
               <div class="panel panel-pad">
-                <p class="t-label mb-12">Release status</p>
-                <div class="kv status-kv">
-                  <div>Engine</div><div class="t-mono" style="font-weight:700">v1.8.0</div>
-                  <div>Policy</div><div style="color:var(--ok);font-weight:700">2026.06.A</div>
-                  <div>20% cap</div><div style="color:var(--ok)">Active ✓</div>
-                  <div>Connectors</div><div style="color:var(--ok)">Online ✓</div>
+                <p class="t-label mb-12">How it works</p>
+                <div style="display:grid;gap:14px">
+                  <div style="display:flex;gap:12px;align-items:flex-start">
+                    <span style="flex-shrink:0;width:24px;height:24px;border-radius:50%;background:var(--ok-bg);color:var(--brand-mid);font-weight:700;font-size:12.5px;display:flex;align-items:center;justify-content:center">1</span>
+                    <p style="font-size:13.5px;color:var(--ink-2);line-height:1.5">Verify your identity with UAE PASS.</p>
+                  </div>
+                  <div style="display:flex;gap:12px;align-items:flex-start">
+                    <span style="flex-shrink:0;width:24px;height:24px;border-radius:50%;background:var(--ok-bg);color:var(--brand-mid);font-weight:700;font-size:12.5px;display:flex;align-items:center;justify-content:center">2</span>
+                    <p style="font-size:13.5px;color:var(--ink-2);line-height:1.5">The Programme retrieves your loan and arrears data — nothing to re-enter.</p>
+                  </div>
+                  <div style="display:flex;gap:12px;align-items:flex-start">
+                    <span style="flex-shrink:0;width:24px;height:24px;border-radius:50%;background:var(--ok-bg);color:var(--brand-mid);font-weight:700;font-size:12.5px;display:flex;align-items:center;justify-content:center">3</span>
+                    <p style="font-size:13.5px;color:var(--ink-2);line-height:1.5">MOEI rules check your request and you get a clear result in seconds.</p>
+                  </div>
+                  <div style="display:flex;gap:12px;align-items:flex-start">
+                    <span style="flex-shrink:0;width:24px;height:24px;border-radius:50%;background:var(--ok-bg);color:var(--brand-mid);font-weight:700;font-size:12.5px;display:flex;align-items:center;justify-content:center">4</span>
+                    <p style="font-size:13.5px;color:var(--ink-2);line-height:1.5">Exceptional cases go to a Programme officer for a human decision.</p>
+                  </div>
                 </div>
               </div>
 
               <div class="panel panel-pad">
-                <p class="t-label mb-12">Trust guard</p>
-                <div class="kv status-kv">
-                  <div>Consent</div><div>Purpose-bound scope</div>
-                  <div>Audit chain</div><div>SHA256 integrity</div>
-                  <div>UAE PASS</div><div>v3 session</div>
-                  <div>PII</div><div style="color:var(--ok)">Redacted ✓</div>
-                </div>
-              </div>
-
-              <div class="panel panel-pad">
-                <p class="t-label mb-12">Shortcuts</p>
-                <div style="display:grid;gap:8px">
-                  <a class="btn ghost sm text-center" href="#/officer">Officer workbench</a>
-                  <a class="btn ghost sm text-center" href="#/supervisor">Supervisor metrics</a>
-                  <a class="btn ghost sm text-center" href="#/auditor">Audit ledger</a>
-                </div>
+                <p class="t-label mb-12">For Programme staff</p>
+                <a class="btn ghost sm text-center" href="#/officer" style="display:block">Open the officer workbench</a>
               </div>
             </div>
           </div>
