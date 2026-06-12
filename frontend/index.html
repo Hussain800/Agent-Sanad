@@ -1578,6 +1578,102 @@
       border-color: #008c44;
       color: #fff;
     }
+    /* ── UAE PASS official-page replica (simulated) ── */
+    body.uaepass-mode .top-utility-bar,
+    body.uaepass-mode .topbar,
+    body.uaepass-mode .sidenav,
+    body.uaepass-mode .gov-footer { display: none !important; }
+    body.uaepass-mode .main-area { padding: 0; }
+    .uaepass-page {
+      min-height: 100vh;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      font-family: Roboto, "Segoe UI", Arial, sans-serif;
+    }
+    .uaepass-grad {
+      height: 10px;
+      background: linear-gradient(90deg, #00b16a 0%, #2bb3a3 55%, #2aa9b8 100%);
+    }
+    .uaepass-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 96px 24px 48px;
+      text-align: center;
+    }
+    .uaepass-fp { margin-bottom: 36px; }
+    .uaepass-h1 {
+      font-size: 34px;
+      font-weight: 400;
+      color: #4a4a4a;
+      letter-spacing: .2px;
+      margin: 0 0 34px;
+    }
+    .uaepass-sub { font-size: 14px; color: #6b6b6b; margin: -22px 0 22px; min-height: 0; }
+    .uaepass-sub:empty { display: none; }
+    .uaepass-field { width: 100%; max-width: 630px; text-align: left; }
+    .uaepass-input {
+      width: 100%;
+      height: 64px;
+      padding: 0 22px;
+      font-size: 16px;
+      font-family: inherit;
+      color: #333;
+      border: 1.5px solid #9ec3f0;
+      border-radius: 10px;
+      box-shadow: 0 0 0 3px rgba(158, 195, 240, 0.25);
+      outline: none;
+    }
+    .uaepass-input::placeholder { color: #9a9a9a; }
+    .uaepass-input:focus { border-color: #6ea8e8; }
+    .uaepass-remember {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      color: #2b2b2b;
+      margin: 12px 0 26px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .uaepass-remember input { width: 17px; height: 17px; accent-color: #1a73e8; }
+    .uaepass-login-btn {
+      width: 100%;
+      max-width: 630px;
+      height: 70px;
+      border: 0;
+      border-radius: 10px;
+      background: #76828f;
+      color: #fff;
+      font-size: 23px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background .15s ease;
+    }
+    .uaepass-login-btn:hover { background: #67737f; }
+    .uaepass-extras { width: 100%; max-width: 630px; }
+    .uaepass-divider { border-top: 1px solid #e3e3e3; margin: 26px 0 22px; }
+    .uaepass-alt { font-size: 16.5px; color: #4a4a4a; margin: 0 0 14px; }
+    .uaepass-link { color: #00A651; font-weight: 500; }
+    .uaepass-sim { font-size: 12px; color: #9a9a9a; margin-top: 26px; }
+    .uaepass-footer {
+      border-top: 1px solid #e3e3e3;
+      padding: 22px 16px 26px;
+      text-align: center;
+    }
+    .uaepass-footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 14px 56px;
+      font-size: 17px;
+      color: #5f6b76;
+      margin-bottom: 14px;
+    }
+    .uaepass-footer p { font-size: 13px; color: #8a8a8a; }
+    .uaepass-page .identity-box { margin-bottom: 6px; }
     .pass-status {
       margin: 24px 0 8px;
       font-size: 17px;
@@ -2876,7 +2972,7 @@
               </div>
 
               <div class="console-actions">
-                <button class="btn primary btn-lg" id="consoleBtnStart" data-i18n="console.btn_start">Process via UAE PASS</button>
+                <button class="btn primary btn-lg" id="consoleBtnStart" data-i18n="console.btn_start">Start application</button>
                 <button class="btn secondary btn-lg" id="consoleBtnCustom" data-i18n="console.btn_custom">Custom application</button>
               </div>
               <p class="t-caption" style="margin-top:14px">The 20% salary cap and repayment-period rules are enforced by deterministic policy code. Clear cases produce a draft automatically; exceptions go to an officer. The LLM reads and explains — it never decides.</p>
@@ -2888,7 +2984,7 @@
                 <div style="display:grid;gap:14px">
                   <div style="display:flex;gap:12px;align-items:flex-start">
                     <span style="flex-shrink:0;width:24px;height:24px;border-radius:50%;background:var(--ok-bg);color:var(--brand-mid);font-weight:700;font-size:12.5px;display:flex;align-items:center;justify-content:center">1</span>
-                    <p style="font-size:13.5px;color:var(--ink-2);line-height:1.5">Verify your identity with UAE PASS.</p>
+                    <p style="font-size:13.5px;color:var(--ink-2);line-height:1.5">You are signed in with UAE PASS. ✓</p>
                   </div>
                   <div style="display:flex;gap:12px;align-items:flex-start">
                     <span style="flex-shrink:0;width:24px;height:24px;border-radius:50%;background:var(--ok-bg);color:var(--brand-mid);font-weight:700;font-size:12.5px;display:flex;align-items:center;justify-content:center">2</span>
@@ -2914,25 +3010,30 @@
         </div>
       </section>
 
-      <!-- UAE PASS MOCK -->
+      <!-- UAE PASS MOCK — faithful replica of the official login page (simulated) -->
       <section class="screen" id="screen-uaepass">
-        <div class="ws-body narrow" style="margin:0 auto">
-          <div class="panel panel-pad pass-card">
-            <div class="uaepass-logo">
-              <svg width="46" height="46" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M24 6c-9.94 0-18 8.06-18 18" stroke="#0a0a0a" stroke-width="3" stroke-linecap="round"/>
-                <path d="M24 13a11 11 0 0 0-11 11c0 6 2.5 11.2 6.5 14.6" stroke="#0a0a0a" stroke-width="3" stroke-linecap="round"/>
-                <path d="M24 20a4 4 0 0 1 4 4c0 5.6 1.6 10.2 4.6 13.2" stroke="#00A651" stroke-width="3" stroke-linecap="round"/>
-                <path d="M42 24c0-9.94-8.06-18-18-18" stroke="#00A651" stroke-width="3" stroke-linecap="round"/>
-                <path d="M35 24a11 11 0 0 0-5.2-9.35" stroke="#0a0a0a" stroke-width="3" stroke-linecap="round"/>
-              </svg>
-              <div class="uaepass-wordmark">UAE&nbsp;<span>PASS</span></div>
-            </div>
-            <div class="pass-status" id="passStatus">Login to UAE PASS</div>
-            <div class="pass-sub" id="passSub">Sign in securely with your UAE PASS digital identity. This sign-in is simulated for evaluation — no real credentials are used.</div>
+        <div class="uaepass-page">
+          <div class="uaepass-grad" aria-hidden="true"></div>
+          <div class="uaepass-body">
+            <svg class="uaepass-fp" width="88" height="88" viewBox="0 0 88 88" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <g stroke="#1c1c1c" stroke-width="3.2" stroke-linecap="round" fill="none">
+                <path d="M44 14a30 30 0 0 1 30 30c0 5.4-.8 10.6-2.4 15.4"/>
+                <path d="M26.5 19.8A30 30 0 0 1 44 14" transform="rotate(-14 44 44)"/>
+                <path d="M14 44a30 30 0 0 1 7.6-19.9"/>
+                <path d="M44 24a20 20 0 0 1 20 20c0 6.6-1.3 12.9-3.8 18.6"/>
+                <path d="M24 44a20 20 0 0 1 11.4-18.1"/>
+                <path d="M44 34a10 10 0 0 1 10 10c0 7.6-1.8 14.7-5 21"/>
+                <path d="M34 44a10 10 0 0 1 6-9.2"/>
+                <path d="M44 44c0 8.4-2 16.3-5.6 23.3"/>
+              </g>
+              <path d="M14 44c0 7.4 1.7 14.4 4.8 20.6" stroke="#00A651" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+              <path d="M24 44c0 6.4 1.5 12.4 4.2 17.8" stroke="#EF3340" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+            </svg>
+            <h1 class="uaepass-h1" id="passStatus">Login to UAE PASS</h1>
+            <p class="uaepass-sub" id="passSub"></p>
             <div class="uaepass-field" id="uaepassField">
-              <label for="uaepassIdInput">Emirates ID, email, or phone</label>
-              <input id="uaepassIdInput" type="text" value="784-1990-1234567-1" readonly aria-label="Emirates ID (simulated)">
+              <input class="uaepass-input" id="uaepassIdInput" type="text" placeholder="Emirates ID, email, or phone eg. 971500000000" aria-label="Emirates ID, email, or phone (simulated)">
+              <label class="uaepass-remember"><input type="checkbox" checked id="uaepassRemember"> Remember me</label>
             </div>
             <div class="spinner" id="passSpinner"></div>
             <div class="identity-box" id="passIdentity">
@@ -2941,9 +3042,20 @@
               <div class="row"><span>UAE PASS level</span><b>SOP2 — verified</b></div>
               <div class="row"><span>Linked Programme file</span><b id="passFile">Housing loan beneficiary</b></div>
             </div>
-            <button class="btn uaepass-btn" id="btnVerify" data-i18n="uaepass.btn_verify">Login with UAE PASS</button>
-            <button class="btn primary" id="btnPassContinue" style="display:none" data-i18n="uaepass.btn_continue">Continue to application</button>
-            <div style="margin-top:8px"><button class="btn subtle" id="btnPassBack" data-i18n="uaepass.btn_back">Back</button></div>
+            <button class="uaepass-login-btn" id="btnVerify" data-i18n="uaepass.btn_verify">Login</button>
+            <button class="btn primary" id="btnPassContinue" style="display:none;margin-top:14px" data-i18n="uaepass.btn_continue">Continue to application</button>
+            <div class="uaepass-extras" id="uaepassExtras">
+              <div class="uaepass-divider"></div>
+              <p class="uaepass-alt">Don't have UAEPASS account? <span class="uaepass-link">Create new account</span></p>
+              <p class="uaepass-alt"><span class="uaepass-link">Recover your account</span></p>
+            </div>
+            <p class="uaepass-sim">Simulated sign-in for evaluation — no real credentials are used.</p>
+          </div>
+          <div class="uaepass-footer">
+            <div class="uaepass-footer-links">
+              <span>Home</span><span>About</span><span>Support</span><span>FAQ</span><span>Kiosk Locations</span><span>Service Provider</span>
+            </div>
+            <p>Copyright © 2019 - UAE PASS</p>
           </div>
         </div>
       </section>
@@ -3593,7 +3705,7 @@
     /* Version the URL: browsers heuristically cache i18n.json, and a stale
        translations file against a newer page renders raw keys. Bump the
        revision suffix whenever i18n.json changes within the same release. */
-    fetch("i18n.json?v=" + encodeURIComponent(CLIENT_BUILD) + "-2").then(r => r.json()).then(d => { I18N = d; applyLang(); }).catch(() => {});
+    fetch("i18n.json?v=" + encodeURIComponent(CLIENT_BUILD) + "-3").then(r => r.json()).then(d => { I18N = d; applyLang(); }).catch(() => {});
   }
   function __(key) { return (I18N[LANG] && I18N[LANG][key]) || key; }
   function applyLang() {
@@ -3685,6 +3797,8 @@
       const el = $("screen-" + s);
       if (el) el.classList.toggle("active", s === name);
     });
+    /* The UAE PASS replica renders full-bleed, as if redirected off-site. */
+    document.body.classList.toggle("uaepass-mode", name === "uaepass");
     window.scrollTo(0, 0);
     
     // Update sidenav
@@ -3742,14 +3856,17 @@
     else if (h.startsWith("#/interop-lab"))    { show("interop-lab"); initInteropLab(); }
     else if (h.startsWith("#/copilot"))        { show("copilot"); initCopilot(); }
     else if (h.startsWith("#/mission-control")){ show("mission-control"); initMissionControl(); }
-    else { show("landing"); initLanding(); }
+    else {
+      /* Login-first: no Programme data is shown before UAE PASS sign-in. */
+      if (!S.identityVerified) { location.hash = "#/uaepass"; return; }
+      show("landing"); initLanding();
+    }
   }
   window.addEventListener("hashchange", route);
 
   /* ═══════════════ UAE PASS mock ═══════════════ */
   const _btnStartPass = $("btnStartPass");
   if (_btnStartPass) _btnStartPass.onclick = () => { location.hash = "#/uaepass"; };
-  $("btnPassBack").onclick  = () => { location.hash = "#/"; };
   $("btnVerify").onclick = () => {
     $("btnVerify").style.display = "none";
     $("passSpinner").style.display = "block";
@@ -3758,6 +3875,7 @@
     setTimeout(() => {
       $("passSpinner").style.display = "none";
       $("uaepassField").style.display = "none";
+      $("uaepassExtras").style.display = "none";
       $("passIdentity").style.display = "block";
       $("passStatus").textContent = "Identity verified";
       $("passSub").textContent = "Welcome back. Your Programme profile has been linked.";
@@ -3767,13 +3885,13 @@
   };
   $("btnPassContinue").onclick = async () => {
     await ensureCases();
-    location.hash = "#/consent";
+    location.hash = "#/";
   };
   $("btnConsentGrant").onclick = async () => {
     await loadSample(S.sampleId);
     location.hash = "#/apply";
   };
-  $("btnConsentBack").onclick = () => { location.hash = "#/uaepass"; };
+  $("btnConsentBack").onclick = () => { location.hash = "#/"; };
 
   /* ═══════════════ sample cases ═══════════════ */
   async function ensureCases() {
@@ -5251,11 +5369,11 @@
     $("consoleBtnStart").onclick = () => {
       S.sampleId = $("consoleCaseSelect").value;
       S.mode = "sample";
-      location.hash = "#/uaepass";
+      location.hash = "#/consent";
     };
     $("consoleBtnCustom").onclick = () => {
       S.mode = "custom";
-      location.hash = "#/uaepass";
+      location.hash = "#/consent";
     };
     
     updateConsoleCaseDetails();
