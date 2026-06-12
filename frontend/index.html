@@ -1319,6 +1319,9 @@
       padding: 16px;
       display: grid;
       gap: 8px;
+      /* Pack rows to the top: without this, a short card next to a tall one
+         stretches its rows and the status pill deforms into an oval. */
+      align-content: start;
       background: var(--card);
       transition: all 0.2s ease;
       border-top: 3.5px solid var(--brand-light);
