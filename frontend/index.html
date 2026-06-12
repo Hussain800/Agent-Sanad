@@ -1754,8 +1754,10 @@
       to { opacity: 1; transform: scale(1); }
     }
     .identity-box .row {
-      display: flex;
-      justify-content: space-between;
+      display: grid;
+      grid-template-columns: minmax(150px, 1fr) minmax(0, auto);
+      align-items: baseline;
+      column-gap: 24px;
       padding: 6px 0;
       font-size: 13px;
       border-bottom: 1px solid rgba(14, 61, 39, 0.05);
@@ -1765,12 +1767,28 @@
     }
     .identity-box .row span {
       color: var(--muted);
+      min-width: 0;
     }
     .identity-box .row b {
       color: var(--ink);
+      min-width: 0;
+      text-align: right;
+      overflow-wrap: anywhere;
     }
     .identity-box .row b.ok {
       color: var(--ok);
+    }
+    @media (max-width: 420px) {
+      .identity-box {
+        padding: 14px 16px;
+      }
+      .identity-box .row {
+        grid-template-columns: 1fr;
+        row-gap: 3px;
+      }
+      .identity-box .row b {
+        text-align: left;
+      }
     }
 
     /* IBM 7-skills playbook callout */
